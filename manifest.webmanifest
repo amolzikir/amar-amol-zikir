@@ -1,0 +1,9 @@
+{
+  "name": "আমার আমল ও জিকির",
+  "short_name": "আমল ও জিকির",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7faf7",
+  "theme_color": "#176b50",
+  "description": "ব্যক্তিগত আমল, জিকির, ফোল্ডার ও নোট"
+}
