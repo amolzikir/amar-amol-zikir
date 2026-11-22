@@ -74,7 +74,7 @@ const firebaseConfig = {
 };
 const TABS=["আমল","জিকির","দোয়া","নোট","অন্যান্য"];
 const DB_NAME="AmolZikirLocal", STORE="items";
-let dbLocal, activeTab=TABS[0], parentId=null, editing=null, viewing=null, currentUser=null, cloud=null, auth=null, syncBusy=false, pendingFolderDelete=null, menuFolderId=null;
+let dbLocal, activeTab=TABS[0], parentId=null, editing=null, viewing=null, currentUser=null, cloud=null, auth=null, syncBusy=false, pendingFolderDelete=null, menuFolderId=null, specialView=null;
 const $=id=>document.getElementById(id);
 function toast(s){$("toast").textContent=s;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",2600)}
 function openLocal(){return new Promise((resolve,reject)=>{let r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE,{keyPath:"id"});r.onsuccess=()=>{dbLocal=r.result;resolve()};r.onerror=()=>reject(r.error)})}
