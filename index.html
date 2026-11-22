@@ -83,7 +83,7 @@ function putItem(x){return new Promise((res,rej)=>{let r=dbLocal.transaction(STO
 function delLocal(id){return new Promise((res,rej)=>{let r=dbLocal.transaction(STORE,"readwrite").objectStore(STORE).delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
 function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function renderTabs(){$("tabs").innerHTML=TABS.map(t=>`<button class="tab ${t===activeTab?"active":""}" data-tab="${esc(t)}">${esc(t)}</button>`).join("");$("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;parentId=null;render()})}
+function renderTabs(){$("tabs").innerHTML=TABS.map(t=>`<button class="tab ${t===activeTab?"active":""}" data-tab="${esc(t)}">${esc(t)}</button>`).join("");$("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;parentId=null;specialView=null;render()})}
 async function render(){
  renderTabs();const all=await allItems();let live=all.filter(x=>!x.deletedAt&&(specialView?true:x.tab===activeTab));const q=$("search").value.trim().toLowerCase();if(specialView){live=live.filter(x=>specialView==="favorites"?x.favorite:specialView==="bookmarks"?x.bookmarked:specialView==="pinned"?x.pinned:specialView==="recent"?x.type==="note":true)}
  let path=[], p=parentId;while(p){let x=all.find(a=>a.id===p);if(!x)break;path.unshift(x);p=x.parentId}
