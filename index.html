@@ -106,8 +106,25 @@ async function syncCloud(){
  try{
   const ref=cloud.collection("users").doc(currentUser.uid).collection("items");
   const local=await allItems(), snap=await ref.get(), remote=new Map();snap.forEach(d=>remote.set(d.id,d.data()));
-  for(const x of local){const r=remote.get(x.id);if(!r||Number(x.updatedAt||0)>Number(r.updatedAt||0)){await ref.doc(x.id).set(x)}}
-  for(const [id,r] of remote){const l=local.find(x=>x.id===id);if(!l||Number(r.updatedAt||0)>Number(l.updatedAt||0))await putItem(r)}
+  // Delete marked notes from Firestore first. Keep the local tombstone so an old
+  // remote copy cannot be uploaded again during a later sync on this device.
+  for(const x of local){
+   if(x.deletedAt){if(remote.has(x.id))await ref.doc(x.id).delete();continue}
+   const r=remote.get(x.id);
+   if(!r||Number(x.updatedAt||0)>Number(r.updatedAt||0)){await ref.doc(x.id).set(x)}
+  }
+  // Also clean up old cloud tombstones left by earlier versions of the app.
+  for(const [id,r] of remote){
+   const l=local.find(x=>x.id===id);
+   if(r.deletedAt){
+    if(l&&!l.deletedAt)await putItem({...l,deletedAt:Number(r.deletedAt)||Date.now(),updatedAt:Number(r.updatedAt)||Date.now()});
+    else if(!l)await putItem(r);
+    await ref.doc(id).delete();
+    continue;
+   }
+   if(l?.deletedAt){await ref.doc(id).delete();continue}
+   if(!l||Number(r.updatedAt||0)>Number(l.updatedAt||0))await putItem(r)
+  }
   $("accountBtn").textContent="✓ "+(currentUser.displayName?.split(" ")[0]||"সিঙ্ক চালু");
   toast("ইন্টারনেটের সঙ্গে তথ্য মিলেছে");
  }catch(e){console.error(e);toast("সিঙ্ক হয়নি—পরে আবার চেষ্টা হবে")}
