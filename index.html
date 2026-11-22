@@ -145,7 +145,7 @@ async function signIn(){if(!auth){toast("লগইন চালুর জন্�
 async function init(){
  await openLocal();render();
  $("newFolder").onclick=()=>openEditor("folder");$("newNote").onclick=()=>openEditor("note");$("fab").onclick=()=>openEditor("note");
- $("cancelEdit").onclick=closeEditor;$("saveEdit").onclick=saveEditor;$("closeView").onclick=closeViewer;
+ $("cancelEdit").onclick=closeEditor;$("saveEdit").onclick=saveEditor;$("closeView").onclick=closeViewer;$("favoriteView").onclick=()=>toggleViewedFlag("favorite");$("bookmarkView").onclick=()=>toggleViewedFlag("bookmarked");$("pinView").onclick=()=>toggleViewedFlag("pinned");
  $("editView").onclick=()=>{let x=viewing;closeViewer();openEditor("note",x)};$("deleteView").onclick=removeViewed;
  $("cancelFolderDelete").onclick=closeFolderDelete;$("confirmFolderDelete").onclick=confirmFolderDelete;
  $("closeFolderMenu").onclick=closeFolderMenu;$("folderMenu").querySelectorAll("[data-folder-action]").forEach(b=>b.onclick=()=>folderMenuAction(b.dataset.folderAction));
