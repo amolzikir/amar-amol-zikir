@@ -329,7 +329,7 @@ async function loadDailyAmal(){
 
 let dailyCalendarMonth=localDateKey().slice(0,7);
 function dailyDateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-Object.assign(I18N,{"উপরে নিন":["Move up","تحريك إلى الأعلى","اوپر کریں"],"নিচে নিন":["Move down","تحريك إلى الأسفل","نیچے کریں"],"আমলের নাম সম্পাদনা করুন":["Edit amal name","تعديل اسم العمل","عمل کا نام تبدیل کریں"],"আমলের নতুন নাম লিখুন":["Enter the new amal name","أدخل اسم العمل الجديد","عمل کا نیا نام درج کریں"],"আমলের নাম পরিবর্তন হয়েছে":["Amal name updated","تم تحديث اسم العمل","عمل کا نام تبدیل ہوگیا"],"বাকি":["Not done","لم يكتمل","باقی"],"সম্পন্ন":["Completed","مكتمل","مکمل"]});
+Object.assign(I18N,{"উপরে নিন":["Move up","تحريك إلى الأعلى","اوپر کریں"],"নিচে নিন":["Move down","تحريك إلى الأسفل","نیچے کریں"],"আমলের নাম সম্পাদনা করুন":["Edit amal name","تعديل اسم العمل","عمل کا نام تبدیل کریں"],"আমলের নতুন নাম লিখুন":["Enter the new amal name","أدخل اسم العمل الجديد","عمل کا نیا نام درج کریں"],"আমলের নাম পরিবর্তন হয়েছে":["Amal name updated","تم تحديث اسم العمل","عمل کا نام تبدیل ہوگیا"],"আমলের লক্ষ্যসংখ্যা লিখুন":["Enter the amal target count","أدخل عدد الهدف للعمل","عمل کا ہدفی شمار درج کریں"],"লক্ষ্য ১ থেকে ১০০০০০-এর মধ্যে পূর্ণসংখ্যা দিন":["Enter a whole number from 1 to 100000","أدخل عددًا صحيحًا من 1 إلى 100000","1 سے 100000 کے درمیان پورا عدد درج کریں"],"আমলের তথ্য আপডেট হয়েছে":["Amal details updated","تم تحديث بيانات العمل","عمل کی تفصیلات اپ ڈیٹ ہوگئیں"],"বাকি":["Not done","لم يكتمل","باقی"],"সম্পন্ন":["Completed","مكتمل","مکمل"]});
 Object.assign(I18N,{"ধারাবাহিক দিন":["Streak days","أيام متتالية","مسلسل دن"],"গত ৭ দিনের অগ্রগতি":["Last 7 days progress","إنجاز آخر 7 أيام","گزشتہ 7 دنوں کی پیش رفت"]});
 function dailyDayCount(date){const done=dailyAmalRecord?.days?.[date]||{};return (dailyAmalRecord?.items||[]).filter(x=>Number(done[x.id]===true?x.target||1:done[x.id]||0)>=(Number(x.target)||1)).length}
 function dailyIsComplete(date){const items=dailyAmalRecord?.items||[];return items.length>0&&dailyDayCount(date)===items.length}
@@ -389,7 +389,9 @@ async function editDailyAmal(id){
  const item=dailyAmalRecord?.items?.find(x=>x.id===id);if(!item)return;
  const name=prompt(tr("আমলের নতুন নাম লিখুন"),item.name);if(name===null)return;const clean=name.trim();if(!clean){toast(tr("একটি নাম লিখুন"));return}
  if(dailyAmalRecord.items.some(x=>x.id!==id&&x.name.trim().toLocaleLowerCase()===clean.toLocaleLowerCase())){toast(tr("এই আমলটি তালিকায় আছে"));return}
- item.name=clean;await persistDailyAmal();renderDailyAmal();toast(tr("আমলের নাম পরিবর্তন হয়েছে"));
+ const targetText=prompt(tr("আমলের লক্ষ্যসংখ্যা লিখুন"),String(Math.max(1,Number(item.target)||1)));if(targetText===null)return;
+ const target=Number(targetText.trim());if(!Number.isInteger(target)||target<1||target>100000){toast(tr("লক্ষ্য ১ থেকে ১০০০০০-এর মধ্যে পূর্ণসংখ্যা দিন"));return}
+ item.name=clean;item.target=target;await persistDailyAmal();renderDailyAmal();toast(tr("আমলের তথ্য আপডেট হয়েছে"));
 }
 async function moveDailyAmal(id,delta){
  if(!dailyAmalRecord)return;const items=dailyAmalRecord.items||[],i=items.findIndex(x=>x.id===id),j=i+delta;if(i<0||j<0||j>=items.length)return;
