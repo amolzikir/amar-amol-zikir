@@ -1,4 +1,4 @@
-const CACHE="amol-zikir-v38";
+const CACHE="amol-zikir-v39";
 const FILES=["./","./index.html","./manifest.webmanifest"];
 const FIREBASE=[
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
