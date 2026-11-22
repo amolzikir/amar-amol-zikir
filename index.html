@@ -147,7 +147,7 @@ Object.assign(I18N,{
 });
 let currentLang=localStorage.getItem("amol-language")||"bn";
 function currentLocale(){return ({bn:"bn-BD",en:"en-US",ar:"ar",ur:"ur-PK"})[currentLang]||"bn-BD"}
-function tr(s){let o=String(s??"");if(currentLang==="bn")return o;for(const k of Object.keys(I18N).sort((a,b)=>b.length-a.length))o=o.split(k).join(I18N[k][["bn","en","ar","ur"].indexOf(currentLang)]);return o}
+function tr(s){let o=String(s??"");if(currentLang==="bn")return o;for(const k of Object.keys(I18N).sort((a,b)=>b.length-a.length))o=o.split(k).join(I18N[k][currentLang==="en"?0:currentLang==="ar"?1:2]);return o}
 function protectedTextNode(n){const p=n.parentElement;return !p||!!p.closest("#viewBody,#viewTitle,#itemTitle,#itemBody,#noteMenuTitle,#accountBtn,.name,#folderMenuTitle,#folderDeleteInfo")}
 const originalText=new WeakMap(),originalAttrs=new WeakMap();
 function translateNode(n){if(!originalText.has(n))originalText.set(n,n.nodeValue);const v=tr(originalText.get(n));if(n.nodeValue!==v)n.nodeValue=v}
