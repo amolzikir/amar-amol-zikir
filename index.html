@@ -362,29 +362,28 @@ function shiftDailyCalendar(delta){const p=dailyCalendarMonth.split("-").map(Num
 
 async function shareDailyAmalReport(){
  if(!dailyAmalRecord)return;
- const date=$("dailyAmalDate").value||localDateKey(),done=dailyAmalRecord.days?.[date]||{},items=dailyAmalRecord.items||[];
+ const date=$("dailyAmalDate").value||localDateKey(),done=dailyAmalRecord.days?.[date]||{},items=dailyAmalRecord.items||[],dateLabel=new Date(date+"T12:00:00").toLocaleDateString(currentLocale(),{weekday:"long",year:"numeric",month:"long",day:"numeric"});
  const completed=items.filter(x=>Number(done[x.id]===true?x.target||1:done[x.id]||0)>=(Number(x.target)||1));
- const lines=items.map(x=>{const target=Math.max(1,Number(x.target)||1),count=Math.max(0,Number(done[x.id]===true?target:done[x.id]||0));return (count>=target?"✓ ":"○ ")+x.name+" — "+count+"/"+target});
- const report=tr("দৈনিক আমলের প্রতিবেদন")+"\n"+date+"\n\n"+tr("সম্পন্ন")+": "+completed.length+"/"+items.length+" ("+(items.length?Math.round(completed.length/items.length*100):0)+"%)\n\n"+lines.join("\n");
+ const lines=items.map(x=>{const target=Math.max(1,Number(x.target)||1),count=Math.max(0,Number(done[x.id]===true?target:done[x.id]||0));return (count>=target?"✓ ":"○ ")+x.name+" — "+count.toLocaleString(currentLocale())+"/"+target.toLocaleString(currentLocale())});
+ const percent=items.length?Math.round(completed.length/items.length*100):0;
+ const report=tr("দৈনিক আমলের প্রতিবেদন")+"\n"+dateLabel+"\n\n"+tr("সম্পন্ন")+": "+completed.length.toLocaleString(currentLocale())+"/"+items.length.toLocaleString(currentLocale())+" ("+percent.toLocaleString(currentLocale())+"%)\n\n"+lines.join("\n");
  try{if(navigator.share){await navigator.share({title:tr("দৈনিক আমলের প্রতিবেদন"),text:report});return}if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(report);toast(tr("প্রতিবেদন কপি হয়েছে"));return}}catch(e){if(e&&e.name==="AbortError")return}
  try{const area=document.createElement("textarea");area.value=report;document.body.appendChild(area);area.select();const ok=document.execCommand("copy");area.remove();toast(ok?tr("প্রতিবেদন কপি হয়েছে"):tr("প্রতিবেদন কপি করা যায়নি"))}catch(e){toast(tr("প্রতিবেদন কপি করা যায়নি"))}
-}
-async function shareMonthlyAmalReport(){
+}async function shareMonthlyAmalReport(){
  if(!dailyAmalRecord)return;
  const parts=dailyCalendarMonth.split("-").map(Number),yy=parts[0],mm=parts[1],days=new Date(yy,mm,0).getDate(),today=localDateKey().split("-").map(Number),future=yy>today[0]||(yy===today[0]&&mm>today[1]),elapsed=future?0:(yy===today[0]&&mm===today[1]?today[2]:days),items=dailyAmalRecord.items||[];
  let doneTotal=0,active=0,lines=[];
  for(let n=1;n<=elapsed;n++){
-  const key=yy+"-"+String(mm).padStart(2,"0")+"-"+String(n).padStart(2,"0"),done=dailyDayCount(key),pct=items.length?Math.round(done/items.length*100):0;
+  const key=yy+"-"+String(mm).padStart(2,"0")+"-"+String(n).padStart(2,"0"),done=dailyDayCount(key),pct=items.length?Math.round(done/items.length*100):0,dateLabel=new Date(key+"T12:00:00").toLocaleDateString(currentLocale(),{day:"numeric",month:"short"});
   doneTotal+=done;if(done>0)active++;
-  lines.push(key+" — "+done+"/"+items.length+" ("+pct+"%)");
+  lines.push(dateLabel+" — "+done.toLocaleString(currentLocale())+"/"+items.length.toLocaleString(currentLocale())+" ("+pct.toLocaleString(currentLocale())+"%)");
  }
  const possible=elapsed*items.length,rate=possible?Math.round(doneTotal/possible*100):0;
  const monthName=new Date(yy,mm-1,1).toLocaleDateString(currentLocale(),{month:"long",year:"numeric"});
- const report=tr("মাসিক আমল প্রতিবেদন")+" — "+monthName+"\n"+tr("মোট সম্পন্ন")+": "+doneTotal+"\n"+tr("সক্রিয় দিন")+": "+active+"/"+elapsed+"\n"+tr("মাসিক অগ্রগতি")+": "+rate+"%\n\n"+lines.join("\n");
+ const report=tr("মাসিক আমল প্রতিবেদন")+" — "+monthName+"\n"+tr("মোট সম্পন্ন")+": "+doneTotal.toLocaleString(currentLocale())+"\n"+tr("সক্রিয় দিন")+": "+active.toLocaleString(currentLocale())+"/"+elapsed.toLocaleString(currentLocale())+"\n"+tr("মাসিক অগ্রগতি")+": "+rate.toLocaleString(currentLocale())+"%\n\n"+lines.join("\n");
  try{if(navigator.share){await navigator.share({title:tr("মাসিক আমল প্রতিবেদন"),text:report});return}if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(report);toast(tr("প্রতিবেদন কপি হয়েছে"));return}}catch(e){if(e&&e.name==="AbortError")return}
  try{const area=document.createElement("textarea");area.value=report;document.body.appendChild(area);area.select();const ok=document.execCommand("copy");area.remove();toast(ok?tr("প্রতিবেদন কপি হয়েছে"):tr("প্রতিবেদন কপি করা যায়নি"))}catch(e){toast(tr("প্রতিবেদন কপি করা যায়নি"))}
-}
-function shiftDailyAmalDate(delta){const current=$("dailyAmalDate").value||localDateKey(),d=new Date(current+"T12:00:00");d.setDate(d.getDate()+delta);const key=dailyDateKey(d);$("dailyAmalDate").value=key;dailyCalendarMonth=key.slice(0,7);renderDailyAmal()}
+}function shiftDailyAmalDate(delta){const current=$("dailyAmalDate").value||localDateKey(),d=new Date(current+"T12:00:00");d.setDate(d.getDate()+delta);const key=dailyDateKey(d);$("dailyAmalDate").value=key;dailyCalendarMonth=key.slice(0,7);renderDailyAmal()}
 function renderDailyAmal(){
  if(!dailyAmalRecord)return;
  const date=$("dailyAmalDate").value||localDateKey(),done=dailyAmalRecord.days?.[date]||{};
