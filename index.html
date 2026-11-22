@@ -151,7 +151,7 @@ async function init(){
  $("closeFolderMenu").onclick=closeFolderMenu;$("folderMenu").querySelectorAll("[data-folder-action]").forEach(b=>b.onclick=()=>folderMenuAction(b.dataset.folderAction));
  $("folderColor").onchange=()=>saveFolderPatch({color:$("folderColor").value||null});$("folderSize").onchange=()=>saveFolderPatch({size:$("folderSize").value});
  $("moveFolderNow").onclick=async()=>{if(!menuFolderId)return;const dest=$("folderMoveTo").value;if(dest==="__same__"){toast("ফোল্ডারটি আগের স্থানেই আছে");return}const all=await allItems(),f=all.find(x=>x.id===menuFolderId);if(!f)return;const newParent=dest==="__root__"?null:dest;const peers=all.filter(x=>x.type==="folder"&&!x.deletedAt&&x.tab===f.tab&&x.parentId===(newParent||null)&&x.id!==f.id);const nextOrder=peers.reduce((m,x)=>Math.max(m,Number(x.sortOrder)||0),0)+1;await putItem({...f,parentId:newParent,sortOrder:nextOrder,updatedAt:Date.now()});closeFolderMenu();await render();toast("ফোল্ডার সরানো হয়েছে");syncCloud()};
- $("accountBtn").onclick=()=>currentUser?toast("আপনি লগইন করা আছেন"):signIn();
+ $("homeMenuBtn").onclick=()=> $("homeMenu").classList.add("show");$("closeHomeMenu").onclick=()=> $("homeMenu").classList.remove("show");$("accountBtn").onclick=()=>currentUser?toast("আপনি লগইন করা আছেন"):signIn();
  $("search").oninput=render;
  window.addEventListener("online",()=>{toast("ইন্টারনেট এসেছে—সিঙ্ক হচ্ছে");syncCloud()});
  if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(console.warn)}
