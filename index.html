@@ -85,12 +85,12 @@ function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).sli
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderTabs(){$("tabs").innerHTML=TABS.map(t=>`<button class="tab ${t===activeTab?"active":""}" data-tab="${esc(t)}">${esc(t)}</button>`).join("");$("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;parentId=null;render()})}
 async function render(){
- renderTabs();const all=await allItems();const live=all.filter(x=>!x.deletedAt&&x.tab===activeTab);const q=$("search").value.trim().toLowerCase();
+ renderTabs();const all=await allItems();let live=all.filter(x=>!x.deletedAt&&(specialView?true:x.tab===activeTab));const q=$("search").value.trim().toLowerCase();if(specialView){live=live.filter(x=>specialView==="favorites"?x.favorite:specialView==="bookmarks"?x.bookmarked:specialView==="pinned"?x.pinned:specialView==="recent"?x.type==="note":true)}
  let path=[], p=parentId;while(p){let x=all.find(a=>a.id===p);if(!x)break;path.unshift(x);p=x.parentId}
  $("crumbs").innerHTML=`<button class="crumb" data-root="1">${esc(activeTab)}</button>`+path.map(x=>`<span>›</span><button class="crumb" data-parent="${x.id}">${esc(x.title)}</button>`).join("");
  $("crumbs").querySelector('[data-root]').onclick=()=>{parentId=null;render()};
  $("crumbs").querySelectorAll("[data-parent]").forEach(b=>b.onclick=()=>{parentId=b.dataset.parent;render()});
- const shown=live.filter(x=>x.parentId===(parentId||null)&&(!q||x.title.toLowerCase().includes(q)||(x.body||"").toLowerCase().includes(q)));
+ const shown=live.filter(x=>(specialView?true:x.parentId===(parentId||null))&&(!q||x.title.toLowerCase().includes(q)||(x.body||"").toLowerCase().includes(q)));
  shown.sort((a,b)=>{if(a.type!==b.type)return a.type==="folder"?-1:1;if(a.type==="folder"&&!!a.pinned!==!!b.pinned)return a.pinned?-1:1;return (Number(a.sortOrder)||0)-(Number(b.sortOrder)||0)||Number(b.updatedAt||0)-Number(a.updatedAt||0)});
  $("listTitle").textContent=parentId?(path.at(-1)?.title||"ফোল্ডার"):"আপনার "+activeTab;
  $("count").textContent=shown.length+"টি";
