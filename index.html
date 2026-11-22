@@ -126,6 +126,7 @@ Object.assign(I18N,{
 "বন্ধ করুন":["Turn off","إيقاف","بند کریں"]
 });
 let currentLang=localStorage.getItem("amol-language")||"bn";
+function currentLocale(){return ({bn:"bn-BD",en:"en-US",ar:"ar",ur:"ur-PK"})[currentLang]||"bn-BD"}
 function tr(s){let o=String(s??"");if(currentLang==="bn")return o;for(const k of Object.keys(I18N).sort((a,b)=>b.length-a.length))o=o.split(k).join(I18N[k][["bn","en","ar","ur"].indexOf(currentLang)]);return o}
 function protectedTextNode(n){const p=n.parentElement;return !p||!!p.closest("#viewBody,#viewTitle,#itemTitle,#itemBody,.name,#folderMenuTitle,#folderDeleteInfo")}
 const originalText=new WeakMap(),originalAttrs=new WeakMap();
@@ -175,7 +176,7 @@ async function render(){
  $("listTitle").textContent=searching?"🔎 সার্চের ফলাফল":specialView?({favorites:"❤️ ফেভারিট",bookmarks:"🔖 বুকমার্কস",pinned:"📌 পিন করা পেজ",recent:"🕘 সাম্প্রতিক",all:"📚 সব সংগ্রহ"}[specialView]||"আপনার সংগ্রহ"):parentId?(path.at(-1)?.title||"ফোল্ডার"):"আপনার "+activeTab;
  $("count").textContent=shown.length+"টি";
  if(!shown.length){$("items").innerHTML=`<div class="empty" style="grid-column:1/-1">${searching?"এই অক্ষর বা শব্দের সঙ্গে মিলে এমন কিছু পাওয়া যায়নি।":"এখানে এখনো কিছু নেই।<br>＋ ফোল্ডার অথবা ＋ নোট চেপে শুরু করুন।"}</div>`;return}
- $("items").innerHTML=shown.map(x=>`<div class="item-wrap"><button class="item ${x.type==="note"?"note":""} ${x.type==="folder"?"folder-card "+(x.size==="small"?"folder-small":x.size==="large"?"folder-large":""):""}" data-id="${x.id}"><span class="emoji">${x.type==="folder"?"📁":"📝"}</span><span class="name">${esc(x.title)}</span><span class="meta">${x.type==="folder"?"ফোল্ডার":new Date(x.updatedAt).toLocaleDateString("bn-BD")}</span></button><button class="${x.type==="folder"?"folder-menu-btn":"note-menu-btn"}" ${x.type==="folder"?"data-folder-menu":"data-note-menu"}="${x.id}" aria-label="${x.type==="folder"?"ফোল্ডার":"নোট"} মেনু">⋮</button></div>`).join("");
+ $("items").innerHTML=shown.map(x=>`<div class="item-wrap"><button class="item ${x.type==="note"?"note":""} ${x.type==="folder"?"folder-card "+(x.size==="small"?"folder-small":x.size==="large"?"folder-large":""):""}" data-id="${x.id}"><span class="emoji">${x.type==="folder"?"📁":"📝"}</span><span class="name">${esc(x.title)}</span><span class="meta">${x.type==="folder"?"ফোল্ডার":new Date(x.updatedAt).toLocaleDateString(currentLocale())}</span></button><button class="${x.type==="folder"?"folder-menu-btn":"note-menu-btn"}" ${x.type==="folder"?"data-folder-menu":"data-note-menu"}="${x.id}" aria-label="${x.type==="folder"?"ফোল্ডার":"নোট"} মেনু">⋮</button></div>`).join("");
  $("items").querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{let x=shown.find(y=>y.id===b.dataset.id);if(x.type==="folder"){parentId=x.id;if($("search").value.trim())$("search").value="";render()}else openViewer(x)});
  $("items").querySelectorAll("[data-folder-menu]").forEach(b=>b.onclick=e=>{e.stopPropagation();openFolderMenu(b.dataset.folderMenu)});$("items").querySelectorAll("[data-note-menu]").forEach(b=>b.onclick=e=>{e.stopPropagation();openNoteMenu(shown.find(y=>y.id===b.dataset.noteMenu))});
 }
@@ -184,7 +185,7 @@ function closeEditor(){$("editor").classList.remove("show");editing=null;if(edit
 function cancelEditor(){const returnToViewer=editingFromViewer;closeEditor();editingFromViewer=false;if(returnToViewer&&viewing){$("viewer").classList.add("show")}}
 async function saveEditor(){let title=$("itemTitle").value.trim();if(!title){toast("একটি নাম লিখুন");return}let old=editing.item;const returnToViewer=editingFromViewer;let x={...(old||{}),id:old?.id||uid(),type:editing.type,tab:old?.tab||activeTab,parentId:old?old.parentId:(parentId||null),title,body:editing.type==="note"?$("itemBody").value:"",updatedAt:Date.now(),deletedAt:null};await putItem(x);closeEditor();editingFromViewer=false;await render();if(returnToViewer)openViewer(x);toast("ডিভাইসে সংরক্ষিত হয়েছে");syncCloud()}
 function editViewedNote(){if(!viewing)return;const x=viewing;$("viewer").classList.remove("show");openEditor("note",x,true);editingFromViewer=true}
-function openViewer(x){viewing=x;saveNavState();$("viewTitle").textContent=x.title;$("viewDate").textContent=new Date(x.updatedAt).toLocaleString("bn-BD");$("viewBody").textContent=x.body||"";$("viewer").classList.add("show")}
+function openViewer(x){viewing=x;saveNavState();$("viewTitle").textContent=x.title;$("viewDate").textContent=new Date(x.updatedAt).toLocaleString(currentLocale());$("viewBody").textContent=x.body||"";$("viewer").classList.add("show")}
 function closeViewer(){$("viewer").classList.remove("show");viewing=null;saveNavState()}
 function openNoteMenu(x=viewing){if(!x)return;viewing=x;$("noteMenuTitle").textContent="📝 "+(x.title||"নোট")+" — অপশন";$("favoriteView").textContent=x.favorite?"❤️ ফেভারিট থেকে সরান":"♡ ফেভারিটে রাখুন";$("bookmarkView").textContent=x.bookmarked?"🔖 বুকমার্ক সরান":"🔖 বুকমার্ক করুন";$("pinView").textContent=x.pinned?"📌 পিন তুলে দিন":"📌 পিন করুন";$("noteMenu").classList.add("show")}
 function closeNoteMenu(){$("noteMenu").classList.remove("show")}
