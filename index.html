@@ -83,8 +83,24 @@ function putItem(x){return new Promise((res,rej)=>{let r=dbLocal.transaction(STO
 function delLocal(id){return new Promise((res,rej)=>{let r=dbLocal.transaction(STORE,"readwrite").objectStore(STORE).delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
 function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function saveNavState(){try{localStorage.setItem("amol-nav-state",JSON.stringify({activeTab,parentId,specialView,search:$("search")?.value||"",viewingId:viewing?.id||null}))}catch(e){console.warn("Navigation state could not be saved",e)}}
-function restoreNavState(){try{const s=JSON.parse(localStorage.getItem("amol-nav-state")||"null");if(!s)return null;if(TABS.includes(s.activeTab))activeTab=s.activeTab;parentId=s.parentId||null;specialView=s.specialView||null;if($("search"))$("search").value=s.search||"";return s.viewingId||null}catch(e){console.warn("Navigation state could not be restored",e);return null}}
+function saveNavState(){
+ const state={activeTab,parentId,specialView,search:$("search")?.value||"",viewingId:viewing?.id||null};
+ try{localStorage.setItem("amol-nav-state",JSON.stringify(state))}catch(e){console.warn("Navigation state could not be saved",e)}
+ try{const p=new URLSearchParams();p.set("tab",state.activeTab);if(state.parentId)p.set("folder",state.parentId);if(state.specialView)p.set("view",state.specialView);if(state.search)p.set("search",state.search);if(state.viewingId)p.set("note",state.viewingId);history.replaceState(null,"",location.pathname+location.search+"#"+p.toString())}catch(e){console.warn("Navigation URL could not be saved",e)}
+}
+function restoreNavState(){
+ try{
+  const p=new URLSearchParams(location.hash.startsWith("#")?location.hash.slice(1):location.hash);
+  let s=null;
+  if(p.has("tab")||p.has("folder")||p.has("view")||p.has("note"))s={activeTab:p.get("tab"),parentId:p.get("folder"),specialView:p.get("view"),search:p.get("search")||"",viewingId:p.get("note")};
+  if(!s)s=JSON.parse(localStorage.getItem("amol-nav-state")||"null");
+  if(!s)return null;
+  if(TABS.includes(s.activeTab))activeTab=s.activeTab;
+  parentId=s.parentId||null;specialView=s.specialView||null;
+  if($("search"))$("search").value=s.search||"";
+  return s.viewingId||null;
+ }catch(e){console.warn("Navigation state could not be restored",e);return null}
+}
 function renderTabs(){$("tabs").innerHTML=TABS.map(t=>`<button class="tab ${t===activeTab?"active":""}" data-tab="${esc(t)}">${esc(t)}</button>`).join("");$("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;parentId=null;specialView=null;render()})}
 async function render(){
  saveNavState();renderTabs();const all=await allItems();const rawQ=$("search").value.trim();const q=rawQ.normalize("NFC").toLocaleLowerCase();const searching=!!q;let live=all.filter(x=>!x.deletedAt&&(searching?true:(specialView?true:x.tab===activeTab)));if(!searching&&specialView){live=live.filter(x=>specialView==="favorites"?x.favorite:specialView==="bookmarks"?x.bookmarked:specialView==="pinned"?x.pinned:specialView==="recent"?x.type==="note":true)}
