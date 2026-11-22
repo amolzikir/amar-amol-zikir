@@ -145,6 +145,22 @@ Object.assign(I18N,{
 "শেয়ার করা যায়নি; অন্য অপশন ব্যবহার করুন":["Could not share; try another option","تعذرت المشاركة؛ جرّب خيارًا آخر","شیئر نہیں ہو سکا؛ دوسرا طریقہ آزمائیں"],
 "ফোল্ডারটি মুছে ফেলার নিয়ম বেছে নিন।":["Choose how to delete this folder.","اختر كيفية حذف هذا المجلد.","اس فولڈر کو حذف کرنے کا طریقہ منتخب کریں۔"]
 });
+Object.assign(I18N,{
+"ইন্টারনেটের সঙ্গে তথ্য মিলেছে":["Data synced with the internet","تمت مزامنة البيانات عبر الإنترنت","انٹرنیٹ کے ساتھ ڈیٹا ہم آہنگ ہو گیا"],
+"সিঙ্ক হয়নি—পরে আবার চেষ্টা হবে":["Sync failed — will retry later","تعذرت المزامنة — ستتم المحاولة لاحقًا","سنک نہیں ہو سکا — بعد میں دوبارہ کوشش ہوگی"],
+"📤 শেয়ার মেনু খুলুন":["📤 Open share menu","📤 فتح قائمة المشاركة","📤 شیئر مینو کھولیں"],
+"📋 লেখা কপি":["📋 Copy text","📋 نسخ النص","📋 متن کاپی کریں"],
+"রাতে আরামদায়কভাবে ব্যবহার করুন":["Use comfortably at night","استخدمه براحة ليلًا","رات کو آرام سے استعمال کریں"],
+"ভেতরের সবকিছুসহ ডিলিট":["Delete with all contents","حذف مع جميع المحتويات","تمام مواد سمیت حذف کریں"],
+"📌 পিন / আনপিন":["📌 Pin / Unpin","📌 تثبيت / إلغاء التثبيت","📌 پن / اَن پن"],
+"🗑️ ডিলিট":["🗑️ Delete","🗑️ حذف","🗑️ حذف"],
+"হালকা সবুজ":["Light green","أخضر فاتح","ہلکا سبز"],
+"হালকা নীল":["Light blue","أزرق فاتح","ہلکا نیلا"],
+"হালকা হলুদ":["Light yellow","أصفر فاتح","ہلکا پیلا"],
+"হালকা গোলাপি":["Light pink","وردي فاتح","ہلکا گلابی"],
+"হালকা বেগুনি":["Light purple","بنفسجي فاتح","ہلکا جامنی"],
+"ধূসর":["Gray","رمادي","سرمئی"]
+});
 let currentLang=localStorage.getItem("amol-language")||"bn";
 function currentLocale(){return ({bn:"bn-BD",en:"en-US",ar:"ar",ur:"ur-PK"})[currentLang]||"bn-BD"}
 function tr(s){let o=String(s??"");if(currentLang==="bn")return o;for(const k of Object.keys(I18N).sort((a,b)=>b.length-a.length))o=o.split(k).join(I18N[k][currentLang==="en"?0:currentLang==="ar"?1:2]);return o}
