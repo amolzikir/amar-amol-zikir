@@ -32,18 +32,19 @@ footer{margin:26px 2px 0;color:var(--muted);font-size:11px;text-align:center;lin
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#193d30;color:white;padding:10px 15px;border-radius:999px;font-size:13px;display:none;z-index:9;max-width:90%;text-align:center}
 @media(min-width:650px){.overlay{align-items:center}.modal{border-radius:22px}.grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
 
-/* Full-page notebook-style note editor */
-#editor{padding:0;align-items:stretch;justify-content:stretch;background:var(--paper)}
-#editor .modal{width:100%;max-width:none;height:100%;height:100dvh;max-height:100dvh;border:0;border-radius:0;padding:16px 18px calc(16px + env(safe-area-inset-bottom));margin:0;background:var(--paper);color:var(--ink);box-shadow:none;display:flex;flex-direction:column;overflow:hidden}
-#editor .modal h3{font-size:16px;font-weight:600;margin:0 0 18px;padding:8px 0;color:var(--muted)}
-#editor .modal>label{display:none}
-#editor #itemTitle{font-size:22px;font-weight:700;line-height:1.4;padding:8px 0;margin:0 0 8px;border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--ink);outline:none}
-#editor #bodyWrap{display:flex;flex:1;flex-direction:column;min-height:0}
-#editor #bodyWrap>label{display:none}
-#editor #itemBody{flex:1;width:100%;min-height:0;resize:none;border:0;border-radius:0;background:transparent;color:var(--ink);padding:8px 0;margin:0;line-height:1.75;font-size:17px;outline:none;box-shadow:none}
-#editor .field::placeholder{color:var(--muted);opacity:.72}
-#editor .modal-actions{margin-top:12px;padding:12px 0 0;border-top:1px solid var(--line);justify-content:flex-end;flex-shrink:0}
-body.dark #editor .modal,body.dark #editor .field{background:var(--paper);color:var(--ink);border-color:var(--line)}
+
+/* Seamless full-screen notebook editor: title and body share one page */
+#editor.overlay{position:fixed!important;inset:0!important;padding:0!important;margin:0!important;align-items:stretch!important;justify-content:stretch!important;background:var(--paper)!important;overflow:hidden!important}
+#editor.overlay.show{display:flex!important}
+#editor .modal{position:relative!important;display:flex!important;flex-direction:column!important;gap:0!important;width:100%!important;max-width:none!important;height:100vh!important;height:100dvh!important;min-height:0!important;max-height:none!important;margin:0!important;padding:calc(14px + env(safe-area-inset-top)) 20px calc(12px + env(safe-area-inset-bottom))!important;border:0!important;border-radius:0!important;background:var(--paper)!important;color:var(--ink)!important;box-shadow:none!important;overflow:hidden!important}
+#editor #editorTitle{flex:none!important;margin:0 0 14px!important;padding:4px 0 10px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font-size:15px!important;font-weight:600!important;color:var(--muted)!important}
+#editor .modal>label,#editor #bodyWrap>label{display:none!important}
+#editor #itemTitle.field,#editor #itemBody.field{display:block!important;width:100%!important;border:0!important;border-bottom:0!important;border-radius:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;color:var(--ink)!important;padding:8px 0!important}
+#editor #itemTitle.field{flex:none!important;height:auto!important;min-height:48px!important;margin:0 0 8px!important;font-size:22px!important;font-weight:700!important;line-height:1.4!important}
+#editor #bodyWrap{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;min-height:0!important;margin:0!important;padding:0!important;background:transparent!important}
+#editor #itemBody.field{flex:1 1 auto!important;min-height:0!important;resize:none!important;margin:0!important;font-size:17px!important;line-height:1.8!important}
+#editor #itemTitle::placeholder,#editor #itemBody::placeholder{color:var(--muted)!important;opacity:.65!important}
+#editor .modal-actions{flex:none!important;display:flex!important;justify-content:flex-end!important;margin:10px 0 0!important;padding:12px 0 0!important;border-top:1px solid var(--line)!important;background:var(--paper)!important}
 </style>
 </head>
 <body>
