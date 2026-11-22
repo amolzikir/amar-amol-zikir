@@ -1,4 +1,4 @@
-const CACHE="amol-zikir-v1";
+const CACHE="amol-zikir-v2";
 const FILES=["./","./index.html","./manifest.webmanifest"];
 const FIREBASE=[
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
@@ -6,7 +6,7 @@ const FIREBASE=[
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"
 ];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>caches.open(CACHE)).then(c=>Promise.all(FIREBASE.map(u=>c.add(u).catch(()=>{})))).then(()=>self.skipWaiting()))});
-self.addEventListener("activate",e=>{e.waitUntil(self.clients.claim())});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("amol-zikir-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{
  const u=new URL(e.request.url);
  if(e.request.method!=="GET")return;
