@@ -344,9 +344,9 @@ function renderDailyWeekly(){
 }
 function renderDailyCalendar(){
  if(!dailyAmalRecord)return;
- const parts=dailyCalendarMonth.split("-").map(Number),yy=parts[0],mm=parts[1],first=new Date(yy,mm-1,1),start=new Date(yy,mm-1,1-first.getDay()),selected=$("dailyAmalDate").value||localDateKey(),today=localDateKey(),items=dailyAmalRecord.items||[];
+ const parts=dailyCalendarMonth.split("-").map(Number),yy=parts[0],mm=parts[1],first=new Date(yy,mm-1,1),weekStart=currentLang==="bn"?6:0,offset=(first.getDay()-weekStart+7)%7,start=new Date(yy,mm-1,1-offset),selected=$("dailyAmalDate").value||localDateKey(),today=localDateKey(),items=dailyAmalRecord.items||[];
  $("dailyCalMonth").textContent=first.toLocaleDateString(currentLocale(),{month:"long",year:"numeric"});
- $("dailyCalWeek").innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(2024,0,7+i);return "<span>"+d.toLocaleDateString(currentLocale(),{weekday:"short"})+"</span>"}).join("");
+ $("dailyCalWeek").innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(2024,0,7+((weekStart+i)%7));return "<span>"+d.toLocaleDateString(currentLocale(),{weekday:"short"})+"</span>"}).join("");
  const days=new Date(yy,mm,0).getDate(),nowParts=today.split("-").map(Number),todayMonth=nowParts[0]===yy&&nowParts[1]===mm,monthIsFuture=yy>nowParts[0]||(yy===nowParts[0]&&mm>nowParts[1]),elapsed=monthIsFuture?0:todayMonth?nowParts[2]:days;let active=0,completedTotal=0;
  for(let n=1;n<=elapsed;n++){const key=yy+"-"+String(mm).padStart(2,"0")+"-"+String(n).padStart(2,"0"),finished=dailyDayCount(key);completedTotal+=finished;if(finished>0)active++}
  const possible=elapsed*items.length,rate=possible?Math.round(completedTotal/possible*100):0;
