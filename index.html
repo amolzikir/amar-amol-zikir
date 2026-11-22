@@ -140,10 +140,15 @@ Object.assign(I18N,{
 "আপনার রিমাইন্ডার":["Your reminder","تذكيرك","آپ کی یاد دہانی"],
 "অ্যাপ সম্পর্কে":["About this app","حول هذا التطبيق","اس ایپ کے بارے میں"]
 });
+Object.assign(I18N,{
+"মুছে ফেলার নির্দেশ সংরক্ষিত হয়েছে":["Deletion request saved","تم حفظ طلب الحذف","حذف کی ہدایت محفوظ ہوگئی"],
+"শেয়ার করা যায়নি; অন্য অপশন ব্যবহার করুন":["Could not share; try another option","تعذرت المشاركة؛ جرّب خيارًا آخر","شیئر نہیں ہو سکا؛ دوسرا طریقہ آزمائیں"],
+"ফোল্ডারটি মুছে ফেলার নিয়ম বেছে নিন।":["Choose how to delete this folder.","اختر كيفية حذف هذا المجلد.","اس فولڈر کو حذف کرنے کا طریقہ منتخب کریں۔"]
+});
 let currentLang=localStorage.getItem("amol-language")||"bn";
 function currentLocale(){return ({bn:"bn-BD",en:"en-US",ar:"ar",ur:"ur-PK"})[currentLang]||"bn-BD"}
 function tr(s){let o=String(s??"");if(currentLang==="bn")return o;for(const k of Object.keys(I18N).sort((a,b)=>b.length-a.length))o=o.split(k).join(I18N[k][["bn","en","ar","ur"].indexOf(currentLang)]);return o}
-function protectedTextNode(n){const p=n.parentElement;return !p||!!p.closest("#viewBody,#viewTitle,#itemTitle,#itemBody,#noteMenuTitle,.name,#folderMenuTitle,#folderDeleteInfo")}
+function protectedTextNode(n){const p=n.parentElement;return !p||!!p.closest("#viewBody,#viewTitle,#itemTitle,#itemBody,#noteMenuTitle,#accountBtn,.name,#folderMenuTitle,#folderDeleteInfo")}
 const originalText=new WeakMap(),originalAttrs=new WeakMap();
 function translateNode(n){if(!originalText.has(n))originalText.set(n,n.nodeValue);const v=tr(originalText.get(n));if(n.nodeValue!==v)n.nodeValue=v}
 function translateTree(root=document.body){document.documentElement.lang=currentLang;document.title=tr("আমার আমল ও জিকির");document.documentElement.dir=currentLang==="ar"||currentLang==="ur"?"rtl":"ltr";document.body.classList.toggle("rtl-language",document.documentElement.dir==="rtl");const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode())if(!protectedTextNode(n))translateNode(n);root.querySelectorAll?.("input[placeholder],textarea[placeholder],[aria-label],option").forEach(e=>{if(e.matches("#itemTitle,#itemBody"))return;for(const a of ["placeholder","aria-label","title"])if(e.hasAttribute(a)){let m=originalAttrs.get(e);if(!m){m={};originalAttrs.set(e,m)}if(!(a in m))m[a]=e.getAttribute(a);e.setAttribute(a,tr(m[a]))}})}
