@@ -105,10 +105,14 @@ function saveNavState(){
 }
 function restoreNavState(){
  try{
+  const navEntry=performance.getEntriesByType("navigation")[0];
+  const navigationType=navEntry?.type||(performance.navigation?.type===1?"reload":"navigate");
+  // Restore the previous screen only for a page refresh, not a fresh website launch.
+  if(navigationType!=="reload")return null;
   const p=new URLSearchParams(location.hash.startsWith("#")?location.hash.slice(1):location.hash);
   let s=null;
   s=JSON.parse(localStorage.getItem("amol-nav-state")||"null");
-   if(!s&&(p.has("tab")||p.has("folder")||p.has("view")||p.has("note")))s={activeTab:p.get("tab"),parentId:p.get("folder"),specialView:p.get("view"),search:p.get("search")||"",viewingId:p.get("note")};
+  if(!s&&(p.has("tab")||p.has("folder")||p.has("view")||p.has("note")))s={activeTab:p.get("tab"),parentId:p.get("folder"),specialView:p.get("view"),search:p.get("search")||"",viewingId:p.get("note")};
   if(!s)return null;
   if(TABS.includes(s.activeTab))activeTab=s.activeTab;
   parentId=s.parentId||null;specialView=s.specialView||null;
