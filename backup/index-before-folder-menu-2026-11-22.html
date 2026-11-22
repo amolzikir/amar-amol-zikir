@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#176b50">
+<meta name="description" content="ব্যক্তিগত আমল, জিকির, ফোল্ডার ও নোট">
+<link rel="manifest" href="manifest.webmanifest">
+<title>আমার আমল ও জিকির</title>
+<style>
+:root{--green:#176b50;--green2:#e8f4ed;--ink:#18352b;--muted:#6b7d75;--paper:#f7faf7;--line:#e2ebe5;--white:#fff;--gold:#d7a94b;--shadow:0 8px 28px rgba(20,70,50,.08)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif}
+button,input,textarea{font:inherit}button{cursor:pointer}
+header{background:linear-gradient(135deg,#125c45,#258564);color:white;padding:18px 18px 22px;border-radius:0 0 24px 24px;box-shadow:var(--shadow)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-size:20px;font-weight:800;letter-spacing:.1px}.sub{font-size:12px;opacity:.85;margin-top:4px}
+.pill{border:1px solid #ffffff66;background:#ffffff18;color:#fff;border-radius:999px;padding:7px 11px;font-size:12px}
+main{max-width:850px;margin:auto;padding:16px 14px 90px}
+.tabs{display:flex;gap:8px;overflow:auto;padding:3px 0 13px;scrollbar-width:none}.tab{border:1px solid var(--line);background:white;color:var(--muted);padding:10px 15px;border-radius:999px;white-space:nowrap;font-weight:650}.tab.active{background:var(--green);border-color:var(--green);color:white}
+.toolbar{display:flex;gap:9px;align-items:center;margin:4px 0 15px}.search{flex:1;min-width:0;border:1px solid var(--line);background:white;border-radius:13px;padding:12px 13px;outline:none}.action{border:0;background:var(--green);color:white;border-radius:13px;padding:11px 14px;font-weight:700}.action.secondary{background:var(--green2);color:var(--green);border:1px solid #cfe3d6}.action:disabled{opacity:.5}
+.crumbs{font-size:13px;color:var(--muted);margin:4px 0 14px;display:flex;gap:6px;flex-wrap:wrap}.crumb{border:0;background:none;color:var(--green);padding:0;font-weight:650}
+.sectionhead{display:flex;align-items:center;justify-content:space-between;margin:12px 2px}.sectionhead h2{font-size:16px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:11px}
+.item{background:white;border:1px solid var(--line);border-radius:17px;padding:14px;min-height:112px;box-shadow:0 3px 12px rgba(20,70,50,.035);text-align:left;color:var(--ink);position:relative}
+.item-wrap{position:relative;min-width:0}.item-wrap>.item{width:100%;height:100%}.rename-folder{position:absolute;right:7px;top:7px;border:1px solid var(--line);background:#fff;color:var(--green);border-radius:9px;padding:5px 8px;font-size:12px;font-weight:700;z-index:1}.item.folder-card{padding-right:48px}
+.item .emoji{font-size:25px;display:block;margin-bottom:9px}.item .name{font-weight:750;display:block;overflow-wrap:anywhere}.item .meta{font-size:11px;color:var(--muted);display:block;margin-top:5px}.item.folder-card{padding-top:54px}.delete-folder{position:absolute;right:7px;top:39px;border:1px solid #f0d2d2;background:#fff7f7;color:#a83232;border-radius:9px;padding:5px 8px;font-size:12px;font-weight:700;z-index:1}
+.item.note{min-height:130px}.item.note .emoji{font-size:20px}.empty{background:white;border:1px dashed #bfd4c7;border-radius:18px;padding:28px 18px;text-align:center;color:var(--muted);line-height:1.7}
+.fab{position:fixed;right:20px;bottom:22px;border:0;border-radius:18px;background:var(--gold);color:#34270d;width:58px;height:58px;font-size:29px;box-shadow:0 8px 22px #8b6a253d}
+.overlay{position:fixed;inset:0;background:#10271f77;display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:5}.overlay.show{display:flex}.modal{background:white;width:min(100%,620px);border-radius:22px 22px 16px 16px;padding:18px;max-height:90vh;overflow:auto;box-shadow:var(--shadow)}
+.modal h3{margin:0 0 14px;font-size:18px}.field{display:block;width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0 13px;background:#fff;outline-color:#77ad91}.field.label{font-size:13px;color:var(--muted);border:0;padding:0;margin:8px 0 2px}.modal-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:14px}.cancel{background:#f0f4f1;color:var(--ink);border:0;border-radius:12px;padding:11px 14px}
+.noteview{white-space:pre-wrap;line-height:1.85;font-size:15px;overflow-wrap:anywhere}.small{font-size:12px;color:var(--muted)}
+footer{margin:26px 2px 0;color:var(--muted);font-size:11px;text-align:center;line-height:1.7}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#193d30;color:white;padding:10px 15px;border-radius:999px;font-size:13px;display:none;z-index:9;max-width:90%;text-align:center}
+@media(min-width:650px){.overlay{align-items:center}.modal{border-radius:22px}.grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
+</style>
+</head>
+<body>
+<header>
+ <div class="top"><div><div class="brand">🌿 আমার আমল ও জিকির</div><div class="sub">আপনার ব্যক্তিগত আমলনামা ও নোটবুক</div></div><button class="pill" id="accountBtn">লগইন করুন</button></div>
+</header>
+<main>
+ <nav class="tabs" id="tabs"></nav>
+ <div class="toolbar"><input class="search" id="search" placeholder="ফোল্ডার বা নোট খুঁজুন…"><button class="action secondary" id="newFolder">＋ ফোল্ডার</button><button class="action" id="newNote">＋ নোট</button></div>
+ <div class="crumbs" id="crumbs"></div>
+ <div class="sectionhead"><h2 id="listTitle">আপনার সংগ্রহ</h2><span class="small" id="count"></span></div>
+ <div id="items" class="grid"></div>
+ <footer>আপনার তথ্য প্রথমে এই ডিভাইসেই সংরক্ষিত হয়। ইন্টারনেট এলে লগইন করা থাকলে ক্লাউডে মিলিয়ে নেওয়া হবে।<br>নিয়মিত ইন্টারনেট সংযোগে সিঙ্ক সম্পন্ন হয়েছে কি না দেখে নিন।</footer>
+</main>
+<button class="fab" id="fab" aria-label="নতুন তৈরি করুন">＋</button>
+<div id="editor" class="overlay"><div class="modal">
+ <h3 id="editorTitle">নতুন নোট</h3>
+ <label class="small" for="itemTitle">নাম / শিরোনাম</label><input id="itemTitle" class="field" maxlength="120" placeholder="যেমন: সকালবেলার জিকির">
+ <div id="bodyWrap"><label class="small" for="itemBody">নোট</label><textarea id="itemBody" class="field" rows="8" placeholder="এখানে লিখুন…"></textarea></div>
+ <div class="modal-actions"><button class="cancel" id="cancelEdit">বাতিল</button><button class="action" id="saveEdit">সংরক্ষণ</button></div>
+</div></div>
+<div id="viewer" class="overlay"><div class="modal">
+ <h3 id="viewTitle"></h3><div class="small" id="viewDate"></div><p class="noteview" id="viewBody"></p>
+ <div class="modal-actions"><button class="cancel" id="closeView">বন্ধ</button><button class="action secondary" id="editView">সম্পাদনা</button><button class="action" id="deleteView">মুছুন</button></div>
+</div></div>
+<div id="folderDelete" class="overlay"><div class="modal"><h3>ফোল্ডার মুছে ফেলুন</h3><p id="folderDeleteInfo" class="small"></p><label style="display:flex;gap:10px;align-items:flex-start;line-height:1.6;margin:16px 0"><input id="deleteFolderContents" type="checkbox" style="width:20px;height:20px;flex:none;margin-top:2px"><span><b>ভেতরের সবকিছুসহ ডিলিট</b><br><span class="small">টিক দিলে এই ফোল্ডারের সব নোট ও ভেতরের সব সাব-ফোল্ডারও মুছে যাবে।</span></span></label><p class="small">টিক না দিলে শুধু এই ফোল্ডারটি মুছবে; ভেতরের নোট ও সাব-ফোল্ডার এক ধাপ বাইরের ফোল্ডারে চলে আসবে।</p><div class="modal-actions"><button class="cancel" id="cancelFolderDelete">বাতিল</button><button class="action" id="confirmFolderDelete" style="background:#a83232">ফোল্ডার মুছুন</button></div></div></div>
+<div id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAzYI9pjmPyZiycC8_ys2BBkOsNXtVKgEU",
+  authDomain: "amar-amol-zikir.firebaseapp.com",
+  projectId: "amar-amol-zikir",
+  storageBucket: "amar-amol-zikir.firebasestorage.app",
+  messagingSenderId: "376750802843",
+  appId: "1:376750802843:web:82bb5694220ec530f1433e",
+  measurementId: "G-Z59RLJY6NK"
+};
+const TABS=["আমল","জিকির","দোয়া","নোট","অন্যান্য"];
+const DB_NAME="AmolZikirLocal", STORE="items";
+let dbLocal, activeTab=TABS[0], parentId=null, editing=null, viewing=null, currentUser=null, cloud=null, auth=null, syncBusy=false, pendingFolderDelete=null;
+const $=id=>document.getElementById(id);
+function toast(s){$("toast").textContent=s;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",2600)}
+function openLocal(){return new Promise((resolve,reject)=>{let r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE,{keyPath:"id"});r.onsuccess=()=>{dbLocal=r.result;resolve()};r.onerror=()=>reject(r.error)})}
+function allItems(){return new Promise((res,rej)=>{let r=dbLocal.transaction(STORE).objectStore(STORE).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)})}
+function putItem(x){return new Promise((res,rej)=>{let r=dbLocal.transaction(STORE,"readwrite").objectStore(STORE).put(x);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function delLocal(id){return new Promise((res,rej)=>{let r=dbLocal.transaction(STORE,"readwrite").objectStore(STORE).delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderTabs(){$("tabs").innerHTML=TABS.map(t=>`<button class="tab ${t===activeTab?"active":""}" data-tab="${esc(t)}">${esc(t)}</button>`).join("");$("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;parentId=null;render()})}
+async function render(){
+ renderTabs();const all=await allItems();const live=all.filter(x=>!x.deletedAt&&x.tab===activeTab);const q=$("search").value.trim().toLowerCase();
+ let path=[], p=parentId;while(p){let x=all.find(a=>a.id===p);if(!x)break;path.unshift(x);p=x.parentId}
+ $("crumbs").innerHTML=`<button class="crumb" data-root="1">${esc(activeTab)}</button>`+path.map(x=>`<span>›</span><button class="crumb" data-parent="${x.id}">${esc(x.title)}</button>`).join("");
+ $("crumbs").querySelector('[data-root]').onclick=()=>{parentId=null;render()};
+ $("crumbs").querySelectorAll("[data-parent]").forEach(b=>b.onclick=()=>{parentId=b.dataset.parent;render()});
+ const shown=live.filter(x=>x.parentId===(parentId||null)&&(!q||x.title.toLowerCase().includes(q)||(x.body||"").toLowerCase().includes(q)));
+ shown.sort((a,b)=>(a.type===b.type?b.updatedAt-a.updatedAt:(a.type==="folder"?-1:1)));
+ $("listTitle").textContent=parentId?(path.at(-1)?.title||"ফোল্ডার"):"আপনার "+activeTab;
+ $("count").textContent=shown.length+"টি";
+ if(!shown.length){$("items").innerHTML=`<div class="empty" style="grid-column:1/-1">এখানে এখনো কিছু নেই।<br>＋ ফোল্ডার অথবা ＋ নোট চেপে শুরু করুন।</div>`;return}
+ $("items").innerHTML=shown.map(x=>`<div class="item-wrap"><button class="item ${x.type==="note"?"note":""} ${x.type==="folder"?"folder-card":""}" data-id="${x.id}"><span class="emoji">${x.type==="folder"?"📁":"📝"}</span><span class="name">${esc(x.title)}</span><span class="meta">${x.type==="folder"?"ফোল্ডার":new Date(x.updatedAt).toLocaleDateString("bn-BD")}</span></button>${x.type==="folder"?`<button class="rename-folder" data-rename="${x.id}" aria-label="ফোল্ডারের নাম পরিবর্তন">নাম বদল</button><button class="delete-folder" data-folder-delete="${x.id}" aria-label="ফোল্ডার মুছুন">মুছুন</button>`:""}</div>`).join("");
+ $("items").querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{let x=shown.find(y=>y.id===b.dataset.id);if(x.type==="folder"){parentId=x.id;render()}else openViewer(x)});
+ $("items").querySelectorAll("[data-rename]").forEach(b=>b.onclick=e=>{e.stopPropagation();let x=shown.find(y=>y.id===b.dataset.rename);if(x)openEditor("folder",x)});
+ $("items").querySelectorAll("[data-folder-delete]").forEach(b=>b.onclick=e=>{e.stopPropagation();openFolderDelete(b.dataset.folderDelete)});
+}
+function openEditor(type,item=null){editing={type,item};$("editorTitle").textContent=item?"সম্পাদনা":type==="folder"?"নতুন ফোল্ডার":"নতুন নোট";$("itemTitle").value=item?.title||"";$("itemBody").value=item?.body||"";$("bodyWrap").style.display=type==="folder"?"none":"block";$("editor").classList.add("show");$("itemTitle").focus()}
+function closeEditor(){$("editor").classList.remove("show");editing=null}
+async function saveEditor(){let title=$("itemTitle").value.trim();if(!title){toast("একটি নাম লিখুন");return}let old=editing.item;let x={id:old?.id||uid(),type:editing.type,tab:old?.tab||activeTab,parentId:old?old.parentId:(parentId||null),title,body:editing.type==="note"?$("itemBody").value:"",updatedAt:Date.now(),deletedAt:null};await putItem(x);closeEditor();await render();toast("ডিভাইসে সংরক্ষিত হয়েছে");syncCloud()}
+function openViewer(x){viewing=x;$("viewTitle").textContent=x.title;$("viewDate").textContent=new Date(x.updatedAt).toLocaleString("bn-BD");$("viewBody").textContent=x.body||"";$("viewer").classList.add("show")}
+function closeViewer(){$("viewer").classList.remove("show")}
+function openFolderDelete(id){allItems().then(all=>{const f=all.find(x=>x.id===id&&x.type==="folder");if(!f)return;pendingFolderDelete=f;$("deleteFolderContents").checked=false;$("folderDeleteInfo").textContent="‘"+f.title+"’ ফোল্ডারটি মুছে ফেলার নিয়ম বেছে নিন।";$("folderDelete").classList.add("show")})}
+function closeFolderDelete(){$("folderDelete").classList.remove("show");pendingFolderDelete=null}
+async function confirmFolderDelete(){if(!pendingFolderDelete)return;const all=await allItems();const folder=all.find(x=>x.id===pendingFolderDelete.id&&x.type==="folder");if(!folder){closeFolderDelete();return}const recursive=$("deleteFolderContents").checked;const now=Date.now();if(recursive){const ids=new Set([folder.id]);let changed=true;while(changed){changed=false;for(const x of all){if(x.parentId&&ids.has(x.parentId)&&!ids.has(x.id)){ids.add(x.id);changed=true}}}for(const x of all){if(ids.has(x.id))await putItem({...x,deletedAt:now,updatedAt:now})}}else{for(const x of all){if(x.parentId===folder.id)await putItem({...x,parentId:folder.parentId||null,updatedAt:now})}await putItem({...folder,deletedAt:now,updatedAt:now})}closeFolderDelete();await render();toast(recursive?"ফোল্ডার ও ভেতরের সবকিছু মুছে ফেলার নির্দেশ দেওয়া হয়েছে":"ফোল্ডার মুছে গেছে; ভেতরের জিনিসপত্র রাখা হয়েছে");syncCloud()}
+async function removeViewed(){if(!viewing)return;if(!confirm("এই নোটটি মুছে ফেলবেন?"))return;let x={...viewing,deletedAt:Date.now(),updatedAt:Date.now()};await putItem(x);closeViewer();await render();toast("মুছে ফেলার নির্দেশ সংরক্ষিত হয়েছে");syncCloud()}
+async function syncCloud(){
+ if(!currentUser||!cloud||!navigator.onLine||syncBusy)return;syncBusy=true;
+ try{
+  const ref=cloud.collection("users").doc(currentUser.uid).collection("items");
+  const local=await allItems(), snap=await ref.get(), remote=new Map();snap.forEach(d=>remote.set(d.id,d.data()));
+  // Delete marked notes from Firestore first. Keep the local tombstone so an old
+  // remote copy cannot be uploaded again during a later sync on this device.
+  for(const x of local){
+   if(x.deletedAt){if(remote.has(x.id))await ref.doc(x.id).delete();continue}
+   const r=remote.get(x.id);
+   if(!r||Number(x.updatedAt||0)>Number(r.updatedAt||0)){await ref.doc(x.id).set(x)}
+  }
+  // Also clean up old cloud tombstones left by earlier versions of the app.
+  for(const [id,r] of remote){
+   const l=local.find(x=>x.id===id);
+   if(r.deletedAt){
+    if(l&&!l.deletedAt)await putItem({...l,deletedAt:Number(r.deletedAt)||Date.now(),updatedAt:Number(r.updatedAt)||Date.now()});
+    else if(!l)await putItem(r);
+    await ref.doc(id).delete();
+    continue;
+   }
+   if(l?.deletedAt){await ref.doc(id).delete();continue}
+   if(!l||Number(r.updatedAt||0)>Number(l.updatedAt||0))await putItem(r)
+  }
+  $("accountBtn").textContent="✓ "+(currentUser.displayName?.split(" ")[0]||"সিঙ্ক চালু");
+  toast("ইন্টারনেটের সঙ্গে তথ্য মিলেছে");
+ }catch(e){console.error(e);toast("সিঙ্ক হয়নি—পরে আবার চেষ্টা হবে")}
+ finally{syncBusy=false;render()}
+}
+async function signIn(){if(!auth){toast("লগইন চালুর জন্য ইন্টারনেট দরকার");return}const p=new firebase.auth.GoogleAuthProvider();try{await auth.signInWithPopup(p)}catch(e){try{await auth.signInWithRedirect(p)}catch(err){toast("লগইন করা যায়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন")}}}
+async function init(){
+ await openLocal();render();
+ $("newFolder").onclick=()=>openEditor("folder");$("newNote").onclick=()=>openEditor("note");$("fab").onclick=()=>openEditor("note");
+ $("cancelEdit").onclick=closeEditor;$("saveEdit").onclick=saveEditor;$("closeView").onclick=closeViewer;
+ $("editView").onclick=()=>{let x=viewing;closeViewer();openEditor("note",x)};$("deleteView").onclick=removeViewed;
+ $("cancelFolderDelete").onclick=closeFolderDelete;$("confirmFolderDelete").onclick=confirmFolderDelete;
+ $("accountBtn").onclick=()=>currentUser?toast("আপনি লগইন করা আছেন"):signIn();
+ $("search").oninput=render;
+ window.addEventListener("online",()=>{toast("ইন্টারনেট এসেছে—সিঙ্ক হচ্ছে");syncCloud()});
+ if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(console.warn)}
+ try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();cloud=firebase.firestore();
+ auth.onAuthStateChanged(async u=>{currentUser=u;if(u){$("accountBtn").textContent="✓ "+(u.displayName?.split(" ")[0]||"লগইন");await syncCloud()}else{$("accountBtn").textContent="লগইন করুন"}})
+ }catch(e){console.warn("Firebase unavailable; offline local mode remains available",e)}
+}
+init();
+</script>
+</body></html>
