@@ -21,6 +21,7 @@ main{max-width:850px;margin:auto;padding:16px 14px 90px}
 .sectionhead{display:flex;align-items:center;justify-content:space-between;margin:12px 2px}.sectionhead h2{font-size:16px;margin:0}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:11px}
 .item{background:white;border:1px solid var(--line);border-radius:17px;padding:14px;min-height:112px;box-shadow:0 3px 12px rgba(20,70,50,.035);text-align:left;color:var(--ink);position:relative}
+.item-wrap{position:relative;min-width:0}.item-wrap>.item{width:100%;height:100%}.rename-folder{position:absolute;right:7px;top:7px;border:1px solid var(--line);background:#fff;color:var(--green);border-radius:9px;padding:5px 8px;font-size:12px;font-weight:700;z-index:1}.item.folder-card{padding-right:48px}
 .item .emoji{font-size:25px;display:block;margin-bottom:9px}.item .name{font-weight:750;display:block;overflow-wrap:anywhere}.item .meta{font-size:11px;color:var(--muted);display:block;margin-top:5px}
 .item.note{min-height:130px}.item.note .emoji{font-size:20px}.empty{background:white;border:1px dashed #bfd4c7;border-radius:18px;padding:28px 18px;text-align:center;color:var(--muted);line-height:1.7}
 .fab{position:fixed;right:20px;bottom:22px;border:0;border-radius:18px;background:var(--gold);color:#34270d;width:58px;height:58px;font-size:29px;box-shadow:0 8px 22px #8b6a253d}
@@ -92,8 +93,9 @@ async function render(){
  $("listTitle").textContent=parentId?(path.at(-1)?.title||"ফোল্ডার"):"আপনার "+activeTab;
  $("count").textContent=shown.length+"টি";
  if(!shown.length){$("items").innerHTML=`<div class="empty" style="grid-column:1/-1">এখানে এখনো কিছু নেই।<br>＋ ফোল্ডার অথবা ＋ নোট চেপে শুরু করুন।</div>`;return}
- $("items").innerHTML=shown.map(x=>`<button class="item ${x.type==="note"?"note":""}" data-id="${x.id}"><span class="emoji">${x.type==="folder"?"📁":"📝"}</span><span class="name">${esc(x.title)}</span><span class="meta">${x.type==="folder"?"ফোল্ডার":new Date(x.updatedAt).toLocaleDateString("bn-BD")}</span></button>`).join("");
+ $("items").innerHTML=shown.map(x=>`<div class="item-wrap"><button class="item ${x.type==="note"?"note":""} ${x.type==="folder"?"folder-card":""}" data-id="${x.id}"><span class="emoji">${x.type==="folder"?"📁":"📝"}</span><span class="name">${esc(x.title)}</span><span class="meta">${x.type==="folder"?"ফোল্ডার":new Date(x.updatedAt).toLocaleDateString("bn-BD")}</span></button>${x.type==="folder"?`<button class="rename-folder" data-rename="${x.id}" aria-label="ফোল্ডারের নাম পরিবর্তন">নাম বদল</button>`:""}</div>`).join("");
  $("items").querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{let x=shown.find(y=>y.id===b.dataset.id);if(x.type==="folder"){parentId=x.id;render()}else openViewer(x)});
+ $("items").querySelectorAll("[data-rename]").forEach(b=>b.onclick=e=>{e.stopPropagation();let x=shown.find(y=>y.id===b.dataset.rename);if(x)openEditor("folder",x)});
 }
 function openEditor(type,item=null){editing={type,item};$("editorTitle").textContent=item?"সম্পাদনা":type==="folder"?"নতুন ফোল্ডার":"নতুন নোট";$("itemTitle").value=item?.title||"";$("itemBody").value=item?.body||"";$("bodyWrap").style.display=type==="folder"?"none":"block";$("editor").classList.add("show");$("itemTitle").focus()}
 function closeEditor(){$("editor").classList.remove("show");editing=null}
