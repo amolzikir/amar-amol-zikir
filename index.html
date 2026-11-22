@@ -296,7 +296,7 @@ function renderDailyAmal(){
  $("dailyAmalSummary").textContent=tr("আজকের অগ্রগতি: ")+completed+" / "+total+" "+tr("সম্পন্ন");
  const list=$("dailyAmalList");
  if(!total){list.innerHTML='<div class="daily-amal-empty">'+tr("এখনো কোনো আমল যোগ করেননি। নিচে নিজের আমল বা জিকিরের নাম লিখে যোগ করুন।")+'</div>';return}
- list.innerHTML=dailyAmalRecord.items.map(x=>'<label class="daily-amal-row '+(done[x.id]?"done":"")+'"><input type="checkbox" data-daily-check="'+esc(x.id)+'" '+(done[x.id]?"checked":"")+'><span class="daily-amal-name">'+esc(x.name)+'</span><button type="button" class="daily-amal-remove" data-daily-delete="'+esc(x.id)+'" aria-label="'+tr("তালিকা থেকে বাদ দিন")+'">×</button></label>').join("");
+ list.innerHTML=dailyAmalRecord.items.map(x=>'<div class="daily-amal-row '+(done[x.id]?"done":"")+'"><input type="checkbox" data-daily-check="'+esc(x.id)+'" '+(done[x.id]?"checked":"")+'><span class="daily-amal-name">'+esc(x.name)+'</span><button type="button" class="daily-amal-remove" data-daily-delete="'+esc(x.id)+'" aria-label="'+tr("তালিকা থেকে বাদ দিন")+'">×</button></div>').join("");
 }
 async function persistDailyAmal(){
  if(!dailyAmalRecord)return;
