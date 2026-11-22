@@ -22,7 +22,7 @@ main{max-width:850px;margin:auto;padding:16px 14px 90px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:11px}
 .item{background:white;border:1px solid var(--line);border-radius:17px;padding:14px;min-height:112px;box-shadow:0 3px 12px rgba(20,70,50,.035);text-align:left;color:var(--ink);position:relative}
 .item-wrap{position:relative;min-width:0}.item-wrap>.item{width:100%;height:100%}.rename-folder{position:absolute;right:7px;top:7px;border:1px solid var(--line);background:#fff;color:var(--green);border-radius:9px;padding:5px 8px;font-size:12px;font-weight:700;z-index:1}.item.folder-card{padding-right:48px}
-.item .emoji{font-size:25px;display:block;margin-bottom:9px}.item .name{font-weight:750;display:block;overflow-wrap:anywhere}.item .meta{font-size:11px;color:var(--muted);display:block;margin-top:5px}
+.item .emoji{font-size:25px;display:block;margin-bottom:9px}.item .name{font-weight:750;display:block;overflow-wrap:anywhere}.item .meta{font-size:11px;color:var(--muted);display:block;margin-top:5px}.item.folder-card{padding-top:54px}.delete-folder{position:absolute;right:7px;top:39px;border:1px solid #f0d2d2;background:#fff7f7;color:#a83232;border-radius:9px;padding:5px 8px;font-size:12px;font-weight:700;z-index:1}
 .item.note{min-height:130px}.item.note .emoji{font-size:20px}.empty{background:white;border:1px dashed #bfd4c7;border-radius:18px;padding:28px 18px;text-align:center;color:var(--muted);line-height:1.7}
 .fab{position:fixed;right:20px;bottom:22px;border:0;border-radius:18px;background:var(--gold);color:#34270d;width:58px;height:58px;font-size:29px;box-shadow:0 8px 22px #8b6a253d}
 .overlay{position:fixed;inset:0;background:#10271f77;display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:5}.overlay.show{display:flex}.modal{background:white;width:min(100%,620px);border-radius:22px 22px 16px 16px;padding:18px;max-height:90vh;overflow:auto;box-shadow:var(--shadow)}
@@ -56,6 +56,7 @@ footer{margin:26px 2px 0;color:var(--muted);font-size:11px;text-align:center;lin
  <h3 id="viewTitle"></h3><div class="small" id="viewDate"></div><p class="noteview" id="viewBody"></p>
  <div class="modal-actions"><button class="cancel" id="closeView">বন্ধ</button><button class="action secondary" id="editView">সম্পাদনা</button><button class="action" id="deleteView">মুছুন</button></div>
 </div></div>
+<div id="folderDelete" class="overlay"><div class="modal"><h3>ফোল্ডার মুছে ফেলুন</h3><p id="folderDeleteInfo" class="small"></p><label style="display:flex;gap:10px;align-items:flex-start;line-height:1.6;margin:16px 0"><input id="deleteFolderContents" type="checkbox" style="width:20px;height:20px;flex:none;margin-top:2px"><span><b>ভেতরের সবকিছুসহ ডিলিট</b><br><span class="small">টিক দিলে এই ফোল্ডারের সব নোট ও ভেতরের সব সাব-ফোল্ডারও মুছে যাবে।</span></span></label><p class="small">টিক না দিলে শুধু এই ফোল্ডারটি মুছবে; ভেতরের নোট ও সাব-ফোল্ডার এক ধাপ বাইরের ফোল্ডারে চলে আসবে।</p><div class="modal-actions"><button class="cancel" id="cancelFolderDelete">বাতিল</button><button class="action" id="confirmFolderDelete" style="background:#a83232">ফোল্ডার মুছুন</button></div></div></div>
 <div id="toast"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -72,7 +73,7 @@ const firebaseConfig = {
 };
 const TABS=["আমল","জিকির","দোয়া","নোট","অন্যান্য"];
 const DB_NAME="AmolZikirLocal", STORE="items";
-let dbLocal, activeTab=TABS[0], parentId=null, editing=null, viewing=null, currentUser=null, cloud=null, auth=null, syncBusy=false;
+let dbLocal, activeTab=TABS[0], parentId=null, editing=null, viewing=null, currentUser=null, cloud=null, auth=null, syncBusy=false, pendingFolderDelete=null;
 const $=id=>document.getElementById(id);
 function toast(s){$("toast").textContent=s;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",2600)}
 function openLocal(){return new Promise((resolve,reject)=>{let r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE,{keyPath:"id"});r.onsuccess=()=>{dbLocal=r.result;resolve()};r.onerror=()=>reject(r.error)})}
@@ -93,15 +94,19 @@ async function render(){
  $("listTitle").textContent=parentId?(path.at(-1)?.title||"ফোল্ডার"):"আপনার "+activeTab;
  $("count").textContent=shown.length+"টি";
  if(!shown.length){$("items").innerHTML=`<div class="empty" style="grid-column:1/-1">এখানে এখনো কিছু নেই।<br>＋ ফোল্ডার অথবা ＋ নোট চেপে শুরু করুন।</div>`;return}
- $("items").innerHTML=shown.map(x=>`<div class="item-wrap"><button class="item ${x.type==="note"?"note":""} ${x.type==="folder"?"folder-card":""}" data-id="${x.id}"><span class="emoji">${x.type==="folder"?"📁":"📝"}</span><span class="name">${esc(x.title)}</span><span class="meta">${x.type==="folder"?"ফোল্ডার":new Date(x.updatedAt).toLocaleDateString("bn-BD")}</span></button>${x.type==="folder"?`<button class="rename-folder" data-rename="${x.id}" aria-label="ফোল্ডারের নাম পরিবর্তন">নাম বদল</button>`:""}</div>`).join("");
+ $("items").innerHTML=shown.map(x=>`<div class="item-wrap"><button class="item ${x.type==="note"?"note":""} ${x.type==="folder"?"folder-card":""}" data-id="${x.id}"><span class="emoji">${x.type==="folder"?"📁":"📝"}</span><span class="name">${esc(x.title)}</span><span class="meta">${x.type==="folder"?"ফোল্ডার":new Date(x.updatedAt).toLocaleDateString("bn-BD")}</span></button>${x.type==="folder"?`<button class="rename-folder" data-rename="${x.id}" aria-label="ফোল্ডারের নাম পরিবর্তন">নাম বদল</button><button class="delete-folder" data-folder-delete="${x.id}" aria-label="ফোল্ডার মুছুন">মুছুন</button>`:""}</div>`).join("");
  $("items").querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{let x=shown.find(y=>y.id===b.dataset.id);if(x.type==="folder"){parentId=x.id;render()}else openViewer(x)});
  $("items").querySelectorAll("[data-rename]").forEach(b=>b.onclick=e=>{e.stopPropagation();let x=shown.find(y=>y.id===b.dataset.rename);if(x)openEditor("folder",x)});
+ $("items").querySelectorAll("[data-folder-delete]").forEach(b=>b.onclick=e=>{e.stopPropagation();openFolderDelete(b.dataset.folderDelete)});
 }
 function openEditor(type,item=null){editing={type,item};$("editorTitle").textContent=item?"সম্পাদনা":type==="folder"?"নতুন ফোল্ডার":"নতুন নোট";$("itemTitle").value=item?.title||"";$("itemBody").value=item?.body||"";$("bodyWrap").style.display=type==="folder"?"none":"block";$("editor").classList.add("show");$("itemTitle").focus()}
 function closeEditor(){$("editor").classList.remove("show");editing=null}
 async function saveEditor(){let title=$("itemTitle").value.trim();if(!title){toast("একটি নাম লিখুন");return}let old=editing.item;let x={id:old?.id||uid(),type:editing.type,tab:old?.tab||activeTab,parentId:old?old.parentId:(parentId||null),title,body:editing.type==="note"?$("itemBody").value:"",updatedAt:Date.now(),deletedAt:null};await putItem(x);closeEditor();await render();toast("ডিভাইসে সংরক্ষিত হয়েছে");syncCloud()}
 function openViewer(x){viewing=x;$("viewTitle").textContent=x.title;$("viewDate").textContent=new Date(x.updatedAt).toLocaleString("bn-BD");$("viewBody").textContent=x.body||"";$("viewer").classList.add("show")}
 function closeViewer(){$("viewer").classList.remove("show")}
+function openFolderDelete(id){allItems().then(all=>{const f=all.find(x=>x.id===id&&x.type==="folder");if(!f)return;pendingFolderDelete=f;$("deleteFolderContents").checked=false;$("folderDeleteInfo").textContent="‘"+f.title+"’ ফোল্ডারটি মুছে ফেলার নিয়ম বেছে নিন।";$("folderDelete").classList.add("show")})}
+function closeFolderDelete(){$("folderDelete").classList.remove("show");pendingFolderDelete=null}
+async function confirmFolderDelete(){if(!pendingFolderDelete)return;const all=await allItems();const folder=all.find(x=>x.id===pendingFolderDelete.id&&x.type==="folder");if(!folder){closeFolderDelete();return}const recursive=$("deleteFolderContents").checked;const now=Date.now();if(recursive){const ids=new Set([folder.id]);let changed=true;while(changed){changed=false;for(const x of all){if(x.parentId&&ids.has(x.parentId)&&!ids.has(x.id)){ids.add(x.id);changed=true}}}for(const x of all){if(ids.has(x.id))await putItem({...x,deletedAt:now,updatedAt:now})}}else{for(const x of all){if(x.parentId===folder.id)await putItem({...x,parentId:folder.parentId||null,updatedAt:now})}await putItem({...folder,deletedAt:now,updatedAt:now})}closeFolderDelete();await render();toast(recursive?"ফোল্ডার ও ভেতরের সবকিছু মুছে ফেলার নির্দেশ দেওয়া হয়েছে":"ফোল্ডার মুছে গেছে; ভেতরের জিনিসপত্র রাখা হয়েছে");syncCloud()}
 async function removeViewed(){if(!viewing)return;if(!confirm("এই নোটটি মুছে ফেলবেন?"))return;let x={...viewing,deletedAt:Date.now(),updatedAt:Date.now()};await putItem(x);closeViewer();await render();toast("মুছে ফেলার নির্দেশ সংরক্ষিত হয়েছে");syncCloud()}
 async function syncCloud(){
  if(!currentUser||!cloud||!navigator.onLine||syncBusy)return;syncBusy=true;
@@ -138,6 +143,7 @@ async function init(){
  $("newFolder").onclick=()=>openEditor("folder");$("newNote").onclick=()=>openEditor("note");$("fab").onclick=()=>openEditor("note");
  $("cancelEdit").onclick=closeEditor;$("saveEdit").onclick=saveEditor;$("closeView").onclick=closeViewer;
  $("editView").onclick=()=>{let x=viewing;closeViewer();openEditor("note",x)};$("deleteView").onclick=removeViewed;
+ $("cancelFolderDelete").onclick=closeFolderDelete;$("confirmFolderDelete").onclick=confirmFolderDelete;
  $("accountBtn").onclick=()=>currentUser?toast("আপনি লগইন করা আছেন"):signIn();
  $("search").oninput=render;
  window.addEventListener("online",()=>{toast("ইন্টারনেট এসেছে—সিঙ্ক হচ্ছে");syncCloud()});
