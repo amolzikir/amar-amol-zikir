@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#176b50">
+<meta name="description" content="ব্যক্তিগত আমল, জিকির, ফোল্ডার ও নোট">
+<link rel="manifest" href="manifest.webmanifest">
+<title>আমার আমল ও জিকির</title>
+<style>
+:root{--green:#176b50;--green2:#e8f4ed;--ink:#18352b;--muted:#6b7d75;--paper:#f7faf7;--line:#e2ebe5;--white:#fff;--gold:#d7a94b;--shadow:0 8px 28px rgba(20,70,50,.08)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif}body.dark{--paper:#101b17;--ink:#e5f0e9;--muted:#a5b8ad;--line:#2a4035;--green2:#233d30}body.dark .item,body.dark .modal,body.dark .search,body.dark .field,body.dark .folder-menu-select,body.dark .folder-menu-action{background:#1b2a23;color:var(--ink);border-color:var(--line)}body.dark .cancel{background:#2a4035;color:var(--ink)}
+button,input,textarea{font:inherit}button{cursor:pointer}
+header{background:linear-gradient(135deg,#125c45,#258564);color:white;padding:18px 18px 22px;border-radius:0 0 24px 24px;box-shadow:var(--shadow)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.top-left{display:flex;align-items:center;gap:12px}.home-menu-btn{width:42px;height:42px;border:1px solid #ffffff66;background:#ffffff18;color:white;border-radius:13px;font-size:25px;display:grid;place-items:center}.brand{font-size:20px;font-weight:800;letter-spacing:.1px}.sub{font-size:12px;opacity:.85;margin-top:4px}
+.pill{border:1px solid #ffffff66;background:#ffffff18;color:#fff;border-radius:999px;padding:7px 11px;font-size:12px}
+main{max-width:850px;margin:auto;padding:16px 14px 90px}
+.tabs{display:flex;gap:8px;overflow:auto;padding:3px 0 13px;scrollbar-width:none}.tab{border:1px solid var(--line);background:white;color:var(--muted);padding:10px 15px;border-radius:999px;white-space:nowrap;font-weight:650}.tab.active{background:var(--green);border-color:var(--green);color:white}
+.toolbar{display:flex;gap:9px;align-items:center;margin:4px 0 15px}.search{flex:1;min-width:0;border:1px solid var(--line);background:white;border-radius:13px;padding:12px 13px;outline:none}.action{border:0;background:var(--green);color:white;border-radius:13px;padding:11px 14px;font-weight:700}.action.secondary{background:var(--green2);color:var(--green);border:1px solid #cfe3d6}.action:disabled{opacity:.5}
+.crumbs{font-size:13px;color:var(--muted);margin:4px 0 14px;display:flex;gap:6px;flex-wrap:wrap}.crumb{border:0;background:none;color:var(--green);padding:0;font-weight:650}
+.sectionhead{display:flex;align-items:center;justify-content:space-between;margin:12px 2px}.sectionhead h2{font-size:16px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:11px}
+.item{background:white;border:1px solid var(--line);border-radius:17px;padding:14px;min-height:112px;box-shadow:0 3px 12px rgba(20,70,50,.035);text-align:left;color:var(--ink);position:relative}
+.item-wrap{position:relative;min-width:0}.item-wrap>.item{width:100%;height:100%}.folder-menu-btn,.note-menu-btn{position:absolute;right:7px;top:7px;z-index:2;border:1px solid var(--line);background:#fff;color:var(--green);border-radius:10px;width:34px;height:34px;font-size:22px;line-height:1}.item.folder-card,.item.note{padding-right:48px;padding-top:48px}.folder-menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.folder-menu-action{border:1px solid var(--line);background:#f8fbf9;color:var(--ink);border-radius:12px;padding:12px 9px;text-align:left;font-weight:650}.folder-menu-action.danger{color:#a83232;background:#fff7f7;border-color:#f0d2d2}.folder-menu-select{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff;margin:6px 0 12px}
+.item .emoji{font-size:25px;display:block;margin-bottom:9px}.item .name{font-weight:750;display:block;overflow-wrap:anywhere}.item .meta{font-size:11px;color:var(--muted);display:block;margin-top:5px}.item.folder-card{padding-top:54px}.delete-folder{position:absolute;right:7px;top:39px;border:1px solid #f0d2d2;background:#fff7f7;color:#a83232;border-radius:9px;padding:5px 8px;font-size:12px;font-weight:700;z-index:1}
+.item.folder-small{min-height:88px;padding:10px}.item.folder-small .emoji{font-size:19px;margin-bottom:4px}.item.folder-large{min-height:150px;padding:20px}.item.folder-large .emoji{font-size:34px}.item.note{min-height:130px}.item.note .emoji{font-size:20px}.empty{background:white;border:1px dashed #bfd4c7;border-radius:18px;padding:28px 18px;text-align:center;color:var(--muted);line-height:1.7}
+.fab{position:fixed;right:20px;bottom:22px;border:0;border-radius:18px;background:var(--gold);color:#34270d;width:58px;height:58px;font-size:29px;box-shadow:0 8px 22px #8b6a253d}
+.overlay{position:fixed;inset:0;background:#10271f77;display:none;align-items:center;justify-content:center;padding:12px;z-index:5}.overlay.show{display:flex}.modal{background:white;width:min(100%,620px);border-radius:22px;padding:18px;max-height:90vh;overflow:auto;box-shadow:var(--shadow)}#homeMenu .modal{width:min(100%,420px);max-height:86vh}#homeMenu .folder-menu-grid{grid-template-columns:1fr;gap:6px}#homeMenu .folder-menu-action{white-space:nowrap;padding:10px 12px}#viewer{padding:0;align-items:stretch}#viewer .modal{width:100%;max-width:none;height:100%;max-height:100dvh;border-radius:0;padding:0;display:flex;flex-direction:column;overflow:hidden}#viewer .viewer-head{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--line)}#viewer .viewer-head h3{margin:0;flex:1;overflow-wrap:anywhere}#viewer .noteview{padding:18px 18px 40px;margin:0;overflow:auto;flex:1;min-height:0}#viewer .viewer-back{border:0;background:var(--green2);color:var(--green);border-radius:11px;padding:9px 12px;font-size:18px}#viewer .viewer-more{border:0;background:var(--green);color:#fff;border-radius:11px;width:42px;height:42px;font-size:25px}#noteMenu{z-index:7}#noteMenu .modal{width:min(100%,440px)}
+.modal h3{margin:0 0 14px;font-size:18px}.field{display:block;width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0 13px;background:#fff;outline-color:#77ad91}.field.label{font-size:13px;color:var(--muted);border:0;padding:0;margin:8px 0 2px}.modal-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:14px}.cancel{background:#f0f4f1;color:var(--ink);border:0;border-radius:12px;padding:11px 14px}
+.noteview{white-space:pre-wrap;line-height:1.85;font-size:15px;overflow-wrap:anywhere}.small{font-size:12px;color:var(--muted)}
+footer{margin:26px 2px 0;color:var(--muted);font-size:11px;text-align:center;line-height:1.7}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#193d30;color:white;padding:10px 15px;border-radius:999px;font-size:13px;display:none;z-index:9;max-width:90%;text-align:center}
+@media(min-width:650px){.overlay{align-items:center}.modal{border-radius:22px}.grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
+
+
+/* Seamless full-screen notebook editor: title and body share one page */
+#editor.overlay{position:fixed!important;inset:0!important;padding:0!important;margin:0!important;align-items:stretch!important;justify-content:stretch!important;background:var(--paper)!important;overflow:hidden!important}
+#editor.overlay.show{display:flex!important}
+#editor .modal{position:relative!important;display:flex!important;flex-direction:column!important;gap:0!important;width:100%!important;max-width:none!important;height:100vh!important;height:100dvh!important;min-height:0!important;max-height:none!important;margin:0!important;padding:calc(14px + env(safe-area-inset-top)) 20px calc(12px + env(safe-area-inset-bottom))!important;border:0!important;border-radius:0!important;background:var(--paper)!important;color:var(--ink)!important;box-shadow:none!important;overflow:hidden!important}
+#editor #editorTitle{flex:none!important;margin:0 0 14px!important;padding:4px 0 10px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font-size:15px!important;font-weight:600!important;color:var(--muted)!important}
+#editor .modal>label,#editor #bodyWrap>label{display:none!important}
+#editor #itemTitle.field,#editor #itemBody.field{display:block!important;width:100%!important;border:0!important;border-bottom:0!important;border-radius:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;color:var(--ink)!important;padding:8px 0!important}
+#editor #itemTitle.field{flex:none!important;height:auto!important;min-height:48px!important;margin:0 0 8px!important;font-size:22px!important;font-weight:700!important;line-height:1.4!important}
+#editor #bodyWrap{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;min-height:0!important;margin:0!important;padding:0!important;background:transparent!important}
+#editor #itemBody.field{flex:1 1 auto!important;min-height:0!important;resize:none!important;margin:0!important;font-size:17px!important;line-height:1.8!important}
+#editor #itemTitle::placeholder,#editor #itemBody::placeholder{color:var(--muted)!important;opacity:.65!important}
+#editor .modal-actions{flex:none!important;display:flex!important;justify-content:flex-end!important;margin:10px 0 0!important;padding:12px 0 0!important;border-top:1px solid var(--line)!important;background:var(--paper)!important}
+</style>
+</head>
+<body>
+<header>
+ <div class="top"><div class="top-left"><button class="home-menu-btn" id="homeMenuBtn" aria-label="প্রধান মেনু">☰</button><div><div class="brand">🌿 আমার আমল ও জিকির</div><div class="sub">আপনার ব্যক্তিগত আমলনামা ও নোটবুক</div></div></div><button class="pill" id="accountBtn">লগইন করুন</button></div>
+</header>
+<main>
+ <nav class="tabs" id="tabs"></nav>
+ <div class="toolbar"><input class="search" id="search" placeholder="ফোল্ডার বা নোট খুঁজুন…"><button class="action secondary" id="newFolder">＋ ফোল্ডার</button><button class="action" id="newNote">＋ নোট</button></div>
+ <div class="crumbs" id="crumbs"></div>
+ <div class="sectionhead"><h2 id="listTitle">আপনার সংগ্রহ</h2><span class="small" id="count"></span></div>
+ <div id="items" class="grid"></div>
+ <footer>আপনার তথ্য প্রথমে এই ডিভাইসেই সংরক্ষিত হয়। ইন্টারনেট এলে লগইন করা থাকলে ক্লাউডে মিলিয়ে নেওয়া হবে।<br>নিয়মিত ইন্টারনেট সংযোগে সিঙ্ক সম্পন্ন হয়েছে কি না দেখে নিন।</footer>
+</main>
+<button class="fab" id="fab" aria-label="নতুন তৈরি করুন">＋</button>
+<div id="editor" class="overlay"><div class="modal">
+ <h3 id="editorTitle">নতুন নোট</h3>
+ <label class="small" for="itemTitle">নাম / শিরোনাম</label><input id="itemTitle" class="field" maxlength="120" placeholder="যেমন: সকালবেলার জিকির">
+ <div id="bodyWrap"><label class="small" for="itemBody">নোট</label><textarea id="itemBody" class="field" rows="8" placeholder="এখানে লিখুন…"></textarea></div>
+ <div class="modal-actions"><button class="cancel" id="cancelEdit">বাতিল</button><button class="action" id="saveEdit">সংরক্ষণ</button></div>
+</div></div>
+<div id="viewer" class="overlay"><div class="modal"><div class="viewer-head"><button class="viewer-back" id="closeView" aria-label="ফিরে যান">‹</button><h3 id="viewTitle"></h3><button class="viewer-more" id="openNoteMenu" aria-label="নোটের অপশন">⋮</button></div><div class="small" id="viewDate" style="padding:10px 18px 0"></div><div class="noteview" id="viewBody" role="button" tabindex="0" aria-label="লেখা সম্পাদনা করতে টাচ করুন" onclick="editViewedNote()" onkeydown="if(event.key==\'Enter\'||event.key==\' \'){event.preventDefault();editViewedNote()}"></div></div></div>
+ <div id="noteMenu" class="overlay"><div class="modal"><h3 id="noteMenuTitle">📝 নোটের অপশন</h3><div class="folder-menu-grid"><button class="folder-menu-action" id="favoriteView">♡ ফেভারিটে রাখুন</button><button class="folder-menu-action" id="bookmarkView">🔖 বুকমার্ক করুন</button><button class="folder-menu-action" id="pinView">📌 পিন করুন</button><button class="folder-menu-action" id="reminderView">⏰ রিমাইন্ডার</button><button class="folder-menu-action" id="findView">🔎 নোটের ভেতরে খুঁজুন</button><button class="folder-menu-action" id="copyView">📄 কপি তৈরি করুন</button><button class="folder-menu-action" id="shareView">📤 শেয়ার / পাঠান</button></div><div class="modal-actions"><button class="cancel" id="closeNoteMenu">বন্ধ করুন</button><button class="action secondary" id="editView">সম্পাদনা</button><button class="action" id="deleteView">মুছুন</button></div></div></div>
+ <div id="reminderPanel" class="overlay"><div class="modal"><h3>⏰ রিমাইন্ডার সেট করুন</h3><label class="small" for="reminderDate">তারিখ ও সময়</label><input class="field" id="reminderDate" type="datetime-local"><p class="small">নির্ধারিত সময়ে অ্যাপ খোলা থাকলে বা আবার খুললে মনে করিয়ে দেবে। অ্যাপ বন্ধ থাকলে নির্দিষ্ট সময়ে নোটিফিকেশন আসার নিশ্চয়তা নেই।</p><div class="modal-actions"><button class="cancel" id="cancelReminder">বাতিল</button><button class="action secondary" id="clearReminder">রিমাইন্ডার সরান</button><button class="action" id="saveReminder">সংরক্ষণ</button></div></div></div><div id="findPanel" class="overlay"><div class="modal"><h3>🔎 নোটের ভেতরে খুঁজুন</h3><input class="field" id="findTerm" placeholder="যে শব্দ বা বাক্য খুঁজবেন"><div id="findResult" class="small"></div><div class="modal-actions"><button class="cancel" id="closeFind">বন্ধ</button><button class="action" id="doFind">খুঁজুন</button></div></div></div><div id="sharePanel" class="overlay"><div class="modal"><h3>📤 নোট শেয়ার করুন</h3><p class="small">ফোনের শেয়ার মেনু থেকে WhatsApp, Facebook, Messenger, Telegram, ইমেইলসহ ইনস্টল করা অ্যাপ বেছে নিতে পারবেন।</p><div class="folder-menu-grid"><button class="folder-menu-action" id="nativeShare">📤 শেয়ার মেনু খুলুন</button><button class="folder-menu-action" id="whatsappShare">🟢 WhatsApp</button><button class="folder-menu-action" id="emailShare">✉️ ইমেইল</button><button class="folder-menu-action" id="copyTextShare">📋 লেখা কপি</button></div><div class="modal-actions"><button class="cancel" id="closeShare">বন্ধ</button></div></div></div><div id="homeMenu" class="overlay"><div class="modal"><h3>☰ প্রধান মেনু</h3><div class="folder-menu-grid"><button class="folder-menu-action" data-home-view="home">🏠 হোম পেজ</button><button class="folder-menu-action" data-home-view="favorites">❤️ ফেভারিট</button><button class="folder-menu-action" data-home-view="pinned">📌 পিন করা পেজ</button><button class="folder-menu-action" data-home-view="bookmarks">🔖 বুকমার্কস</button><button class="folder-menu-action" data-home-view="recent">🕘 সাম্প্রতিক</button><button class="folder-menu-action" data-home-view="all">📚 সব সংগ্রহ</button><button class="folder-menu-action" data-home-view="settings">⚙️ সেটিংস</button><button class="folder-menu-action" data-home-view="about">🌿 অ্যাপ সম্পর্কে</button></div><div class="modal-actions"><button class="cancel" id="closeHomeMenu">বন্ধ করুন</button></div></div></div><div id="settingsPanel" class="overlay"><div class="modal"><h3>⚙️ সেটিংস</h3><div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0"><div><b>ডার্ক মোড</b><div class="small">রাতে আরামদায়কভাবে ব্যবহার করুন</div></div><button class="action secondary" id="themeToggle">চালু করুন</button></div><div class="small" id="syncInfo">আপনার তথ্য ডিভাইসে সংরক্ষিত হয়; লগইন থাকলে ক্লাউডে সিঙ্ক হয়।</div><div class="modal-actions"><button class="cancel" id="closeSettings">বন্ধ করুন</button></div></div></div><div id="folderDelete" class="overlay"><div class="modal"><h3>ফোল্ডার মুছে ফেলুন</h3><p id="folderDeleteInfo" class="small"></p><label style="display:flex;gap:10px;align-items:flex-start;line-height:1.6;margin:16px 0"><input id="deleteFolderContents" type="checkbox" style="width:20px;height:20px;flex:none;margin-top:2px"><span><b>ভেতরের সবকিছুসহ ডিলিট</b><br><span class="small">টিক দিলে এই ফোল্ডারের সব নোট ও ভেতরের সব সাব-ফোল্ডারও মুছে যাবে।</span></span></label><p class="small">টিক না দিলে শুধু এই ফোল্ডারটি মুছবে; ভেতরের নোট ও সাব-ফোল্ডার এক ধাপ বাইরের ফোল্ডারে চলে আসবে।</p><div class="modal-actions"><button class="cancel" id="cancelFolderDelete">বাতিল</button><button class="action" id="confirmFolderDelete" style="background:#a83232">ফোল্ডার মুছুন</button></div></div></div>
+<div id="folderMenu" class="overlay"><div class="modal"><h3 id="folderMenuTitle">ফোল্ডার অপশন</h3><div class="folder-menu-grid"><button class="folder-menu-action" data-folder-action="rename">✏️ নাম পরিবর্তন</button><button class="folder-menu-action" data-folder-action="pin">📌 পিন / আনপিন</button><button class="folder-menu-action" data-folder-action="up">⬆️ উপরে সরান</button><button class="folder-menu-action" data-folder-action="down">⬇️ নিচে সরান</button><button class="folder-menu-action danger" data-folder-action="delete">🗑️ ডিলিট</button><button class="folder-menu-action" data-folder-action="close">বন্ধ করুন</button></div><label class="small">ফোল্ডারের রং</label><select id="folderColor" class="folder-menu-select"><option value="">ডিফল্ট</option><option value="#e8f4ed">হালকা সবুজ</option><option value="#e8f0ff">হালকা নীল</option><option value="#fff3d9">হালকা হলুদ</option><option value="#fce8ef">হালকা গোলাপি</option><option value="#f0eaff">হালকা বেগুনি</option><option value="#eeeeee">ধূসর</option></select><label class="small">ফোল্ডারের আকার</label><select id="folderSize" class="folder-menu-select"><option value="normal">স্বাভাবিক</option><option value="small">ছোট</option><option value="large">বড়</option></select><label class="small">অন্য ফোল্ডারে সরান</label><select id="folderMoveTo" class="folder-menu-select"></select><div class="modal-actions"><button class="cancel" id="closeFolderMenu">বন্ধ</button><button class="action" id="moveFolderNow">সরান</button></div></div></div>
+<div id="toast"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAzYI9pjmPyZiycC8_ys2BBkOsNXtVKgEU",
+  authDomain: "amar-amol-zikir.firebaseapp.com",
+  projectId: "amar-amol-zikir",
+  storageBucket: "amar-amol-zikir.firebasestorage.app",
+  messagingSenderId: "376750802843",
+  appId: "1:376750802843:web:82bb5694220ec530f1433e",
+  measurementId: "G-Z59RLJY6NK"
+};
+const TABS=["আমল","জিকির","দোয়া","নোট","অন্যান্য"];
+const DB_NAME="AmolZikirLocal", STORE="items";
+let dbLocal, activeTab=TABS[0], parentId=null, editing=null, viewing=null, currentUser=null, cloud=null, auth=null, syncBusy=false, pendingFolderDelete=null, menuFolderId=null, specialView=null, editingFromViewer=false;
+const $=id=>document.getElementById(id);
+function toast(s){$("toast").textContent=s;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",2600)}
+function openLocal(){return new Promise((resolve,reject)=>{let r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE,{keyPath:"id"});r.onsuccess=()=>{dbLocal=r.result;resolve()};r.onerror=()=>reject(r.error)})}
+function allItems(){return new Promise((res,rej)=>{let r=dbLocal.transaction(STORE).objectStore(STORE).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)})}
+function putItem(x){return new Promise((res,rej)=>{let r=dbLocal.transaction(STORE,"readwrite").objectStore(STORE).put(x);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function delLocal(id){return new Promise((res,rej)=>{let r=dbLocal.transaction(STORE,"readwrite").objectStore(STORE).delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function saveNavState(){
+ const state={activeTab,parentId,specialView,search:$("search")?.value||"",viewingId:viewing?.id||null};
+ try{localStorage.setItem("amol-nav-state",JSON.stringify(state))}catch(e){console.warn("Navigation state could not be saved",e)}
+ try{const p=new URLSearchParams();p.set("tab",state.activeTab);if(state.parentId)p.set("folder",state.parentId);if(state.specialView)p.set("view",state.specialView);if(state.search)p.set("search",state.search);if(state.viewingId)p.set("note",state.viewingId);history.replaceState(null,"",location.pathname+location.search+"#"+p.toString())}catch(e){console.warn("Navigation URL could not be saved",e)}
+}
+function restoreNavState(){
+ try{
+  const p=new URLSearchParams(location.hash.startsWith("#")?location.hash.slice(1):location.hash);
+  let s=null;
+  s=JSON.parse(localStorage.getItem("amol-nav-state")||"null");
+   if(!s&&(p.has("tab")||p.has("folder")||p.has("view")||p.has("note")))s={activeTab:p.get("tab"),parentId:p.get("folder"),specialView:p.get("view"),search:p.get("search")||"",viewingId:p.get("note")};
+  if(!s)return null;
+  if(TABS.includes(s.activeTab))activeTab=s.activeTab;
+  parentId=s.parentId||null;specialView=s.specialView||null;
+  if($("search"))$("search").value=s.search||"";
+  return s.viewingId||null;
+ }catch(e){console.warn("Navigation state could not be restored",e);return null}
+}
+function renderTabs(){$("tabs").innerHTML=TABS.map(t=>`<button class="tab ${t===activeTab?"active":""}" data-tab="${esc(t)}">${esc(t)}</button>`).join("");$("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;parentId=null;specialView=null;render()})}
+async function render(){
+ saveNavState();renderTabs();const all=await allItems();const rawQ=$("search").value.trim();const q=rawQ.normalize("NFC").toLocaleLowerCase();const searching=!!q;let live=all.filter(x=>!x.deletedAt&&(searching?true:(specialView?true:x.tab===activeTab)));if(!searching&&specialView){live=live.filter(x=>specialView==="favorites"?x.favorite:specialView==="bookmarks"?x.bookmarked:specialView==="pinned"?x.pinned:specialView==="recent"?x.type==="note":true)}
+ let path=[], p=parentId;while(p){let x=all.find(a=>a.id===p);if(!x)break;path.unshift(x);p=x.parentId}
+ $("crumbs").innerHTML=`<button class="crumb" data-root="1">${esc(activeTab)}</button>`+path.map(x=>`<span>›</span><button class="crumb" data-parent="${x.id}">${esc(x.title)}</button>`).join("");
+ $("crumbs").querySelector('[data-root]').onclick=()=>{parentId=null;render()};
+ $("crumbs").querySelectorAll("[data-parent]").forEach(b=>b.onclick=()=>{parentId=b.dataset.parent;render()});
+ const shown=live.filter(x=>{if(!searching&&!(specialView?true:x.parentId===(parentId||null)))return false;if(!searching)return true;const title=String(x.title||"").normalize("NFC").toLocaleLowerCase(),body=String(x.body||"").normalize("NFC").toLocaleLowerCase();return title.includes(q)||body.includes(q)});
+ shown.sort((a,b)=>{if(searching){const rank=x=>{const t=String(x.title||"").normalize("NFC").toLocaleLowerCase(),v=String(x.body||"").normalize("NFC").toLocaleLowerCase();if(t.startsWith(q))return 0;const ti=t.indexOf(q);if(ti>=0)return 1+ti/10000;const bi=v.indexOf(q);return 2+(bi<0?0:bi/10000)};return rank(a)-rank(b)||Number(b.updatedAt||0)-Number(a.updatedAt||0)}if(a.type!==b.type)return a.type==="folder"?-1:1;if(a.type==="folder"&&!!a.pinned!==!!b.pinned)return a.pinned?-1:1;return (Number(a.sortOrder)||0)-(Number(b.sortOrder)||0)||Number(b.updatedAt||0)-Number(a.updatedAt||0)});
+ $("listTitle").textContent=searching?"🔎 সার্চের ফলাফল":specialView?({favorites:"❤️ ফেভারিট",bookmarks:"🔖 বুকমার্কস",pinned:"📌 পিন করা পেজ",recent:"🕘 সাম্প্রতিক",all:"📚 সব সংগ্রহ"}[specialView]||"আপনার সংগ্রহ"):parentId?(path.at(-1)?.title||"ফোল্ডার"):"আপনার "+activeTab;
+ $("count").textContent=shown.length+"টি";
+ if(!shown.length){$("items").innerHTML=`<div class="empty" style="grid-column:1/-1">${searching?"এই অক্ষর বা শব্দের সঙ্গে মিলে এমন কিছু পাওয়া যায়নি।":"এখানে এখনো কিছু নেই।<br>＋ ফোল্ডার অথবা ＋ নোট চেপে শুরু করুন।"}</div>`;return}
+ $("items").innerHTML=shown.map(x=>`<div class="item-wrap"><button class="item ${x.type==="note"?"note":""} ${x.type==="folder"?"folder-card "+(x.size==="small"?"folder-small":x.size==="large"?"folder-large":""):""}" data-id="${x.id}"><span class="emoji">${x.type==="folder"?"📁":"📝"}</span><span class="name">${esc(x.title)}</span><span class="meta">${x.type==="folder"?"ফোল্ডার":new Date(x.updatedAt).toLocaleDateString("bn-BD")}</span></button><button class="${x.type==="folder"?"folder-menu-btn":"note-menu-btn"}" ${x.type==="folder"?"data-folder-menu":"data-note-menu"}="${x.id}" aria-label="${x.type==="folder"?"ফোল্ডার":"নোট"} মেনু">⋮</button></div>`).join("");
+ $("items").querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{let x=shown.find(y=>y.id===b.dataset.id);if(x.type==="folder"){parentId=x.id;if($("search").value.trim())$("search").value="";render()}else openViewer(x)});
+ $("items").querySelectorAll("[data-folder-menu]").forEach(b=>b.onclick=e=>{e.stopPropagation();openFolderMenu(b.dataset.folderMenu)});$("items").querySelectorAll("[data-note-menu]").forEach(b=>b.onclick=e=>{e.stopPropagation();openNoteMenu(shown.find(y=>y.id===b.dataset.noteMenu))});
+}
+function openEditor(type,item=null,focusBody=false){editing={type,item};editingFromViewer=false;$("editorTitle").textContent=item?"সম্পাদনা":type==="folder"?"নতুন ফোল্ডার":"নতুন নোট";$("itemTitle").value=item?.title||"";$("itemBody").value=item?.body||"";$("bodyWrap").style.display=type==="folder"?"none":"block";$("editor").classList.add("show");if(focusBody&&type==="note"){$("itemBody").focus();const end=$("itemBody").value.length;$("itemBody").setSelectionRange(end,end)}else $("itemTitle").focus()}
+function closeEditor(){$("editor").classList.remove("show");editing=null}
+function cancelEditor(){const returnToViewer=editingFromViewer;closeEditor();editingFromViewer=false;if(returnToViewer&&viewing){$("viewer").classList.add("show")}}
+async function saveEditor(){let title=$("itemTitle").value.trim();if(!title){toast("একটি নাম লিখুন");return}let old=editing.item;const returnToViewer=editingFromViewer;let x={...(old||{}),id:old?.id||uid(),type:editing.type,tab:old?.tab||activeTab,parentId:old?old.parentId:(parentId||null),title,body:editing.type==="note"?$("itemBody").value:"",updatedAt:Date.now(),deletedAt:null};await putItem(x);closeEditor();editingFromViewer=false;await render();if(returnToViewer)openViewer(x);toast("ডিভাইসে সংরক্ষিত হয়েছে");syncCloud()}
+function editViewedNote(){if(!viewing)return;const x=viewing;$("viewer").classList.remove("show");openEditor("note",x,true);editingFromViewer=true}
+function openViewer(x){viewing=x;saveNavState();$("viewTitle").textContent=x.title;$("viewDate").textContent=new Date(x.updatedAt).toLocaleString("bn-BD");$("viewBody").textContent=x.body||"";$("viewer").classList.add("show")}
+function closeViewer(){$("viewer").classList.remove("show");viewing=null;saveNavState()}
+function openNoteMenu(x=viewing){if(!x)return;viewing=x;$("noteMenuTitle").textContent="📝 "+(x.title||"নোট")+" — অপশন";$("favoriteView").textContent=x.favorite?"❤️ ফেভারিট থেকে সরান":"♡ ফেভারিটে রাখুন";$("bookmarkView").textContent=x.bookmarked?"🔖 বুকমার্ক সরান":"🔖 বুকমার্ক করুন";$("pinView").textContent=x.pinned?"📌 পিন তুলে দিন":"📌 পিন করুন";$("noteMenu").classList.add("show")}
+function closeNoteMenu(){$("noteMenu").classList.remove("show")}
+function noteShareText(){return (viewing?.title||"নোট")+"\n\n"+(viewing?.body||"")}
+async function makeNoteCopy(){if(!viewing)return;const copy={...viewing,id:uid(),title:(viewing.title||"নোট")+" — কপি",favorite:false,bookmarked:false,pinned:false,reminderAt:null,createdAt:Date.now(),updatedAt:Date.now(),deletedAt:null};await putItem(copy);await render();toast("নোটের কপি তৈরি হয়েছে");syncCloud()}
+function openReminder(){if(!viewing)return;const d=viewing.reminderAt?new Date(viewing.reminderAt):new Date(Date.now()+3600000);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());$("reminderDate").value=d.toISOString().slice(0,16);$("reminderPanel").classList.add("show")}
+async function saveReminder(){if(!viewing)return;const value=$("reminderDate").value;if(!value){toast("তারিখ ও সময় নির্বাচন করুন");return}const at=new Date(value).getTime();if(!Number.isFinite(at)||at<=Date.now()){toast("ভবিষ্যতের তারিখ ও সময় দিন");return}viewing={...viewing,reminderAt:at,reminderDone:false,updatedAt:Date.now()};await putItem(viewing);$("reminderPanel").classList.remove("show");openViewer(viewing);await render();syncCloud();toast("রিমাইন্ডার সংরক্ষিত হয়েছে")}
+async function clearReminder(){if(!viewing)return;viewing={...viewing,reminderAt:null,reminderDone:false,updatedAt:Date.now()};await putItem(viewing);$("reminderPanel").classList.remove("show");openViewer(viewing);await render();syncCloud();toast("রিমাইন্ডার সরানো হয়েছে")}
+async function checkReminders(){if(!dbLocal)return;const all=await allItems(),now=Date.now();for(const x of all){if(x.type==="note"&&!x.deletedAt&&x.reminderAt&&x.reminderAt<=now&&!x.reminderDone){await putItem({...x,reminderDone:true,updatedAt:now});const msg=(x.title||"নোট")+" — আপনার রিমাইন্ডার";if("Notification" in window&&Notification.permission==="granted"){try{new Notification("আমার আমল ও জিকির",{body:msg})}catch(e){alert(msg)}}else{alert(msg)}}}}
+async function runFind(){const term=$("findTerm").value.trim();if(!term||!viewing)return;const body=viewing.body||"";const index=body.toLocaleLowerCase().indexOf(term.toLocaleLowerCase());$("findResult").textContent=index<0?"এই নোটে শব্দটি পাওয়া যায়নি।":"পাওয়া গেছে। অবস্থান: "+(index+1)+" নম্বর অক্ষর।\n"+body.slice(Math.max(0,index-45),Math.min(body.length,index+term.length+65))}
+async function openFolderMenu(id){const all=await allItems();const f=all.find(x=>x.id===id&&x.type==="folder"&&!x.deletedAt);if(!f)return;menuFolderId=id;$("folderMenuTitle").textContent="📁 "+f.title;$("folderColor").value=f.color||"";$("folderSize").value=f.size||"normal";$("folderMenu").classList.add("show");const descendants=new Set([id]);let again=true;while(again){again=false;for(const x of all)if(x.parentId&&descendants.has(x.parentId)&&!descendants.has(x.id)){descendants.add(x.id);again=true}}const targets=all.filter(x=>x.type==="folder"&&!x.deletedAt&&x.tab===f.tab&&!descendants.has(x.id));$("folderMoveTo").innerHTML="<option value=\"__same__\">এখানেই রাখুন</option><option value=\"__root__\">মূল তালিকায়</option>"+targets.map(x=>"<option value=\""+esc(x.id)+"\">"+esc(x.title)+"</option>").join("");$("folderMenu").querySelector("[data-folder-action=pin]").textContent=f.pinned?"📌 পিন তুলে দিন":"📌 পিন করুন"}
+function closeFolderMenu(){$("folderMenu").classList.remove("show");menuFolderId=null}
+async function saveFolderPatch(patch){if(!menuFolderId)return;const all=await allItems(),f=all.find(x=>x.id===menuFolderId);if(!f)return;await putItem({...f,...patch,updatedAt:Date.now()});await render();syncCloud()}
+async function folderMenuAction(action){if(!menuFolderId)return;const all=await allItems(),f=all.find(x=>x.id===menuFolderId);if(!f)return;if(action==="close"){closeFolderMenu();return}if(action==="rename"){closeFolderMenu();openEditor("folder",f);return}if(action==="delete"){const id=f.id;closeFolderMenu();openFolderDelete(id);return}if(action==="pin"){await saveFolderPatch({pinned:!f.pinned});$("folderMenu").classList.add("show");return}if(action==="up"||action==="down"){const siblings=all.filter(x=>x.type==="folder"&&!x.deletedAt&&x.tab===f.tab&&x.parentId===(f.parentId||null)).sort((a,b)=>(Number(a.sortOrder)||0)-(Number(b.sortOrder)||0)||Number(a.updatedAt||0)-Number(b.updatedAt||0));const i=siblings.findIndex(x=>x.id===f.id),j=action==="up"?i-1:i+1;if(j<0||j>=siblings.length){toast("আর সরানো যাচ্ছে না");return}const moved=siblings.splice(i,1)[0];siblings.splice(j,0,moved);for(let k=0;k<siblings.length;k++)await putItem({...siblings[k],sortOrder:k+1,updatedAt:Date.now()});await render();syncCloud();return}}
+function openFolderDelete(id){allItems().then(all=>{const f=all.find(x=>x.id===id&&x.type==="folder");if(!f)return;pendingFolderDelete=f;$("deleteFolderContents").checked=false;$("folderDeleteInfo").textContent="‘"+f.title+"’ ফোল্ডারটি মুছে ফেলার নিয়ম বেছে নিন।";$("folderDelete").classList.add("show")})}
+function closeFolderDelete(){$("folderDelete").classList.remove("show");pendingFolderDelete=null}
+async function confirmFolderDelete(){if(!pendingFolderDelete)return;const all=await allItems();const folder=all.find(x=>x.id===pendingFolderDelete.id&&x.type==="folder");if(!folder){closeFolderDelete();return}const recursive=$("deleteFolderContents").checked;const now=Date.now();if(recursive){const ids=new Set([folder.id]);let changed=true;while(changed){changed=false;for(const x of all){if(x.parentId&&ids.has(x.parentId)&&!ids.has(x.id)){ids.add(x.id);changed=true}}}for(const x of all){if(ids.has(x.id))await putItem({...x,deletedAt:now,updatedAt:now})}}else{for(const x of all){if(x.parentId===folder.id)await putItem({...x,parentId:folder.parentId||null,updatedAt:now})}await putItem({...folder,deletedAt:now,updatedAt:now})}closeFolderDelete();await render();toast(recursive?"ফোল্ডার ও ভেতরের সবকিছু মুছে ফেলার নির্দেশ দেওয়া হয়েছে":"ফোল্ডার মুছে গেছে; ভেতরের জিনিসপত্র রাখা হয়েছে");syncCloud()}
+async function toggleViewedFlag(flag){if(!viewing)return;const updated={...viewing,[flag]:!viewing[flag],updatedAt:Date.now()};await putItem(updated);viewing=updated;openViewer(updated);await render();syncCloud();toast("সংরক্ষিত হয়েছে")}
+async function removeViewed(){if(!viewing)return;if(!confirm("এই নোটটি মুছে ফেলবেন?"))return;let x={...viewing,deletedAt:Date.now(),updatedAt:Date.now()};await putItem(x);closeViewer();await render();toast("মুছে ফেলার নির্দেশ সংরক্ষিত হয়েছে");syncCloud()}
+async function syncCloud(){
+ if(!currentUser||!cloud||!navigator.onLine||syncBusy)return;syncBusy=true;
+ try{
+  const ref=cloud.collection("users").doc(currentUser.uid).collection("items");
+  const local=await allItems(), snap=await ref.get(), remote=new Map();snap.forEach(d=>remote.set(d.id,d.data()));
+  // Delete marked notes from Firestore first. Keep the local tombstone so an old
+  // remote copy cannot be uploaded again during a later sync on this device.
+  for(const x of local){
+   if(x.deletedAt){if(remote.has(x.id))await ref.doc(x.id).delete();continue}
+   const r=remote.get(x.id);
+   if(!r||Number(x.updatedAt||0)>Number(r.updatedAt||0)){await ref.doc(x.id).set(x)}
+  }
+  // Also clean up old cloud tombstones left by earlier versions of the app.
+  for(const [id,r] of remote){
+   const l=local.find(x=>x.id===id);
+   if(r.deletedAt){
+    if(l&&!l.deletedAt)await putItem({...l,deletedAt:Number(r.deletedAt)||Date.now(),updatedAt:Number(r.updatedAt)||Date.now()});
+    else if(!l)await putItem(r);
+    await ref.doc(id).delete();
+    continue;
+   }
+   if(l?.deletedAt){await ref.doc(id).delete();continue}
+   if(!l||Number(r.updatedAt||0)>Number(l.updatedAt||0))await putItem(r)
+  }
+  $("accountBtn").textContent="✓ "+(currentUser.displayName?.split(" ")[0]||"সিঙ্ক চালু");
+  toast("ইন্টারনেটের সঙ্গে তথ্য মিলেছে");
+ }catch(e){console.error(e);toast("সিঙ্ক হয়নি—পরে আবার চেষ্টা হবে")}
+ finally{syncBusy=false;render()}
+}
+async function signIn(){if(!auth){toast("লগইন চালুর জন্য ইন্টারনেট দরকার");return}const p=new firebase.auth.GoogleAuthProvider();try{await auth.signInWithPopup(p)}catch(e){try{await auth.signInWithRedirect(p)}catch(err){toast("লগইন করা যায়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন")}}}
+async function init(){
+  await openLocal();const restoreViewingId=restoreNavState();await render();if(restoreViewingId){const savedItems=await allItems();const savedNote=savedItems.find(x=>x.id===restoreViewingId&&x.type==="note"&&!x.deletedAt);if(savedNote)openViewer(savedNote)}checkReminders();setInterval(checkReminders,30000);
+ $("newFolder").onclick=()=>openEditor("folder");$("newNote").onclick=()=>openEditor("note");$("fab").onclick=()=>openEditor("note");
+ $("cancelEdit").onclick=cancelEditor;$("saveEdit").onclick=saveEditor;$("closeView").onclick=closeViewer;$("openNoteMenu").onclick=()=>openNoteMenu();$("closeNoteMenu").onclick=closeNoteMenu;$("favoriteView").onclick=()=>{closeNoteMenu();toggleViewedFlag("favorite")};$("bookmarkView").onclick=()=>{closeNoteMenu();toggleViewedFlag("bookmarked")};$("pinView").onclick=()=>{closeNoteMenu();toggleViewedFlag("pinned")};$("reminderView").onclick=()=>{closeNoteMenu();openReminder()};$("findView").onclick=()=>{closeNoteMenu();$("findTerm").value="";$("findResult").textContent="";$("findPanel").classList.add("show")};$("copyView").onclick=()=>{closeNoteMenu();makeNoteCopy()};$("shareView").onclick=()=>{closeNoteMenu();$("sharePanel").classList.add("show")};$("cancelReminder").onclick=()=>$("reminderPanel").classList.remove("show");$("saveReminder").onclick=saveReminder;$("clearReminder").onclick=clearReminder;$("closeFind").onclick=()=>$("findPanel").classList.remove("show");$("doFind").onclick=runFind;$("closeShare").onclick=()=>$("sharePanel").classList.remove("show");$("nativeShare").onclick=async()=>{if(!viewing)return;try{if(navigator.share)await navigator.share({title:viewing.title,text:noteShareText()});else{await navigator.clipboard.writeText(noteShareText());toast("লেখা কপি হয়েছে")}}catch(e){if(e.name!=="AbortError")toast("শেয়ার করা যায়নি; অন্য অপশন ব্যবহার করুন")}};$("whatsappShare").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(noteShareText()),"_blank");$("emailShare").onclick=()=>{location.href="mailto:?subject="+encodeURIComponent(viewing?.title||"নোট")+"&body="+encodeURIComponent(noteShareText())};$("copyTextShare").onclick=async()=>{try{await navigator.clipboard.writeText(noteShareText());toast("নোটের লেখা কপি হয়েছে")}catch(e){toast("কপি করা যায়নি; শেয়ার মেনু ব্যবহার করুন")}};
+ $("editView").onclick=()=>{let x=viewing;closeNoteMenu();closeViewer();openEditor("note",x)};$("deleteView").onclick=()=>{closeNoteMenu();removeViewed()};
+ $("cancelFolderDelete").onclick=closeFolderDelete;$("confirmFolderDelete").onclick=confirmFolderDelete;
+ $("closeFolderMenu").onclick=closeFolderMenu;$("folderMenu").querySelectorAll("[data-folder-action]").forEach(b=>b.onclick=()=>folderMenuAction(b.dataset.folderAction));
+ $("folderColor").onchange=()=>saveFolderPatch({color:$("folderColor").value||null});$("folderSize").onchange=()=>saveFolderPatch({size:$("folderSize").value});
+ $("moveFolderNow").onclick=async()=>{if(!menuFolderId)return;const dest=$("folderMoveTo").value;if(dest==="__same__"){toast("ফোল্ডারটি আগের স্থানেই আছে");return}const all=await allItems(),f=all.find(x=>x.id===menuFolderId);if(!f)return;const newParent=dest==="__root__"?null:dest;const peers=all.filter(x=>x.type==="folder"&&!x.deletedAt&&x.tab===f.tab&&x.parentId===(newParent||null)&&x.id!==f.id);const nextOrder=peers.reduce((m,x)=>Math.max(m,Number(x.sortOrder)||0),0)+1;await putItem({...f,parentId:newParent,sortOrder:nextOrder,updatedAt:Date.now()});closeFolderMenu();await render();toast("ফোল্ডার সরানো হয়েছে");syncCloud()};
+ $("homeMenuBtn").onclick=()=> $("homeMenu").classList.add("show");$("closeHomeMenu").onclick=()=> $("homeMenu").classList.remove("show");$("homeMenu").querySelectorAll("[data-home-view]").forEach(b=>b.onclick=()=>{const v=b.dataset.homeView;$("homeMenu").classList.remove("show");if(v==="settings"){$("settingsPanel").classList.add("show");return}if(v==="about"){toast("আমার আমল ও জিকির — ব্যক্তিগত আমল ও নোটবুক");return}specialView=v==="home"?null:v;parentId=null;if(v==="home")activeTab=TABS[0];render()});$("closeSettings").onclick=()=> $("settingsPanel").classList.remove("show");$("themeToggle").onclick=()=>{document.body.classList.toggle("dark");localStorage.setItem("amol-dark",document.body.classList.contains("dark")?"1":"0");$("themeToggle").textContent=document.body.classList.contains("dark")?"বন্ধ করুন":"চালু করুন"};if(localStorage.getItem("amol-dark")==="1")document.body.classList.add("dark");$("accountBtn").onclick=()=>currentUser?toast("আপনি লগইন করা আছেন"):signIn();
+ $("search").oninput=render;
+ window.addEventListener("online",()=>{toast("ইন্টারনেট এসেছে—সিঙ্ক হচ্ছে");syncCloud()});
+ if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(console.warn)}
+ try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();cloud=firebase.firestore();
+ auth.onAuthStateChanged(async u=>{currentUser=u;if(u){$("accountBtn").textContent="✓ "+(u.displayName?.split(" ")[0]||"লগইন");await syncCloud()}else{$("accountBtn").textContent="লগইন করুন"}})
+ }catch(e){console.warn("Firebase unavailable; offline local mode remains available",e)}
+}
+init();
+</script>
+</body></html>
