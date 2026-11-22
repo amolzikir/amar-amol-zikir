@@ -92,7 +92,7 @@ async function render(){
  $("crumbs").querySelectorAll("[data-parent]").forEach(b=>b.onclick=()=>{parentId=b.dataset.parent;render()});
  const shown=live.filter(x=>(specialView?true:x.parentId===(parentId||null))&&(!q||x.title.toLowerCase().includes(q)||(x.body||"").toLowerCase().includes(q)));
  shown.sort((a,b)=>{if(a.type!==b.type)return a.type==="folder"?-1:1;if(a.type==="folder"&&!!a.pinned!==!!b.pinned)return a.pinned?-1:1;return (Number(a.sortOrder)||0)-(Number(b.sortOrder)||0)||Number(b.updatedAt||0)-Number(a.updatedAt||0)});
- $("listTitle").textContent=parentId?(path.at(-1)?.title||"ফোল্ডার"):"আপনার "+activeTab;
+ $("listTitle").textContent=specialView?({favorites:"❤️ ফেভারিট",bookmarks:"🔖 বুকমার্কস",pinned:"📌 পিন করা পেজ",recent:"🕘 সাম্প্রতিক",all:"📚 সব সংগ্রহ"}[specialView]||"আপনার সংগ্রহ"):parentId?(path.at(-1)?.title||"ফোল্ডার"):"আপনার "+activeTab;
  $("count").textContent=shown.length+"টি";
  if(!shown.length){$("items").innerHTML=`<div class="empty" style="grid-column:1/-1">এখানে এখনো কিছু নেই।<br>＋ ফোল্ডার অথবা ＋ নোট চেপে শুরু করুন।</div>`;return}
  $("items").innerHTML=shown.map(x=>`<div class="item-wrap"><button class="item ${x.type==="note"?"note":""} ${x.type==="folder"?"folder-card "+(x.size==="small"?"folder-small":x.size==="large"?"folder-large":""):""}" data-id="${x.id}"><span class="emoji">${x.type==="folder"?"📁":"📝"}</span><span class="name">${esc(x.title)}</span><span class="meta">${x.type==="folder"?"ফোল্ডার":new Date(x.updatedAt).toLocaleDateString("bn-BD")}</span></button>${x.type==="folder"?`<button class="folder-menu-btn" data-folder-menu="${x.id}" aria-label="ফোল্ডার মেনু">⋮</button>`:""}</div>`).join("");
