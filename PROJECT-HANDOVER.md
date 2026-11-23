@@ -164,3 +164,11 @@
 - Backups: `backup/index-2026-11-23-before-local-fresh-sync-v121.html` and `backup/sw-2026-11-23-before-local-fresh-sync-v121.js`, exact-content verified.
 - JavaScript syntax and GitHub refetch verification passed. Cache: `amol-zikir-v121`.
 - Real concurrent editing across devices and offline/reconnect behavior still require on-device testing; no claim of device-level verification.
+
+
+## v122 — 2026-11-23
+- Added a final IndexedDB freshness guard before applying a Cloud-pulled record locally. If the local record was edited during the Firestore transaction and its timestamp is newer than the incoming Cloud record, the older incoming copy is skipped and another reconciliation pass is queued.
+- Existing v121 fresh-local-read behavior, v120 Firestore transactions, v119 deletion tombstones, retry/backoff, and reconnect/visibility sync remain intact.
+- Backups: `backup/index-2026-11-23-before-sync-apply-guard-v122.html` and `backup/sw-2026-11-23-before-sync-apply-guard-v122.js`, exact-content verified.
+- JavaScript syntax and GitHub refetch verification passed. Cache: `amol-zikir-v122`.
+- Multi-device and offline/reconnect device tests remain pending.
