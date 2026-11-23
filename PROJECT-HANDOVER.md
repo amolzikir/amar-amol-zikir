@@ -108,3 +108,11 @@
 - Backup তৈরি ও পুনরায় fetch করে exact content মিলিয়ে যাচাই করা হয়েছে: `backup/index-2026-11-23-before-biometric-v114.html`, `backup/sw-2026-11-23-before-biometric-v114.js`।
 - JavaScript syntax check পাস; GitHub থেকে index/sw পুনরায় fetch করে v114 markers ও cache version যাচাই করা হয়েছে। Cache: `amol-zikir-v114`।
 - ব্যবহারকারীর Android ফোনে ১০ মিনিট idle আচরণ ও fingerprint setup/verification পরীক্ষা এখনও বাকি; ফোনে পরীক্ষা না হওয়া পর্যন্ত কাজ সফল হয়েছে বলে দাবি করা যাবে না।
+
+## ১২. v115 — PIN Lock ঐচ্ছিক/সম্পূর্ণ বন্ধ (২৩ নভেম্বর ২০২৬)
+- ব্যবহারকারী চাইলে Settings থেকে বর্তমান PIN যাচাই করে “PIN বন্ধ করুন” চাপলে PIN hash/salt, idle timestamp এবং biometric credential ID মুছে যায়; idle timer বাতিল হয়।
+- বায়োমেট্রিক নিবন্ধনও PIN-এর সঙ্গে বন্ধ হয়, যাতে পরে নতুন PIN চালু করলে পুরোনো biometric registration অপ্রত্যাশিতভাবে থেকে না যায়।
+- Settings-এর ব্যাখ্যা স্পষ্ট করা হয়েছে: lock বন্ধ থাকলে PIN/biometric ছাড়াই অ্যাপ ব্যবহার করা যাবে; পরে নতুন PIN দিয়ে আবার চালু করা যাবে।
+- v115-এ JS syntax check ও GitHub refetch verification পাস। Cache: `amol-zikir-v115`।
+- Backup: `backup/index-2026-11-23-before-pin-disable-v115.html`, `backup/sw-2026-11-23-before-pin-disable-v115.js`; দুই backup exact content দিয়ে যাচাই করা হয়েছে।
+- ব্যবহারকারীর ফোনে on-device confirmation এখনও বাকি।
