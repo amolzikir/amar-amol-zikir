@@ -261,3 +261,13 @@
 - Bumped service-worker cache to `amol-zikir-v132`.
 - Pre-change backups created and exact-content verified: `backup/index.html-2026-11-24-v132-before-xss-audit-hardening.bak`, `backup/sw.js-2026-11-24-v132-before-xss-audit-hardening.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-v132-before-xss-audit-hardening.bak`, `backup/package.json-2026-11-24-v132-before-xss-audit-hardening.bak`, `backup/.github-workflows-firestore-rules.yml-2026-11-24-v132-before-xss-audit-hardening.bak`, `backup/tests-dom-security.test.js-2026-11-24-v132-before-xss-audit-hardening.bak`.
 - Scope limitation: this is a targeted source review and regression coverage, not a formal proof that all runtime HTML injection risks are eliminated. Existing app behavior/data paths were not intentionally changed.
+
+
+## v133 — Daily Amal recovery safeguard (2026-11-24)
+- Added a recovery action shown when the Daily Amal list is empty. It reads the legacy `AmolZikirLocal` database read-only and, when online and signed in, also checks the current user's Firestore Daily Amal document.
+- Recovery only considers non-deleted records that contain at least one saved item. If multiple candidates exist, it selects the newest by `updatedAt`; it does not union records or resurrect individually deleted items.
+- Before restoring, it checks that the current local list is still empty and asks the user to confirm, showing the recovered item names. It then restores the selected record to the active account database and attempts to save it to that account's cloud document.
+- The legacy database is only read; it is never deleted or modified. If no candidate is found, no data is changed.
+- Bumped service-worker cache to `amol-zikir-v133`.
+- Pre-change backups created and exact-content verified: `backup/index.html-2026-11-24-before-daily-amal-recovery.bak`, `backup/sw.js-2026-11-24-before-daily-amal-recovery.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-before-daily-amal-recovery.bak`, `backup/package.json-2026-11-24-before-daily-amal-recovery.bak`, `backup/.github-workflows-firestore-rules.yml-2026-11-24-before-daily-amal-recovery.bak`.
+- Scope: recovery depends on the old browser IndexedDB database or current user's Firestore record still containing a non-deleted Daily Amal record; if neither contains it, an older user-created export/backup may be needed.
