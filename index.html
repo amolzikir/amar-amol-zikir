@@ -906,6 +906,19 @@ Object.assign(I18N,{
 "আমল রিমাইন্ডার বন্ধ হয়েছে":["Amal reminder disabled","تم إيقاف تذكير الأعمال","اعمال کی یاد دہانی بند ہوگئی"]
 });
 
-init();
+
+$("homeMenuBtn").addEventListener("click",()=> $("homeMenu").classList.add("show"));
+$("closeHomeMenu").addEventListener("click",()=> $("homeMenu").classList.remove("show"));
+$("newFolder").addEventListener("click",()=>openEditor("folder"));
+$("newNote").addEventListener("click",()=>openEditor("note"));
+$("fab").addEventListener("click",()=>openEditor("note"));
+$("homeMenu").querySelectorAll("[data-home-view]").forEach(b=>b.addEventListener("click",()=>{
+ const v=b.dataset.homeView;$("homeMenu").classList.remove("show");
+ if(v==="settings"){$("settingsPanel").classList.add("show");return}
+ if(v==="about"){toast("আমার আমল ও জিকির — ব্যক্তিগত আমল ও নোটবুক");return}
+ specialView=v==="home"?null:v;parentId=null;if(v==="home")activeTab=TABS[0];render();
+}));
+window.addEventListener("error",e=>console.error("App runtime error",e.error||e.message));
+init().catch(e=>{console.error("App initialization failed",e);toast("কিছু ফিচার চালু হয়নি। মেনু দিয়ে চেষ্টা করুন।")});
 </script>
 </body></html>
