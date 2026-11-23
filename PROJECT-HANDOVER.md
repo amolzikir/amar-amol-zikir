@@ -54,8 +54,8 @@
 - সর্বশেষ প্রকাশিত release: **v118**; service worker cache string: `amol-zikir-v118`।
 - Backup v2-তে `zikrRoutines` যুক্ত হয়েছে; restore v1/v2 গ্রহণ করে এবং routine merge করে।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৩-১১-২০২৬, v118-এর পর):
-  - `index.html` blob SHA: `e8d7a559511b66594e7dc1f1a33301625a8bff4d` (v118-এর আগে; নতুন SHA নিচের release log-এ যাচাই করে যুক্ত করতে হবে)
-  - `sw.js` blob SHA: `eebdb0cf309ea83e1cc72895830f71f022d6f9b2` (v118-এর আগে; নতুন SHA নিচের release log-এ যাচাই করে যুক্ত করতে হবে)
+  - `index.html` blob SHA: `02e65a680308416c40800788b52f144431481d4a`
+  - `sw.js` blob SHA: `ddffd7c7e731db06377b7d4e4ae24017e9ca5d19`
 - SHA-গুলো কেবল এই নথি হালনাগাদের সময়ের রেফারেন্স; প্রতিটি update-এর আগে নতুন করে fetch করতে হবে।
 - Backup/restore-এর কোডে JSON export, v1/v2 import, record merge ও zikr routine merge আছে; ব্যবহারকারীর ফোনে download/restore test এখনও নিশ্চিত নয়।
 
