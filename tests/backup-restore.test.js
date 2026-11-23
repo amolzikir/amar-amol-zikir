@@ -7,7 +7,10 @@ const source = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8")
 const start = source.indexOf("function validateBackupTree(");
 const end = source.indexOf("\nasync function importAppBackup", start);
 if (start < 0 || end < 0) throw new Error("Backup validators were not found");
-const helpers = source.slice(start, end);
+const mergeStart = source.indexOf("function mergeBackupIds(");
+const mergeEnd = source.indexOf("\nfunction renderZikrRoutines", mergeStart);
+if (mergeStart < 0 || mergeEnd < 0) throw new Error("Backup merge helper was not found");
+const helpers = source.slice(start, end) + "\n" + source.slice(mergeStart, mergeEnd);
 const context = {};
 vm.runInNewContext(helpers + "\nglobalThis.check={validateBackupTree,validateBackupItem,validateBackupRoutine,mergeBackupIds};", context);
 const h = context.check;
