@@ -271,3 +271,11 @@
 - Bumped service-worker cache to `amol-zikir-v133`.
 - Pre-change backups created and exact-content verified: `backup/index.html-2026-11-24-before-daily-amal-recovery.bak`, `backup/sw.js-2026-11-24-before-daily-amal-recovery.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-before-daily-amal-recovery.bak`, `backup/package.json-2026-11-24-before-daily-amal-recovery.bak`, `backup/.github-workflows-firestore-rules.yml-2026-11-24-before-daily-amal-recovery.bak`.
 - Scope: recovery depends on the old browser IndexedDB database or current user's Firestore record still containing a non-deleted Daily Amal record; if neither contains it, an older user-created export/backup may be needed.
+
+
+## v134 — বিস্তৃত Daily Amal পুনরুদ্ধার অনুসন্ধান
+- v133-এর recovery button যদি নির্দিষ্ট `system-daily-amal` রেকর্ড না পায়, এখন legacy IndexedDB-র সব রেকর্ড, সক্রিয় account IndexedDB-র সব রেকর্ড এবং বর্তমান ব্যবহারকারীর Firestore `items` collection-এর সব document পরীক্ষা করে।
+- কেবল স্পষ্টভাবে Daily Amal হিসেবে চিহ্নিত, non-deleted এবং non-empty `items`-সহ রেকর্ড বিবেচনা করে; অন্য নোট/ফোল্ডারকে আমল হিসেবে ধরে না।
+- একাধিক প্রার্থী থাকলে সর্বশেষ `updatedAt`-এর রেকর্ডটি বেছে নেয়; restore-এর আগে ব্যবহারকারীর সামনে নাম দেখিয়ে confirmation চায়।
+- অন্য Google account-এর database বা Guest database অনুসন্ধান/মিশ্রণ করা হয় না; legacy database read-only থাকে।
+- v134-এর JS syntax, Daily Amal selector tests, deployment ও CI ফলাফল আলাদাভাবে যাচাই করতে হবে; ফোনে ব্যবহারকারী নিশ্চিত না করা পর্যন্ত পুনরুদ্ধার সফল বলা যাবে না।
