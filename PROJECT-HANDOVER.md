@@ -99,3 +99,12 @@
 - Settings-এর “এখনই লক করুন” আগের মতো তাৎক্ষণিক কাজ করে।
 - Cache: `amol-zikir-v113`; JavaScript syntax check ও GitHub refetch verification পাস।
 - ব্যবহারকারীর ফোনে রিফ্রেশ/১০ মিনিট idle/আনলক আচরণ পরীক্ষা এখনও বাকি।
+
+## ১১. v114 — বায়োমেট্রিক আনলক ও PIN টাইমআউট সংশোধন (২৩ নভেম্বর ২০২৬)
+- Settings-এ “ফিঙ্গারপ্রিন্ট চালু করুন” ও “বায়োমেট্রিক বন্ধ” বোতাম যোগ হয়েছে; লক স্ক্রিনে বায়োমেট্রিক আনলকের বোতাম দেখা যাবে যখন সেটআপ সম্পন্ন।
+- WebAuthn platform authenticator ব্যবহার করা হয়েছে। Android/Chrome/ডিভাইস সমর্থন করলে fingerprint বা device screen-lock verification চাইবে; কেবল fingerprint বাধ্যতামূলক করা যায় না। PIN সবসময় fallback হিসেবে থাকবে।
+- Credential ID কেবল এই browser-এর localStorage-এ থাকে; ফোন/ব্রাউজার বদলালে পুনরায় সেটআপ লাগতে পারে।
+- PIN idle bug-এর কারণ: PIN তৈরি করার সময় যদি অ্যাপ শুরুতে PIN না থাকায় activity listeners যোগ না হয়ে থাকে, পরে PIN চালু করলেও activity reset হতো না। v114-এ listeners একবার সর্বদা যুক্ত হয় এবং PIN তৈরি করার পরও session শুরু হয়।
+- Backup তৈরি ও পুনরায় fetch করে exact content মিলিয়ে যাচাই করা হয়েছে: `backup/index-2026-11-23-before-biometric-v114.html`, `backup/sw-2026-11-23-before-biometric-v114.js`।
+- JavaScript syntax check পাস; GitHub থেকে index/sw পুনরায় fetch করে v114 markers ও cache version যাচাই করা হয়েছে। Cache: `amol-zikir-v114`।
+- ব্যবহারকারীর Android ফোনে ১০ মিনিট idle আচরণ ও fingerprint setup/verification পরীক্ষা এখনও বাকি; ফোনে পরীক্ষা না হওয়া পর্যন্ত কাজ সফল হয়েছে বলে দাবি করা যাবে না।
