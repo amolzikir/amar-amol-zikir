@@ -1,0 +1,281 @@
+# আমার আমল ও জিকির — প্রকল্প হস্তান্তর নথি
+
+**সর্বশেষ হালনাগাদ:** ২৩ নভেম্বর ২০২৬  
+**উদ্দেশ্য:** ChatGPT-এর পুরোনো চ্যাট হারালেও অন্য ফোন বা অন্য ChatGPT অ্যাকাউন্ট থেকে প্রকল্পের কাজ নিরাপদে চালিয়ে যাওয়া।
+
+## ১. প্রকল্প পরিচিতি
+- অ্যাপ: আমার আমল ও জিকির
+- ধরন: বিনামূল্যের Android-friendly Progressive Web App (PWA)
+- লাইভ ঠিকানা: https://amolzikir.github.io/amar-amol-zikir/
+- GitHub repository: https://github.com/amolzikir/amar-amol-zikir
+- প্রধান ফাইল: `index.html`
+- Service worker: `sw.js`
+- Firebase project ID: `amar-amol-zikir`
+- Firebase ব্যবহার: Google Authentication ও Cloud Firestore
+- Firestore ডেটা-পথ: `users/{uid}/items/{id}`
+- লোকাল ডেটা: IndexedDB store `items`, keyPath `id`
+- ফোল্ডার parent field: `parentId`
+- ব্যবহারকারীর প্রধান ডিভাইস: Android ফোন; তাই সব নির্দেশনা মোবাইল-বান্ধব ও সহজ রাখতে হবে।
+
+## ২. কাজ চালিয়ে যাওয়ার নিয়ম — অবশ্যই মানতে হবে
+1. ব্যবহারকারী কোড নিজে সম্পাদনা করতে স্বচ্ছন্দ নন; সম্ভব হলে GitHub সংযোগ/উপলভ্য টুল দিয়ে সহকারীই কাজ করবে।
+2. কোনো পরিবর্তনের আগে সর্বশেষ `index.html` ও `sw.js` GitHub থেকে আনতে হবে।
+3. গুরুত্বপূর্ণ পরিবর্তনের আগে দুই ফাইলের ব্যাকআপ নিতে হবে; ব্যাকআপ তৈরি হয়েছে কি না fetch করে যাচাই করতে হবে।
+4. GitHub update-এ সংশ্লিষ্ট ফাইলের একেবারে নতুন blob SHA ব্যবহার করতে হবে।
+5. JavaScript syntax যাচাই করতে হবে; তারপর GitHub থেকে আবার fetch করে পরিবর্তন ও service-worker cache version যাচাই করতে হবে।
+6. প্রতিটি release-এ `sw.js`-এর cache version বাড়াতে হবে।
+7. বিদ্যমান কোনো ফিচার/ডেটা ব্যবহারকারীর অনুমতি ছাড়া বাদ দেওয়া, ভাঙা বা মুছে ফেলা যাবে না।
+8. ফোনে বাস্তবে কাজ করছে—ব্যবহারকারী নিশ্চিত না করা পর্যন্ত এমন দাবি করা যাবে না।
+9. ব্যবহারকারী সংক্ষিপ্ত কথা ও দ্রুত বাস্তব কাজ পছন্দ করেন। “চলুক”, “পরের কাজ”, “কাজ চালিয়ে যান” মানে পরবর্তী বাস্তব কাজ শুরু করা।
+10. কম্পন/ভাইব্রেশন সমস্যা নিয়ে আর কাজ বা পরীক্ষা প্রস্তাব করা যাবে না; ব্যবহারকারী বিষয়টি বাদ দিতে বলেছেন।
+
+## ৩. ইতিমধ্যে তৈরি/কাজ করা ফিচারসমূহ
+- Google sign-in; Firestore-এ অনলাইন নোট সংরক্ষণ ও sync।
+- অফলাইনে নোট তৈরি; ইন্টারনেট ফিরলে sync।
+- ফোল্ডার তৈরি, nested folder, rename, move, pin, color/size, reorder ও delete।
+- Home, Favorites, Pinned pages, Bookmarks, Recent, All collection, Settings, About।
+- Dark mode; বাংলা, আরবি, ইংরেজি ও উর্দু ভাষা; আরবি/উর্দু RTL।
+- নোট viewer/editor, fullscreen, search, favorite, bookmark, pin, reminder, copy, share, edit, delete।
+- Android Back navigation ও refresh-এর পর Daily Amal/Tasbih screen ধরে রাখার সংশোধন।
+- ক্যালেন্ডার ও Daily Amal: অগ্রগতি, নির্বাচিত তারিখ, streak/দিনভিত্তিক তথ্য।
+- Personal Home Dashboard।
+- Dua & Dhikr library: আরবি, বাংলা উচ্চারণ, অর্থ, বিভাগ, search, favorite, copy, note হিসেবে save, offline।
+- Tasbih counter: বাক্য নির্বাচন, custom phrase, লক্ষ্য, অগ্রগতি, round/milestone, sound।
+- Backup & Restore: JSON backup; restore merge করে, পুরোনো ডেটা মুছে দেয় না।
+- Quran tracker: তারিখ, সূরা, আয়াত, পৃষ্ঠা, সময়, পরিসংখ্যান; local ও cloud sync।
+- Daily Amal reminder: app চলার সময়/খোলার পর due check; notification permission প্রয়োজন হতে পারে।
+- Daily Hadith card; উৎস-সহ হাদিস ও বাংলা শিক্ষা।
+- Dua/Dhikr-এর আরবি text-to-speech; এটি ফোনের TTS, কোনো ক্বারির রেকর্ডিং নয়।
+- Personal Zikr Routine: নিজস্ব জিকির, লক্ষ্য, দৈনিক গণনা ও অগ্রগতি।
+- Hijri date display; স্থানীয় চাঁদ দেখার কারণে একদিন পার্থক্য হতে পারে।
+- App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
+
+## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
+- সর্বশেষ প্রকাশিত release: **v120**; service worker cache string: `amol-zikir-v120`।
+- Backup v2-তে `zikrRoutines` যুক্ত হয়েছে; restore v1/v2 গ্রহণ করে এবং routine merge করে।
+- সর্বশেষ যাচাইকৃত GitHub fetch (২৩-১১-২০২৬, v118-এর পর):
+  - `index.html` blob SHA: `1578ab85b21246cb33f1b0182bcefd8c08341962`
+  - `sw.js` blob SHA: `c2e8d21981b92af5bb5a7e05fc4e6d43ba94ab70`
+- SHA-গুলো কেবল এই নথি হালনাগাদের সময়ের রেফারেন্স; প্রতিটি update-এর আগে নতুন করে fetch করতে হবে।
+- Backup/restore-এর কোডে JSON export, v1/v2 import, record merge ও zikr routine merge আছে; ব্যবহারকারীর ফোনে download/restore test এখনও নিশ্চিত নয়।
+
+## ৫. পরবর্তী কাজের অগ্রাধিকার
+1. **ডেটা-সুরক্ষা অগ্রাধিকার:** v118-এ malformed JSON, record schema, nested unsafe keys, duplicate ID এবং timestamp merge validation শক্ত করা হয়েছে; IndexedDB record writes এক read-write transaction-এ batch করা হয়েছে। পরবর্তী ধাপে backup/restore regression audit ও নিরাপদ test data দিয়ে পরীক্ষা।
+2. ব্যবহারকারীর সুবিধামতো JSON backup download হয়েছে কি না নিশ্চিত করা; restore পরীক্ষা কেবল আলাদা/নিরাপদ test data দিয়ে।
+3. Firebase sync, edit/delete ও offline-to-online sync-এর conflict ও tombstone আচরণ অডিট; on-device test ছাড়া সফল দাবি নয়।
+4. PIN/biometric/১০ মিনিট idle lock এবং lock বন্ধ/পুনরায় চালুর on-device আচরণ ব্যবহারকারীর কাছ থেকে নিশ্চিত করা; UI lock-কে data encryption বলা যাবে না।
+5. Calendar, Daily Amal, Tasbih, Dua/Dhikr, Quran tracker ও Zikr routines-এর ধাপে ধাপে regression audit।
+6. Hijri date-এর হার্ডকোড করা মাস-শুরুর তারিখ নির্ভরযোগ্য বাংলাদেশি সূত্রে পুনরায় যাচাই; নিশ্চিত সূত্র ছাড়া নির্দিষ্ট তারিখকে চূড়ান্ত বলা যাবে না।
+
+## ৬. Backup ও নিরাপত্তা
+- ব্যবহারকারী নিয়মিত অ্যাপের Settings থেকে JSON backup নামিয়ে ফোনের বাইরে নিরাপদ জায়গায় (যেমন Google Drive) রাখতে পারেন।
+- Backup ফাইলে ব্যক্তিগত নোট/ডেটা থাকতে পারে; কাউকে প্রকাশ্যে শেয়ার করা যাবে না।
+- GitHub repository-তে Firebase client config থাকলেও কোনো private key, service account key, password বা ব্যক্তিগত token কখনো commit করা যাবে না।
+- GitHub Pages ও Firebase-এর বিনামূল্যের quota/নীতিমালা ভবিষ্যতে পরিবর্তিত হতে পারে; বিনামূল্যে চিরকাল চলবে—এমন নিশ্চয়তা দেওয়া যাবে না। ব্যবহারকারী নিজে billing plan না বদলালে স্বয়ংক্রিয়ভাবে paid plan ধরে নেওয়া যাবে না।
+
+## ৭. নতুন ChatGPT-তে কাজ শুরু করার জন্য কপি-পেস্ট নির্দেশনা
+“আমি ‘আমার আমল ও জিকির’ নামে একটি Android-friendly PWA তৈরি করছি। এই প্রকল্পের হস্তান্তর নথি পড়ুন: https://github.com/amolzikir/amar-amol-zikir/blob/main/PROJECT-HANDOVER.md । Repository-এর সর্বশেষ index.html ও sw.js নিজে fetch করে বর্তমান অবস্থা যাচাই করুন। নথির কাজের নিয়মগুলো কঠোরভাবে মানুন: আগে backup, সর্বশেষ SHA, JavaScript syntax check, service-worker cache version bump, শেষে GitHub থেকে verify। বিদ্যমান ফিচার বা ডেটা নষ্ট করবেন না। আমাকে দীর্ঘ নির্দেশনা না দিয়ে সংক্ষেপে বাস্তব কাজ এগিয়ে নিন। আমার ফোন Android; আমি নিজে কোড edit করতে পারি না।”
+
+## ৮. গুরুত্বপূর্ণ সীমাবদ্ধতা
+এই নথি প্রকল্পের অবস্থা ও কাজের নিয়ম ধরে রাখে; এটি ChatGPT-এর পুরোনো চ্যাটের হুবহু বিকল্প নয়। নতুন সহকারীকে প্রতিবার repository-এর live code দেখে যাচাই করতে হবে। Firebase console-এর private account settings বা ব্যবহারকারীর ব্যক্তিগত credentials এই নথিতে নেই এবং থাকা উচিতও নয়।
+
+
+## ৯. v112 — App Lock & Privacy (২৩ নভেম্বর ২০২৬)
+- Settings-এ ৪–৮ সংখ্যার PIN তৈরি/পরিবর্তন/বন্ধ করার UI যোগ করা হয়েছে।
+- PIN hash PBKDF2-SHA-256 (180,000 iterations) ও random 16-byte salt দিয়ে তৈরি; plaintext PIN সংরক্ষণ করা হয় না।
+- PIN hash ও salt কেবল এই ব্রাউজারের localStorage-এ থাকে; Firebase-এ sync হয় না এবং JSON backup-এ অন্তর্ভুক্ত নয়।
+- PIN চালু থাকলে প্রতিবার অ্যাপ reload/নতুন করে খোলার সময় লক স্ক্রিন দেখায়; Settings থেকে “এখনই লক করুন” দিয়ে তাৎক্ষণিক লক করা যায়।
+- PIN পরিবর্তন/বন্ধ করতে বর্তমান PIN জানা আবশ্যক। PIN ভুলে গেলে অ্যাপের মধ্যে recovery নেই।
+- **গুরুত্বপূর্ণ সীমাবদ্ধতা:** এটি UI/app-screen lock; IndexedDB বা ব্রাউজারের ডেটা এনক্রিপ্ট করে না। ফোন/ব্রাউজারের নিজস্ব নিরাপত্তা ও ডেটা ব্যাকআপ বজায় রাখতে হবে।
+- v112 কোড GitHub-এ প্রকাশিত; JS syntax check ও পুনরায় fetch verification পাস করেছে। Cache: `amol-zikir-v112`।
+- ব্যবহারকারীর ফোনে PIN সেট করা, লক হওয়া ও আনলক পরীক্ষা এখনও বাকি; ব্যবহারকারী নিশ্চিত না করা পর্যন্ত on-device success বলা যাবে না।
+
+
+## ১০. v113 — PIN নিষ্ক্রিয়তা টাইমআউট (২৩ নভেম্বর ২০২৬)
+- ব্যবহারকারীর অনুরোধে PIN auto-lock সময় ১০ মিনিট নিষ্ক্রিয়তা নির্ধারণ করা হয়েছে।
+- রিফ্রেশ করলে সঙ্গে সঙ্গে PIN চাইবে না; সর্বশেষ activity timestamp localStorage-এ রেখে reload-এর পর অবশিষ্ট idle সময় গণনা করে।
+- Pointer/touch/keyboard/scroll/click activity idle timer নতুন করে শুরু করে।
+- ১০ মিনিট নিষ্ক্রিয় হলে, অথবা app background থেকে foreground-এ ফিরলে সময়সীমা পার হয়ে থাকলে, PIN lock দেখায়।
+- Settings-এর “এখনই লক করুন” আগের মতো তাৎক্ষণিক কাজ করে।
+- Cache: `amol-zikir-v113`; JavaScript syntax check ও GitHub refetch verification পাস।
+- ব্যবহারকারীর ফোনে রিফ্রেশ/১০ মিনিট idle/আনলক আচরণ পরীক্ষা এখনও বাকি।
+
+## ১১. v114 — বায়োমেট্রিক আনলক ও PIN টাইমআউট সংশোধন (২৩ নভেম্বর ২০২৬)
+- Settings-এ “ফিঙ্গারপ্রিন্ট চালু করুন” ও “বায়োমেট্রিক বন্ধ” বোতাম যোগ হয়েছে; লক স্ক্রিনে বায়োমেট্রিক আনলকের বোতাম দেখা যাবে যখন সেটআপ সম্পন্ন।
+- WebAuthn platform authenticator ব্যবহার করা হয়েছে। Android/Chrome/ডিভাইস সমর্থন করলে fingerprint বা device screen-lock verification চাইবে; কেবল fingerprint বাধ্যতামূলক করা যায় না। PIN সবসময় fallback হিসেবে থাকবে।
+- Credential ID কেবল এই browser-এর localStorage-এ থাকে; ফোন/ব্রাউজার বদলালে পুনরায় সেটআপ লাগতে পারে।
+- PIN idle bug-এর কারণ: PIN তৈরি করার সময় যদি অ্যাপ শুরুতে PIN না থাকায় activity listeners যোগ না হয়ে থাকে, পরে PIN চালু করলেও activity reset হতো না। v114-এ listeners একবার সর্বদা যুক্ত হয় এবং PIN তৈরি করার পরও session শুরু হয়।
+- Backup তৈরি ও পুনরায় fetch করে exact content মিলিয়ে যাচাই করা হয়েছে: `backup/index-2026-11-23-before-biometric-v114.html`, `backup/sw-2026-11-23-before-biometric-v114.js`।
+- JavaScript syntax check পাস; GitHub থেকে index/sw পুনরায় fetch করে v114 markers ও cache version যাচাই করা হয়েছে। Cache: `amol-zikir-v114`।
+- ব্যবহারকারীর Android ফোনে ১০ মিনিট idle আচরণ ও fingerprint setup/verification পরীক্ষা এখনও বাকি; ফোনে পরীক্ষা না হওয়া পর্যন্ত কাজ সফল হয়েছে বলে দাবি করা যাবে না।
+
+## ১২. v115 — PIN Lock ঐচ্ছিক/সম্পূর্ণ বন্ধ (২৩ নভেম্বর ২০২৬)
+- ব্যবহারকারী চাইলে Settings থেকে বর্তমান PIN যাচাই করে “PIN বন্ধ করুন” চাপলে PIN hash/salt, idle timestamp এবং biometric credential ID মুছে যায়; idle timer বাতিল হয়।
+- বায়োমেট্রিক নিবন্ধনও PIN-এর সঙ্গে বন্ধ হয়, যাতে পরে নতুন PIN চালু করলে পুরোনো biometric registration অপ্রত্যাশিতভাবে থেকে না যায়।
+- Settings-এর ব্যাখ্যা স্পষ্ট করা হয়েছে: lock বন্ধ থাকলে PIN/biometric ছাড়াই অ্যাপ ব্যবহার করা যাবে; পরে নতুন PIN দিয়ে আবার চালু করা যাবে।
+- v115-এ JS syntax check ও GitHub refetch verification পাস। Cache: `amol-zikir-v115`।
+- Backup: `backup/index-2026-11-23-before-pin-disable-v115.html`, `backup/sw-2026-11-23-before-pin-disable-v115.js`; দুই backup exact content দিয়ে যাচাই করা হয়েছে।
+- ব্যবহারকারীর ফোনে on-device confirmation এখনও বাকি।
+
+
+## v116 — 2026-11-23
+- Note options menu bottom actions reordered for usability: **মুছুন → সম্পাদনা → বন্ধ করুন** (left to right). Existing action IDs and handlers are unchanged; only visual order changed.
+- Service worker cache: `amol-zikir-v116`.
+- Backup files: `backup/index-2026-11-23-before-note-menu-order-v116.html` and `backup/sw-2026-11-23-before-note-menu-order-v116.js` (verified exact).
+- JavaScript syntax validation passed; GitHub files refetched and release markers verified.
+
+
+## v117 — 2026-11-23
+- Folder options modal bottom actions reordered for usability: **সরান** on the left and **বন্ধ** on the right. Existing IDs and behavior unchanged; visual order only.
+- Service worker cache: `amol-zikir-v117`.
+- Backups: `backup/index-2026-11-23-before-folder-menu-order-v117.html` and `backup/sw-2026-11-23-before-folder-menu-order-v117.js`, both exact-content verified.
+- JavaScript syntax validation passed; GitHub release files refetched and verified.
+
+
+## v118 — 2026-11-23
+- Backup restore validation hardened: JSON envelope/version, record count, ID/type/title/tab/parent/timestamps, nested object depth/size and unsafe property names validated before writes.
+- Allowed record types are `note`, `folder`, `daily-amal`, `counter`, and `quran-tracker`; optional legacy type remains accepted.
+- Duplicate IDs inside an incoming backup are deduplicated, keeping the record with the newest `updatedAt`; local records are replaced only when incoming `updatedAt` is newer.
+- IndexedDB restore writes are batched in one read-write transaction, reducing risk of partial record imports if a write fails.
+- Zikr routine records receive stricter validation and merge remains additive by ID.
+- Backups: `backup/index-2026-11-23-before-safe-restore-v118.html` and `backup/sw-2026-11-23-before-safe-restore-v118.js`, exact-content verified.
+- JavaScript syntax check passed; GitHub files were refetched and v118/cache markers verified. Cache: `amol-zikir-v118`.
+- Important: actual Android-device restore and quota/failure behavior still require safe test data and user confirmation; no live user data was used for testing.
+
+
+## v119 — 2026-11-23
+- Cloud sync fix: Firestore deletion tombstones are now retained instead of immediately deleted. This prevents an offline device's stale local copy from being uploaded again and resurrecting a deleted note/folder.
+- Sync reconciles the union of local and remote IDs using updatedAt/deletedAt timestamps; newer changes win and deletion wins timestamp ties. Tombstone cloud documents retain only metadata (id/type/tab/parentId/title/deletedAt/updatedAt), not note body content.
+- Backup files: `backup/index-2026-11-23-before-cloud-tombstone-v119.html` and `backup/sw-2026-11-23-before-cloud-tombstone-v119.js`, exact-content verified.
+- JavaScript syntax passed; files refetched and verified; cache `amol-zikir-v119`.
+- On-device and multi-device concurrent-edit testing still required. Existing user data was not modified or tested.
+
+
+## v120 — 2026-11-23
+- Cloud sync conflict handling now uses Firestore `runTransaction` per record, re-reading the latest cloud document inside the transaction before comparing `updatedAt`/`deletedAt` and deciding whether to pull or write. This reduces stale-snapshot overwrite races between devices.
+- v119 tombstone retention and deletion-wins-on-timestamp-tie semantics preserved.
+- Backups: `backup/index-2026-11-23-before-transactional-sync-v120.html` and `backup/sw-2026-11-23-before-transactional-sync-v120.js`, exact-content verified.
+- JavaScript syntax passed; GitHub files refetched and v120 cache verified.
+- Firestore transaction behavior still needs real multi-device testing using safe test records; no claim of device-level verification.
+
+## v121 — 2026-11-23
+- Cloud sync now re-reads each record from IndexedDB immediately before its Firestore transaction, instead of relying only on the initial local snapshot. This reduces the chance that an edit made during a long sync is uploaded using an older in-memory copy.
+- Existing offline-first storage, reconnect-triggered sync, visibility-triggered sync, retry backoff, v120 Firestore transactions, and v119 deletion tombstones are preserved.
+- Backups: `backup/index-2026-11-23-before-local-fresh-sync-v121.html` and `backup/sw-2026-11-23-before-local-fresh-sync-v121.js`, exact-content verified.
+- JavaScript syntax and GitHub refetch verification passed. Cache: `amol-zikir-v121`.
+- Real concurrent editing across devices and offline/reconnect behavior still require on-device testing; no claim of device-level verification.
+
+
+## v122 — 2026-11-23
+- Added a final IndexedDB freshness guard before applying a Cloud-pulled record locally. If the local record was edited during the Firestore transaction and its timestamp is newer than the incoming Cloud record, the older incoming copy is skipped and another reconciliation pass is queued.
+- Existing v121 fresh-local-read behavior, v120 Firestore transactions, v119 deletion tombstones, retry/backoff, and reconnect/visibility sync remain intact.
+- Backups: `backup/index-2026-11-23-before-sync-apply-guard-v122.html` and `backup/sw-2026-11-23-before-sync-apply-guard-v122.js`, exact-content verified.
+- JavaScript syntax and GitHub refetch verification passed. Cache: `amol-zikir-v122`.
+- Multi-device and offline/reconnect device tests remain pending.
+
+
+## v123 — Sync diagnostics ও নিরাপদ পরীক্ষার পরিকল্পনা (2026-11-23)
+- Header-এ live Sync status যোগ: signed-out/offline/syncing/success/retry/error।
+- Firebase error code অনুযায়ী ব্যবহারকারী-বোধ্য বাংলা বার্তা; console diagnostic-এ code/message।
+- Existing transaction conflict resolution, local freshness guard, retry/backoff অক্ষত।
+- `tests/sync-safety-checklist.md`-এ production data না ছুঁয়ে আলাদা test Firebase project-এ synthetic record দিয়ে পরীক্ষা করার কেস ও ধাপ যোগ।
+- যাচাই: JS syntax ও GitHub content refetch আবশ্যক; বাস্তব device/Firebase test এখনো আলাদা করে করতে হবে।
+
+
+## v124 — Sync race-condition guard ও status polish (২৩ নভেম্বর ২০২৬)
+- Transaction চলাকালে Local record বদলে গেলে পুরোনো snapshot দিয়ে Cloud-এ লেখা/Cloud থেকে Local overwrite করার পরপরই reconciliation পুনরায় চালু হবে।
+- Pull/markDeleted এবং keepLocal—দুই ফলাফলের পর IndexedDB-র বর্তমান record-কে transaction snapshot-এর সঙ্গে তুলনা করা হয়; সমসাময়িক পরিবর্তন শনাক্ত হলে syncAgain দিয়ে নতুন snapshot-এ আবার মিল করা হয়।
+- Offline error বার্তায় অনিচ্ছাকৃত Urdu শব্দ সংশোধন করে বাংলা করা হয়েছে; sign-out হলে Sync status-ও signed-out দেখায়।
+- Cache version v124। v123-এর transaction conflict policy অপরিবর্তিত।
+- v124-এ extracted production conflict-resolution branch-এর ১৪টি isolated verification check pass করেছে—৬টি production conflict-branch case, ২টি race-guard check, ৪টি error mapping, বাংলা offline message এবং পূর্ণ inline JavaScript syntax। এটি real Firebase integration test নয়।
+
+
+## v125 — Offline/online status test support (২৩ নভেম্বর ২০২৬)
+- Browser offline event listener যোগ করা হয়েছে: নেটওয়ার্ক বিচ্ছিন্ন হলে Sync status তাৎক্ষণিকভাবে offline দেখাবে এবং লোকাল-সেভিং বার্তা দেখাবে।
+- Online event আগের মতো syncCloud চালায়; offline event নিজে কোনো Cloud write করে না।
+- Cache version v125। পরিবর্তনের আগে index.html ও sw.js backup নিয়ে হুবহু যাচাই করা হয়েছে।
+- পরবর্তী বাস্তব পরীক্ষা: ফোনে test note offline অবস্থায় তৈরি করে অনলাইনে ফিরে Cloud sync নিশ্চিত করা; assistant ফোনের network toggle বা Firebase account সরাসরি নিয়ন্ত্রণ করে না।
+
+
+## v126 — Manual Sync recovery control (23 November 2026)
+- Added a compact **“↻ এখনই Sync করুন”** control beneath the Sync status for signed-in users.
+- The control calls the existing guarded `syncCloud()` flow; it does not bypass conflict resolution, local race checks, or retry handling.
+- If a sync is already running, the existing `syncBusy/syncAgain` guard queues another pass instead of starting a parallel sync.
+- The control remains hidden until both a signed-in user and Firebase Cloud connection are available.
+- Service-worker cache version: `amol-zikir-v126`.
+- Scope: this is a manual recovery/diagnostic affordance, not encryption, a new backup system, or proof of Firebase rules security. Real multi-account isolation and Firestore integration tests remain separate follow-up work.
+
+
+## v127 — Local Cloud account binding guard (23 November 2026)
+- Added a browser-origin local owner marker (`amol-local-cloud-owner-uid`) when the first Google account signs in on that browser profile.
+- Cloud sync now refuses to upload/download when a different Google UID is detected in the same browser profile. This prevents an account switch from silently pushing the existing shared IndexedDB dataset into another account's Firestore path.
+- The guard is checked both in the auth-state callback and inside `syncCloud()`, so manual sync and other save-triggered sync calls cannot bypass it.
+- Recovery: return to the original Google account in that browser profile, or use a separate browser/profile for a separate account. Local data is preserved; the guard does not delete or migrate anything.
+- Firestore rules reviewed: `users/{userId}/items/{itemId}` permits read/write only when authenticated UID equals `userId`. This rule file is in the repo, but whether it has been published in Firebase Console cannot be verified from GitHub.
+- Limitation: this is a cloud-upload isolation guard, not full multi-account local database partitioning. If the wrong account is active, local-only edits can still enter that browser's shared IndexedDB; avoid editing until the original account is restored. Full account-specific local stores require a separate migration project.
+- Service-worker cache: `amol-zikir-v127`. JavaScript syntax and static guard checks passed; real Firebase Rules Emulator tests and console publication remain pending.
+
+
+## v128 — Firestore Security Rules Emulator Test Setup (২৩ নভেম্বর ২০২৬)
+- বিদ্যমান `firestore.rules`-এর per-user UID access policy অপরিবর্তিত রাখা হয়েছে; কোনো live Firebase Rules deploy করা হয়নি।
+- Local Firebase Emulator Suite test configuration যোগ: `firebase.json` (Firestore emulator port 8080; emulator UI বন্ধ)।
+- `package.json`-এ isolated test dependencies ও `npm run test:rules` command যোগ।
+- `tests/firestore.rules.test.js`-এ পাঁচটি automated case: signed-out read deny, own-user read/write allow, অন্য user-এর read/write deny, অনুমোদিত path-এর বাইরে write deny।
+- Tests emulator-এ `firestore.rules` লোড করে; এটি live Firebase project-এ rules publish বা পরীক্ষা করে না। চালাতে repository-তে `npm install`-এর পর `npm run test:rules` চালাতে হবে।
+- এই release-এ app runtime (`index.html`) ও service worker বদলানো হয়নি; তাই PWA cache version v127-ই আছে।
+- নিরাপত্তার জন্য স্থানীয় IndexedDB এখনো একটিই shared store। Account-specific database migration এখনো করা হয়নি; migration-এর আগে offline edits, startup flow, system records, backup/restore ও account-switch আচরণ আলাদাভাবে পরীক্ষা করা আবশ্যক।
+- Verified backups: `backup/firestore-rules-2026-11-23-before-firestore-emulator-tests-v128.rules` এবং `backup/PROJECT-HANDOVER-2026-11-23-before-firestore-emulator-tests-v128.md`।
+- Emulator tests এই পরিবেশে চালানো হয়নি; setup ও test source যোগ করা হয়েছে, passing result দাবি করা হচ্ছে না।
+- GitHub Actions workflow `.github/workflows/firestore-rules.yml` যোগ করা হয়েছে; সংশ্লিষ্ট rules/config/test ফাইল বদলালে GitHub Actions-এ স্বয়ংক্রিয়ভাবে emulator test চালানোর চেষ্টা করবে। Workflow run-এর ফলাফল আলাদাভাবে যাচাই করতে হবে।
+
+## v129 — অ্যাকাউন্টভিত্তিক লোকাল ডেটাবেসের প্রথম ধাপ (২৩ নভেম্বর ২০২৬)
+- `AmolZikirLocalAccount_<uid>` নামে পৃথক IndexedDB store ব্যবহার করা হয়েছে; signed-out অবস্থায় `AmolZikirLocalGuest` ব্যবহৃত হয়।
+- প্রথম Google অ্যাকাউন্টে প্রবেশের সময় পুরোনো `AmolZikirLocal` ডেটা নতুন account DB-তে কপি ও read-back যাচাই করা হয়; পুরোনো DB মুছে ফেলা হয় না।
+- পূর্বে নির্ধারিত owner UID-র সঙ্গে মিলে গেলে migration করা হয়; অন্য UID-র জন্য পুরোনো shared ডেটা কপি করা হয় না। অন্য অ্যাকাউন্ট নিজের পৃথক DB ও নিজস্ব Firestore path ব্যবহার করে।
+- Migration-এ একই ID থাকলে `updatedAt/deletedAt`-এর সর্বশেষ রেকর্ড রাখা হয়; target DB-র নতুন রেকর্ড অক্ষত থাকে।
+- Account switch চলাকালে UI pointer input সাময়িক বন্ধ; sync চলাকালে account context বদলালে পুরোনো sync নতুন DB-তে লিখতে পারে না।
+- Offline/Firebase unavailable fallback-এ পূর্বের owner DB (migration সম্পন্ন থাকলে) বা পুরোনো DB খোলা হয়; signed-out কিন্তু Firebase auth state জানা থাকলে Guest DB ব্যবহৃত হয়।
+- এই ধাপ IndexedDB items (নোট, ফোল্ডার, দৈনিক আমল, তাসবিহ কাউন্টার, কুরআন ট্র্যাকার) আলাদা করে। localStorage-এ থাকা app preferences, Dua favorites ও Zikr routines এখনো browser-profile shared; এগুলো account-partition করা এই release-এর অংশ নয়।
+- Verified backups: `backup/index-2026-11-23-before-local-account-partition-v129.html`, `backup/sw-2026-11-23-before-local-account-partition-v129.js`, `backup/PROJECT-HANDOVER-2026-11-23-before-local-account-partition-v129.md`।
+- Static/synthetic checks ছাড়া বাস্তব Android IndexedDB account-switch পরীক্ষা করা হয়নি; user confirmation আবশ্যক। কোনো পুরোনো DB বা record মুছে ফেলা হয়নি।
+
+- v129 test coverage: `tests/local-account-partition.test.js`-এ চারটি automated test যোগ; GitHub Actions-এ local partition tests ও Firestore Emulator tests দুটোই চালানো হবে। বাস্তব Android IndexedDB account-switch পরীক্ষা এখনো user confirmation-এর অপেক্ষায়।
+
+
+## v130 — personal localStorage isolation (2026-11-23)
+- Dua favorites and personal Zikr Routines now use account-specific localStorage keys, aligned with the active IndexedDB account.
+- Existing legacy favorites/routines migrate only to the account whose UID matches `amol-local-cloud-owner-uid`; guest storage does not inherit an existing owner's personal data.
+- For a profile with no prior owner, legacy values migrate into guest-scoped keys.
+- Language, theme, editor size, and sound preferences remain browser-wide settings.
+- Existing legacy keys are preserved; this change does not delete any stored values.
+- Added automated tests for original-owner migration and guest/account separation.
+- Service worker cache: `amol-zikir-v130`.
+- Pre-change verified backups: `backup/index.html-2026-11-23-v129-before-personal-storage-isolation.bak`, `backup/sw.js-2026-11-23-v129-before-personal-storage-isolation.bak`, `backup/PROJECT-HANDOVER.md-2026-11-23-v129-before-personal-storage-isolation.bak`, `backup/tests-local-account-partition.test.js-2026-11-23-v129-before-personal-storage-isolation.bak`.
+\n\n## v131 — DOM attribute injection hardening (2026-11-24)\n- Fixed unsafe HTML attribute interpolation for item IDs in breadcrumb navigation, item cards, and note/folder menu buttons. All three now pass through the existing `esc()` HTML-attribute escaping helper. This prevents crafted IDs imported from a backup or received from cloud data from breaking out of quoted attributes and injecting markup/event handlers.\n- Added `tests/dom-security.test.js` to check hostile ID escaping and guard the three rendering sites against regression. Added `npm run test:security` and included it in the GitHub Actions security workflow.\n- Bumped service-worker cache to `amol-zikir-v131`.\n- Backups created and exact-content verified before edits: `backup/index.html-2026-11-24-v131-before-dom-id-escaping.bak`, `backup/sw.js-2026-11-24-v131-before-dom-id-escaping.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-v131-before-dom-id-escaping.bak`, `backup/package.json-2026-11-24-v131-before-dom-id-escaping.bak`, `backup/.github-workflows-firestore-rules.yml-2026-11-24-v131-before-dom-id-escaping.bak`, `backup/tests-local-account-partition.test.js-2026-11-24-v131-before-dom-id-escaping.bak`.\n- Scope: this hardens these identified HTML attribute insertion points; it is not a claim that every possible browser-side injection path has been formally audited.\n
+
+
+## v132 — HTML injection audit: Dua library links (2026-11-24)
+- Audited all 17 identified HTML insertion sites in `index.html`. Note viewer body/Arabic/pronunciation/meaning and most user-derived text fields already use `esc()`; folder option values, daily Amal IDs/names, Quran entry IDs, and Zikr routine IDs/text are also escaped. Numeric progress values and generated date keys are used in their respective attributes/styles.
+- Fixed two remaining unsafe interpolations in the Dua library renderer: `data-dua-id` now uses `esc(d.id)`; source link href now passes through `safeHttpsUrl()`, which accepts HTTPS URLs only and returns a harmless `#` for javascript:, data:, HTTP, malformed, or other schemes. The existing curated Shamela HTTPS links remain valid.
+- Added automated regression tests for unsafe URL schemes and the Dua card attribute/link rendering.
+- Bumped service-worker cache to `amol-zikir-v132`.
+- Pre-change backups created and exact-content verified: `backup/index.html-2026-11-24-v132-before-xss-audit-hardening.bak`, `backup/sw.js-2026-11-24-v132-before-xss-audit-hardening.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-v132-before-xss-audit-hardening.bak`, `backup/package.json-2026-11-24-v132-before-xss-audit-hardening.bak`, `backup/.github-workflows-firestore-rules.yml-2026-11-24-v132-before-xss-audit-hardening.bak`, `backup/tests-dom-security.test.js-2026-11-24-v132-before-xss-audit-hardening.bak`.
+- Scope limitation: this is a targeted source review and regression coverage, not a formal proof that all runtime HTML injection risks are eliminated. Existing app behavior/data paths were not intentionally changed.
+
+
+## v133 — Daily Amal recovery safeguard (2026-11-24)
+- Added a recovery action shown when the Daily Amal list is empty. It reads the legacy `AmolZikirLocal` database read-only and, when online and signed in, also checks the current user's Firestore Daily Amal document.
+- Recovery only considers non-deleted records that contain at least one saved item. If multiple candidates exist, it selects the newest by `updatedAt`; it does not union records or resurrect individually deleted items.
+- Before restoring, it checks that the current local list is still empty and asks the user to confirm, showing the recovered item names. It then restores the selected record to the active account database and attempts to save it to that account's cloud document.
+- The legacy database is only read; it is never deleted or modified. If no candidate is found, no data is changed.
+- Bumped service-worker cache to `amol-zikir-v133`.
+- Pre-change backups created and exact-content verified: `backup/index.html-2026-11-24-before-daily-amal-recovery.bak`, `backup/sw.js-2026-11-24-before-daily-amal-recovery.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-before-daily-amal-recovery.bak`, `backup/package.json-2026-11-24-before-daily-amal-recovery.bak`, `backup/.github-workflows-firestore-rules.yml-2026-11-24-before-daily-amal-recovery.bak`.
+- Scope: recovery depends on the old browser IndexedDB database or current user's Firestore record still containing a non-deleted Daily Amal record; if neither contains it, an older user-created export/backup may be needed.
+
+
+## v134 — বিস্তৃত Daily Amal পুনরুদ্ধার অনুসন্ধান
+- v133-এর recovery button যদি নির্দিষ্ট `system-daily-amal` রেকর্ড না পায়, এখন legacy IndexedDB-র সব রেকর্ড, সক্রিয় account IndexedDB-র সব রেকর্ড এবং বর্তমান ব্যবহারকারীর Firestore `items` collection-এর সব document পরীক্ষা করে।
+- কেবল স্পষ্টভাবে Daily Amal হিসেবে চিহ্নিত, non-deleted এবং non-empty `items`-সহ রেকর্ড বিবেচনা করে; অন্য নোট/ফোল্ডারকে আমল হিসেবে ধরে না।
+- একাধিক প্রার্থী থাকলে সর্বশেষ `updatedAt`-এর রেকর্ডটি বেছে নেয়; restore-এর আগে ব্যবহারকারীর সামনে নাম দেখিয়ে confirmation চায়।
+- অন্য Google account-এর database বা Guest database অনুসন্ধান/মিশ্রণ করা হয় না; legacy database read-only থাকে।
+- v134-এর JS syntax, Daily Amal selector tests, deployment ও CI ফলাফল আলাদাভাবে যাচাই করতে হবে; ফোনে ব্যবহারকারী নিশ্চিত না করা পর্যন্ত পুনরুদ্ধার সফল বলা যাবে না।
