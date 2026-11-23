@@ -781,27 +781,86 @@ async function exportAppBackup(){
   toast("ব্যাকআপ ফাইল তৈরি হয়েছে");
  }catch(e){console.error(e);toast("ব্যাকআপ তৈরি করা যায়নি")}
 }
+function putItemsBatch(items){
+ return new Promise((resolve,reject)=>{
+  if(!items.length){resolve();return}
+  let tx;
+  try{
+   tx=dbLocal.transaction(STORE,"readwrite");
+   const store=tx.objectStore(STORE);
+   for(const item of items)store.put(item);
+  }catch(e){reject(e);return}
+  tx.oncomplete=()=>resolve();
+  tx.onerror=()=>reject(tx.error||new Error("ব্যাচ সংরক্ষণ ব্যর্থ"));
+  tx.onabort=()=>reject(tx.error||new Error("ব্যাচ সংরক্ষণ বাতিল"));
+ });
+}
+function validateBackupTree(value,depth=0){
+ if(depth>30)return false;
+ if(value===null||typeof value==="string"||typeof value==="boolean")return typeof value!=="string"||value.length<=1000000;
+ if(typeof value==="number")return Number.isFinite(value);
+ if(Array.isArray(value))return value.length<=50000&&value.every(v=>validateBackupTree(v,depth+1));
+ if(typeof value!=="object")return false;
+ const keys=Object.keys(value);
+ if(keys.length>5000)return false;
+ for(const key of keys){
+  if(key==="__proto__"||key==="prototype"||key==="constructor"||key.length>200)return false;
+  if(!validateBackupTree(value[key],depth+1))return false;
+ }
+ return true;
+}
+function validateBackupItem(x){
+ if(!x||typeof x!=="object"||Array.isArray(x)||typeof x.id!=="string"||!x.id.trim()||x.id.length>200)return false;
+ const allowedTypes=["note","folder","daily-amal","counter","quran-tracker"];
+ if(x.type!==undefined&&(typeof x.type!=="string"||!allowedTypes.includes(x.type)))return false;
+ if(x.title!==undefined&&(typeof x.title!=="string"||x.title.length>10000))return false;
+ if(x.tab!==undefined&&(typeof x.tab!=="string"||x.tab.length>100))return false;
+ if(x.parentId!==undefined&&x.parentId!==null&&(typeof x.parentId!=="string"||x.parentId.length>200))return false;
+ if(x.updatedAt!==undefined&&(!Number.isFinite(Number(x.updatedAt))||Number(x.updatedAt)<0))return false;
+ if(x.deletedAt!==undefined&&x.deletedAt!==null&&(!Number.isFinite(Number(x.deletedAt))||Number(x.deletedAt)<0))return false;
+ return validateBackupTree(x);
+}
+function validateBackupRoutine(r){
+ return !!r&&typeof r==="object"&&!Array.isArray(r)&&typeof r.id==="string"&&r.id.trim().length>0&&r.id.length<=200&&typeof r.phrase==="string"&&r.phrase.trim().length>0&&r.phrase.length<=500&&Number.isInteger(Number(r.target))&&Number(r.target)>=1&&Number(r.target)<=100000&&(r.count===undefined||(Number.isInteger(Number(r.count))&&Number(r.count)>=0&&Number(r.count)<=10000000))&&(r.date===undefined||(typeof r.date==="string"&&r.date.length<=30))&&validateBackupTree(r);
+}
 async function importAppBackup(file){
  if(!file)return;
  try{
   if(file.size>20*1024*1024)throw new Error("ফাইলটি ২০ মেগাবাইটের বেশি");
   const data=JSON.parse(await file.text());
   if(!data||data.format!=="amar-amol-zikir-backup"||![1,2].includes(data.version)||!Array.isArray(data.items))throw new Error("ব্যাকআপ ফাইলটি সঠিক নয়");
-  if(data.items.length>50000||!data.items.every(x=>x&&typeof x==="object"&&typeof x.id==="string"&&x.id.length>0&&(!x.type||typeof x.type==="string")))throw new Error("ব্যাকআপের তথ্য যাচাই করা যায়নি");
-  const backupRoutines=data.version>=2?data.localData?.zikrRoutines:undefined;
-  if(backupRoutines!==undefined&&(!Array.isArray(backupRoutines)||backupRoutines.length>1000||!backupRoutines.every(r=>r&&typeof r.id==="string"&&typeof r.phrase==="string"&&Number.isInteger(Number(r.target))&&Number(r.target)>=1&&Number(r.target)<=100000)))throw new Error("ব্যাকআপের জিকির রুটিন যাচাই করা যায়নি");
+  if(data.items.length>50000||!data.items.every(validateBackupItem))throw new Error("ব্যাকআপের তথ্য যাচাই করা যায়নি");
+  const backupRoutines=data.version===2?data.localData?.zikrRoutines:undefined;
+  if(backupRoutines!==undefined&&(!Array.isArray(backupRoutines)||backupRoutines.length>1000||!backupRoutines.every(validateBackupRoutine)))throw new Error("ব্যাকআপের জিকির রুটিন যাচাই করা যায়নি");
   if(!confirm("ব্যাকআপে "+data.items.length+"টি রেকর্ড আছে। বর্তমান তথ্য মুছে না দিয়ে একত্র করা হবে। চালিয়ে যাবেন?"))return;
-  const local=await allItems(),byId=new Map(local.map(x=>[x.id,x]));let added=0,updated=0,kept=0;
+  const local=await allItems(),byId=new Map(local.map(x=>[x.id,x])),incomingById=new Map();
   for(const incoming of data.items){
+   const prior=incomingById.get(incoming.id);
+   if(!prior||Number(incoming.updatedAt||0)>Number(prior.updatedAt||0))incomingById.set(incoming.id,incoming);
+  }
+  const writes=[];let added=0,updated=0,kept=0;
+  for(const incoming of incomingById.values()){
    const current=byId.get(incoming.id);
-   if(!current){await putItem(incoming);byId.set(incoming.id,incoming);added++;continue}
-   if(Number(incoming.updatedAt||0)>Number(current.updatedAt||0)){await putItem(incoming);byId.set(incoming.id,incoming);updated++}
+   if(!current){writes.push(incoming);added++;continue}
+   if(Number(incoming.updatedAt||0)>Number(current.updatedAt||0)){writes.push(incoming);updated++}
    else kept++;
   }
-  let routineAdded=0;if(Array.isArray(backupRoutines)){const existing=readZikrRoutines(),ids=new Set(existing.map(r=>r.id));for(const r of backupRoutines){if(!ids.has(r.id)){existing.push(r);ids.add(r.id);routineAdded++}}saveZikrRoutines(existing)}
-  await render();if(currentUser&&navigator.onLine)await syncCloud();
+  let mergedRoutines=null,routineAdded=0;
+  if(Array.isArray(backupRoutines)){
+   mergedRoutines=readZikrRoutines();
+   const ids=new Set(mergedRoutines.map(r=>r.id));
+   for(const r of backupRoutines){if(!ids.has(r.id)){mergedRoutines.push(r);ids.add(r.id);routineAdded++}}
+  }
+  await putItemsBatch(writes);
+  if(mergedRoutines)saveZikrRoutines(mergedRoutines);
+  await render();
+  if(currentUser&&navigator.onLine)await syncCloud();
   toast("পুনরুদ্ধার সম্পন্ন: নতুন "+added+", হালনাগাদ "+updated+", অপরিবর্তিত "+kept+(routineAdded?" · নতুন জিকির রুটিন "+routineAdded:""));
- }catch(e){console.error(e);toast(e.message==="ফাইলটি ২০ মেগাবাইটের বেশি"||e.message==="ব্যাকআপ ফাইলটি সঠিক নয়"||e.message==="ব্যাকআপের তথ্য যাচাই করা যায়নি"?e.message:"ব্যাকআপ পড়া যায়নি")}
+ }catch(e){
+  console.error(e);
+  const known=["ফাইলটি ২০ মেগাবাইটের বেশি","ব্যাকআপ ফাইলটি সঠিক নয়","ব্যাকআপের তথ্য যাচাই করা যায়নি","ব্যাকআপের জিকির রুটিন যাচাই করা যায়নি"];
+  toast(known.includes(e.message)?e.message:"পুনরুদ্ধার সম্পন্ন হয়নি—বর্তমান তথ্য অপরিবর্তিত রাখার চেষ্টা করা হয়েছে");
+ }
 }
 
 function readZikrRoutines(){try{const v=JSON.parse(localStorage.getItem("amol-zikr-routines")||"[]");return Array.isArray(v)?v:[]}catch(e){return []}}
