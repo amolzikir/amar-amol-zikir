@@ -539,18 +539,30 @@ async function persistTasbih(){
  await putItem(tasbihRecord);updateTasbihUI();
  if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(tasbihRecord.id).set(tasbihRecord)}catch(e){console.warn("Tasbih cloud sync pending",e)}}
 }
-async function tasbihFeedback(kind="tap"){
+function tasbihFeedback(kind="tap"){
  const vibrate=$("tasbihVibration")?.checked,sound=$("tasbihSound")?.checked;
- if(vibrate&&typeof navigator!=="undefined"&&typeof navigator.vibrate==="function")navigator.vibrate(kind==="complete"?[35,45,70]:18);
- if(sound&&typeof window!=="undefined"){try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;const ctx=new Ctx();const notes=kind==="complete"?[660,880]:[520];let t=ctx.currentTime;for(const hz of notes){const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type="sine";osc.frequency.value=hz;gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(.055,t+.012);gain.gain.exponentialRampToValueAtTime(.0001,t+.095);osc.connect(gain);gain.connect(ctx.destination);osc.start(t);osc.stop(t+.1);t+=.12}setTimeout(()=>ctx.close().catch(()=>{}),500)}catch(e){}}
+ if(vibrate&&typeof navigator!=="undefined"&&typeof navigator.vibrate==="function"){try{navigator.vibrate(kind==="complete"?[45,55,90]:25)}catch(e){}}
+ if(sound&&typeof window!=="undefined"){
+  try{
+   const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
+   const ctx=new Ctx();
+   const play=()=>{
+    const notes=kind==="complete"?[660,880]:[620];let t=ctx.currentTime;
+    for(const hz of notes){const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type="sine";osc.frequency.value=hz;gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(.075,t+.015);gain.gain.exponentialRampToValueAtTime(.0001,t+.16);osc.connect(gain);gain.connect(ctx.destination);osc.start(t);osc.stop(t+.17);t+=.19}
+    setTimeout(()=>ctx.close().catch(()=>{}),700);
+   };
+   if(ctx.state==="suspended")ctx.resume().then(play).catch(()=>{});else play();
+  }catch(e){}
+ }
 }
 async function changeTasbih(delta){
- if(!tasbihRecord)await loadTasbih();
- if(delta>0)tasbihFeedback("tap");
- const before=Number(tasbihRecord.count||0),target=Number(tasbihRecord.target||33);
+ if(!tasbihRecord){await loadTasbih();return changeTasbih(delta)}
+ const before=Number(tasbihRecord.count||0),target=Math.max(1,Number(tasbihRecord.target||33));
+ const completes=delta>0&&Math.floor((before+delta)/target)>Math.floor(before/target);
+ if(delta>0)tasbihFeedback(completes?"complete":"tap");
  tasbihRecord={...tasbihRecord,count:Math.max(0,before+delta),updatedAt:Date.now()};
  await persistTasbih();
- if(delta>0&&Math.floor(tasbihRecord.count/target)>Math.floor(before/target)){toast("একটি চক্র সম্পন্ন হয়েছে");tasbihFeedback("complete")}
+ if(completes)toast("একটি চক্র সম্পন্ন হয়েছে");
 }
 async function resetTasbih(){
  if(!tasbihRecord)return;
