@@ -187,4 +187,4 @@
 - Pull/markDeleted এবং keepLocal—দুই ফলাফলের পর IndexedDB-র বর্তমান record-কে transaction snapshot-এর সঙ্গে তুলনা করা হয়; সমসাময়িক পরিবর্তন শনাক্ত হলে syncAgain দিয়ে নতুন snapshot-এ আবার মিল করা হয়।
 - Offline error বার্তায় অনিচ্ছাকৃত Urdu শব্দ সংশোধন করে বাংলা করা হয়েছে; sign-out হলে Sync status-ও signed-out দেখায়।
 - Cache version v124। v123-এর transaction conflict policy অপরিবর্তিত।
-- v124-এ extracted production conflict-resolution branch-এর ৮টি synthetic case pass করেছে; race guard-এর আলাদা পরীক্ষা release verification-এ নথিবদ্ধ। এটি real Firebase integration test নয়।
+- v124-এ extracted production conflict-resolution branch-এর ১৪টি isolated verification check pass করেছে—৬টি production conflict-branch case, ২টি race-guard check, ৪টি error mapping, বাংলা offline message এবং পূর্ণ inline JavaScript syntax। এটি real Firebase integration test নয়।
