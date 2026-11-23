@@ -99,7 +99,7 @@ const firebaseConfig = {
 };
 const TABS=["আমল","জিকির","দোয়া","নোট","অন্যান্য"];
 const DB_NAME="AmolZikirLocal", STORE="items";
-let dbLocal, activeTab=TABS[0], parentId=null, editing=null, viewing=null, currentUser=null, cloud=null, auth=null, syncBusy=false, pendingFolderDelete=null, menuFolderId=null, specialView=null, editingFromViewer=false, editorBackEntry=false;
+let dbLocal, activeTab=TABS[0], parentId=null, editing=null, viewing=null, currentUser=null, cloud=null, auth=null, syncBusy=false, syncAgain=false, pendingFolderDelete=null, menuFolderId=null, specialView=null, editingFromViewer=false, editorBackEntry=false;
 let tasbihRecord=null,tasbihBackEntry=false,dailyAmalRecord=null,dailyBackEntry=false;
 const $=id=>document.getElementById(id);
 
@@ -512,7 +512,7 @@ function closeTasbih(){
  if(tasbihBackEntry){tasbihBackEntry=false;history.back()}
 }
 async function syncCloud(){
- if(!currentUser||!cloud||!navigator.onLine||syncBusy)return;syncBusy=true;
+ if(!currentUser||!cloud||!navigator.onLine)return;if(syncBusy){syncAgain=true;return}syncBusy=true;
  try{
   const ref=cloud.collection("users").doc(currentUser.uid).collection("items");
   const local=await allItems(), snap=await ref.get(), remote=new Map();snap.forEach(d=>remote.set(d.id,d.data()));
@@ -546,7 +546,7 @@ async function syncCloud(){
   $("accountBtn").textContent="✓ "+(currentUser.displayName?.split(" ")[0]||"সিঙ্ক চালু");
   toast("ইন্টারনেটের সঙ্গে তথ্য মিলেছে");
  }catch(e){console.error(e);toast("সিঙ্ক হয়নি—পরে আবার চেষ্টা হবে")}
- finally{syncBusy=false;render()}
+ finally{syncBusy=false;render();if(syncAgain){syncAgain=false;Promise.resolve().then(()=>syncCloud())}}
 }
 async function signIn(){if(!auth){toast("লগইন চালুর জন্য ইন্টারনেট দরকার");return}const p=new firebase.auth.GoogleAuthProvider();try{await auth.signInWithPopup(p)}catch(e){try{await auth.signInWithRedirect(p)}catch(err){toast("লগইন করা যায়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন")}}}
 window.addEventListener("popstate",()=>{if($("dailyAmalPanel")?.classList.contains("show")){$("dailyAmalPanel").classList.remove("show");dailyBackEntry=false;return}if($("tasbihPanel")?.classList.contains("show")){$("tasbihPanel").classList.remove("show");tasbihBackEntry=false;return}if($("noteMenu")?.classList.contains("show")){closeNoteMenu();if($("editor")?.classList.contains("show")){try{history.pushState({amolEditor:true},"",location.href);editorBackEntry=true}catch(e){}}return}if($("editor")?.classList.contains("show")){editorBackEntry=false;cancelEditor()}});
