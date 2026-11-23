@@ -33,8 +33,8 @@ test("recovery refuses empty, missing, or deleted records", () => {
 });
 
 test("recovery does not combine records and thereby avoids reviving removed entries", () => {
-  const a = { source: "legacy", record: { updatedAt: 10, items: [{ id: "keep" }] } };
-  const b = { source: "cloud", record: { updatedAt: 20, items: [{ id: "newer" }] } };
+  const a = { source: "legacy", record: { id: "system-daily-amal", updatedAt: 10, items: [{ id: "keep" }] } };
+  const b = { source: "cloud", record: { id: "system-daily-amal", updatedAt: 20, items: [{ id: "newer" }] } };
   const selected = context.choose([a, b]);
   assert.equal(selected, b);
   assert.deepEqual(Array.from(selected.record.items, x => x.id), ["newer"]);
