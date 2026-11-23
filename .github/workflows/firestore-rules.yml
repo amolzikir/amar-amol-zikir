@@ -10,6 +10,7 @@ on:
       - "tests/local-account-partition.test.js"
       - "tests/dom-security.test.js"
       - "tests/daily-amal-recovery.test.js"
+      - "tests/backup-restore.test.js"
       - ".github/workflows/firestore-rules.yml"
   pull_request:
     paths:
@@ -39,5 +40,7 @@ jobs:
         run: npm run test:security
       - name: Run Daily Amal recovery tests
         run: npm run test:daily-recovery
+      - name: Run backup and restore tests
+        run: npm run test:backup
       - name: Run Firestore emulator security tests
         run: npm run test:rules
