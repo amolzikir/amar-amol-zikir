@@ -544,7 +544,7 @@ async function tasbihFeedback(kind="tap"){
  if(vibrate&&typeof navigator!=="undefined"&&typeof navigator.vibrate==="function")navigator.vibrate(kind==="complete"?[35,45,70]:18);
  if(sound&&typeof window!=="undefined"){try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;const ctx=new Ctx();const notes=kind==="complete"?[660,880]:[520];let t=ctx.currentTime;for(const hz of notes){const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type="sine";osc.frequency.value=hz;gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(.055,t+.012);gain.gain.exponentialRampToValueAtTime(.0001,t+.095);osc.connect(gain);gain.connect(ctx.destination);osc.start(t);osc.stop(t+.1);t+=.12}setTimeout(()=>ctx.close().catch(()=>{}),500)}catch(e){}}
 }
-function changeTasbih(delta){
+async function changeTasbih(delta){
  if(!tasbihRecord)await loadTasbih();
  if(delta>0)tasbihFeedback("tap");
  const before=Number(tasbihRecord.count||0),target=Number(tasbihRecord.target||33);
