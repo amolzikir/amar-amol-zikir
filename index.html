@@ -477,8 +477,8 @@ async function addDailyAmal(){
  const name=$("dailyAmalNew").value.trim();if(!name){toast("একটি আমলের নাম লিখুন");return}
  if(!dailyAmalRecord)await loadDailyAmal();
  dailyAmalRecord.items=dailyAmalRecord.items||[];
- if(dailyAmalRecord.items.some(x=>x.name.trim().toLocaleLowerCase()===name.toLocaleLowerCase())){toast("এই আমলটি তালিকায় আছে");return}
- const target=Math.max(1,Math.min(100000,Number($("dailyAmalTarget").value)||1));dailyAmalRecord.items.push({id:uid(),name,target});
+ const normalizedName=name.normalize("NFC").toLocaleLowerCase(currentLocale());if(dailyAmalRecord.items.some(x=>String(x.name||"").trim().normalize("NFC").toLocaleLowerCase(currentLocale())===normalizedName)){toast("এই আমলটি তালিকায় আছে");return}
+ const target=Number($("dailyAmalTarget").value);if(!Number.isInteger(target)||target<1||target>100000){toast(tr("লক্ষ্য ১ থেকে ১০০০০০-এর মধ্যে পূর্ণসংখ্যা দিন"));return}dailyAmalRecord.items.push({id:uid(),name,target});
  $("dailyAmalNew").value="";$("dailyAmalTarget").value="1";await persistDailyAmal();renderDailyAmal();toast("আমল যোগ হয়েছে");
 }
 async function toggleDailyAmal(id,checked){
@@ -491,7 +491,7 @@ async function changeDailyAmalCount(id,delta){if(!dailyAmalRecord)return;const d
 async function editDailyAmal(id){
  const item=dailyAmalRecord?.items?.find(x=>x.id===id);if(!item)return;
  const name=prompt(tr("আমলের নতুন নাম লিখুন"),item.name);if(name===null)return;const clean=name.trim();if(!clean){toast(tr("একটি নাম লিখুন"));return}
- if(dailyAmalRecord.items.some(x=>x.id!==id&&x.name.trim().toLocaleLowerCase()===clean.toLocaleLowerCase())){toast(tr("এই আমলটি তালিকায় আছে"));return}
+ const normalizedName=clean.normalize("NFC").toLocaleLowerCase(currentLocale());if(dailyAmalRecord.items.some(x=>x.id!==id&&String(x.name||"").trim().normalize("NFC").toLocaleLowerCase(currentLocale())===normalizedName)){toast(tr("এই আমলটি তালিকায় আছে"));return}
  const targetText=prompt(tr("আমলের লক্ষ্যসংখ্যা লিখুন"),String(Math.max(1,Number(item.target)||1)));if(targetText===null)return;
  const target=Number(targetText.trim());if(!Number.isInteger(target)||target<1||target>100000){toast(tr("লক্ষ্য ১ থেকে ১০০০০০-এর মধ্যে পূর্ণসংখ্যা দিন"));return}
  item.name=clean;const oldTarget=Math.max(1,Number(item.target)||1);for(const day of Object.values(dailyAmalRecord.days||{})){if(!day||day[id]===undefined)continue;const raw=day[id]===true?oldTarget:Number(day[id])||0;day[id]=Math.max(0,Math.min(target,raw))}item.target=target;await persistDailyAmal();renderDailyAmal();toast(tr("আমলের তথ্য আপডেট হয়েছে"));
