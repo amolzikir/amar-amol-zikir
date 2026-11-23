@@ -307,6 +307,7 @@ function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 function saveNavState(){
  const screen=$("dailyAmalPanel")?.classList.contains("show")?"daily":$("tasbihPanel")?.classList.contains("show")?"tasbih":$("viewer")?.classList.contains("show")?"note":$("editor")?.classList.contains("show")?"editor":"home";
  const state={activeTab,parentId,specialView,search:$("search")?.value||"",viewingId:viewing?.id||null,screen,dailyDate:$("dailyAmalDate")?.value||"",dailyCalendarMonth};
+ try{if(screen==="daily"||screen==="tasbih")sessionStorage.setItem("amol-active-screen",screen);else sessionStorage.removeItem("amol-active-screen")}catch(e){console.warn("Session route marker could not be saved",e)}
  try{localStorage.setItem("amol-nav-state",JSON.stringify(state))}catch(e){console.warn("Navigation state could not be saved",e)}
  try{const p=new URLSearchParams();p.set("tab",state.activeTab);if(state.parentId)p.set("folder",state.parentId);if(state.specialView)p.set("view",state.specialView);if(state.search)p.set("search",state.search);if(state.viewingId)p.set("note",state.viewingId);if(screen==="daily"||screen==="tasbih")p.set("screen",screen);history.replaceState(null,"",location.pathname+location.search+"#"+p.toString())}catch(e){console.warn("Navigation URL could not be saved",e)}
 }
@@ -314,9 +315,11 @@ function restoreNavState(){
  try{
   const navEntry=performance.getEntriesByType("navigation")[0];
   const navigationType=navEntry?.type||(performance.navigation?.type===1?"reload":"navigate");
-  if(navigationType!=="reload")return null;
+  let sessionScreen=null;try{sessionScreen=sessionStorage.getItem("amol-active-screen")}catch(e){}
+  if(navigationType!=="reload"&&sessionScreen!=="daily"&&sessionScreen!=="tasbih")return null;
   const p=new URLSearchParams(location.hash.startsWith("#")?location.hash.slice(1):location.hash);
   let s=JSON.parse(localStorage.getItem("amol-nav-state")||"null");
+  if(sessionScreen==="daily"||sessionScreen==="tasbih"){s=s||{};s.screen=sessionScreen}
   if(!s&&(p.has("tab")||p.has("folder")||p.has("view")||p.has("note")||p.has("screen")))s={activeTab:p.get("tab"),parentId:p.get("folder"),specialView:p.get("view"),search:p.get("search")||"",viewingId:p.get("note"),screen:p.get("screen")};
   if(!s)return null;
   if(TABS.includes(s.activeTab))activeTab=s.activeTab;
