@@ -130,6 +130,32 @@ test("returning to the first account reopens its own saved database", async () =
   assert.equal(env.databases.get("AmolZikirLocalAccount_user-a").items.has("a-only"), true);
 });
 
+test("late signed-out auth resolution merges fallback legacy records into the guest database", async () => {
+  const legacy = { id: "restored-note", type: "note", title: "ব্যাকআপ থেকে ফেরত", updatedAt: 20 };
+  const guest = { id: "guest-note", type: "note", title: "অতিথি নোট", updatedAt: 30 };
+  const env = makeEnvironment({ AmolZikirLocal: [legacy], AmolZikirLocalGuest: [guest] });
+  await vm.runInNewContext("openLocalFallback()", env.context);
+  env.databases.get("AmolZikirLocal").items.set("late-restore", clone({ id: "late-restore", type: "note", title: "Restore চলাকালীন", updatedAt: 40 }));
+  await vm.runInNewContext("selectLocalDatabase(null)", env.context);
+  const state = env.context.inspect();
+  assert.equal(state.activeLocalDbName, "AmolZikirLocalGuest");
+  const saved = env.databases.get("AmolZikirLocalGuest").items;
+  assert.equal(saved.get("restored-note").title, "ব্যাকআপ থেকে ফেরত");
+  assert.equal(saved.get("guest-note").title, "অতিথি নোট");
+  assert.equal(saved.get("late-restore").title, "Restore চলাকালীন");
+  assert.equal(env.databases.get("AmolZikirLocal").items.has("restored-note"), true);
+});
+
+test("guest migration never copies legacy data when an original account owner is recorded", async () => {
+  const privateItem = { id: "account-private", type: "note", title: "অ্যাকাউন্টের ব্যক্তিগত নোট", updatedAt: 20 };
+  const env = makeEnvironment({ AmolZikirLocal: [privateItem] }, { "amol-local-cloud-owner-uid": "user-a" });
+  await vm.runInNewContext("selectLocalDatabase(null)", env.context);
+  const state = env.context.inspect();
+  assert.equal(state.activeLocalDbName, "AmolZikirLocalGuest");
+  assert.equal(env.databases.get("AmolZikirLocalGuest").items.size, 0);
+  assert.equal(env.databases.get("AmolZikirLocal").items.has("account-private"), true);
+});
+
 test("personal favorites and routines migrate only into their original account", async () => {
   const env = makeEnvironment({ AmolZikirLocal: [] }, {
     "amol-local-cloud-owner-uid": "user-a",
