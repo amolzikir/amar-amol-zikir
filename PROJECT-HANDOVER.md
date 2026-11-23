@@ -318,3 +318,13 @@
 - Service worker cache: amol-zikir-v138.
 - Pre-change exact backups: backup/index.html-2026-11-24-before-v137-guest-migration-fix.bak, backup/sw.js-2026-11-24-before-v137-guest-migration-fix.bak, backup/tests-local-account-partition-2026-11-24-before-v137-guest-migration-fix.bak, backup/PROJECT-HANDOVER-2026-11-24-before-v137-guest-migration-fix.bak, backup/firestore-rules-2026-11-24-before-v137-guest-migration-fix.bak.
 - Verification status at edit time: CI, deployment, JS syntax, and live Android restore must be checked after commit; do not claim phone-side success until the user retests.
+
+
+## v139 — read-only local storage diagnostics (2026-11-24)
+- Added a Settings button: “নিরাপদ ডেটা পরীক্ষা”.
+- The diagnostic reads the existing IndexedDB database list and counts records in the legacy, guest, and recorded-owner account databases. It reports active database name, whether a local cloud-owner marker exists, and signed-in state.
+- It does not import, export, write, delete, migrate, or switch databases. It uses IndexedDB database enumeration before opening existing databases and reads records through readonly transactions. If database enumeration is unavailable, it reports that limitation without opening/creating databases.
+- This is a diagnostic aid, not a repair or restore operation. Deleted/tombstoned records may be included in counts.
+- User should only run it in the Incognito session used for the backup test; do not run Restore again. Report the complete displayed result before any further change.
+- Pre-change backups (exact source content verified): `backup/index.html-2026-11-24-before-readonly-storage-diagnostics.bak`, `backup/sw.js-2026-11-24-before-readonly-storage-diagnostics.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-before-readonly-storage-diagnostics.bak`.
+- Runtime cache bumped to `amol-zikir-v139`.
