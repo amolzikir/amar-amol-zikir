@@ -305,25 +305,24 @@ function delLocal(id){return new Promise((res,rej)=>{let r=dbLocal.transaction(S
 function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function saveNavState(){
- const state={activeTab,parentId,specialView,search:$("search")?.value||"",viewingId:viewing?.id||null};
+ const screen=$("dailyAmalPanel")?.classList.contains("show")?"daily":$("tasbihPanel")?.classList.contains("show")?"tasbih":$("viewer")?.classList.contains("show")?"note":$("editor")?.classList.contains("show")?"editor":"home";
+ const state={activeTab,parentId,specialView,search:$("search")?.value||"",viewingId:viewing?.id||null,screen,dailyDate:$("dailyAmalDate")?.value||"",dailyCalendarMonth};
  try{localStorage.setItem("amol-nav-state",JSON.stringify(state))}catch(e){console.warn("Navigation state could not be saved",e)}
- try{const p=new URLSearchParams();p.set("tab",state.activeTab);if(state.parentId)p.set("folder",state.parentId);if(state.specialView)p.set("view",state.specialView);if(state.search)p.set("search",state.search);if(state.viewingId)p.set("note",state.viewingId);history.replaceState(null,"",location.pathname+location.search+"#"+p.toString())}catch(e){console.warn("Navigation URL could not be saved",e)}
+ try{const p=new URLSearchParams();p.set("tab",state.activeTab);if(state.parentId)p.set("folder",state.parentId);if(state.specialView)p.set("view",state.specialView);if(state.search)p.set("search",state.search);if(state.viewingId)p.set("note",state.viewingId);if(screen==="daily"||screen==="tasbih")p.set("screen",screen);history.replaceState(null,"",location.pathname+location.search+"#"+p.toString())}catch(e){console.warn("Navigation URL could not be saved",e)}
 }
 function restoreNavState(){
  try{
   const navEntry=performance.getEntriesByType("navigation")[0];
   const navigationType=navEntry?.type||(performance.navigation?.type===1?"reload":"navigate");
-  // Restore the previous screen only for a page refresh, not a fresh website launch.
   if(navigationType!=="reload")return null;
   const p=new URLSearchParams(location.hash.startsWith("#")?location.hash.slice(1):location.hash);
-  let s=null;
-  s=JSON.parse(localStorage.getItem("amol-nav-state")||"null");
-  if(!s&&(p.has("tab")||p.has("folder")||p.has("view")||p.has("note")))s={activeTab:p.get("tab"),parentId:p.get("folder"),specialView:p.get("view"),search:p.get("search")||"",viewingId:p.get("note")};
+  let s=JSON.parse(localStorage.getItem("amol-nav-state")||"null");
+  if(!s&&(p.has("tab")||p.has("folder")||p.has("view")||p.has("note")||p.has("screen")))s={activeTab:p.get("tab"),parentId:p.get("folder"),specialView:p.get("view"),search:p.get("search")||"",viewingId:p.get("note"),screen:p.get("screen")};
   if(!s)return null;
   if(TABS.includes(s.activeTab))activeTab=s.activeTab;
   parentId=s.parentId||null;specialView=s.specialView||null;
   if($("search"))$("search").value=s.search||"";
-  return s.viewingId||null;
+  return s;
  }catch(e){console.warn("Navigation state could not be restored",e);return null}
 }
 function renderTabs(){$("tabs").innerHTML=TABS.map(t=>`<button class="tab ${t===activeTab?"active":""}" data-tab="${esc(t)}">${esc(t)}</button>`).join("");$("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;parentId=null;specialView=null;render()})}
@@ -509,9 +508,10 @@ async function removeDailyAmal(id){
 async function openDailyAmal(){
  await loadDailyAmal();$("homeMenu").classList.remove("show");$("dailyAmalPanel").classList.add("show");
  try{history.pushState({amolDailyAmal:true},"",location.href);dailyBackEntry=true}catch(e){}
+ saveNavState();
 }
 function closeDailyAmal(){
- $("dailyAmalPanel").classList.remove("show");
+ $("dailyAmalPanel").classList.remove("show");saveNavState();
  if(dailyBackEntry){dailyBackEntry=false;history.back()}
 }
 
@@ -576,9 +576,10 @@ async function openTasbih(){
  await loadTasbih();
  $("homeMenu").classList.remove("show");$("tasbihPanel").classList.add("show");
  try{history.pushState({amolTasbih:true},"",location.href);tasbihBackEntry=true}catch(e){}
+ saveNavState();
 }
 function closeTasbih(){
- $("tasbihPanel").classList.remove("show");
+ $("tasbihPanel").classList.remove("show");saveNavState();
  if(tasbihBackEntry){tasbihBackEntry=false;history.back()}
 }
 async function syncCloud(){
@@ -619,10 +620,10 @@ async function syncCloud(){
  finally{syncBusy=false;render();if(syncAgain){syncAgain=false;Promise.resolve().then(()=>syncCloud())}}
 }
 async function signIn(){if(!auth){toast("লগইন চালুর জন্য ইন্টারনেট দরকার");return}const p=new firebase.auth.GoogleAuthProvider();try{await auth.signInWithPopup(p)}catch(e){try{await auth.signInWithRedirect(p)}catch(err){toast("লগইন করা যায়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন")}}}
-window.addEventListener("popstate",()=>{if($("dailyAmalPanel")?.classList.contains("show")){$("dailyAmalPanel").classList.remove("show");dailyBackEntry=false;return}if($("tasbihPanel")?.classList.contains("show")){$("tasbihPanel").classList.remove("show");tasbihBackEntry=false;return}if($("noteMenu")?.classList.contains("show")){closeNoteMenu();if($("editor")?.classList.contains("show")){try{history.pushState({amolEditor:true},"",location.href);editorBackEntry=true}catch(e){}}return}if($("editor")?.classList.contains("show")){editorBackEntry=false;cancelEditor()}});
+window.addEventListener("popstate",()=>{if($("dailyAmalPanel")?.classList.contains("show")){$("dailyAmalPanel").classList.remove("show");dailyBackEntry=false;saveNavState();return}if($("tasbihPanel")?.classList.contains("show")){$("tasbihPanel").classList.remove("show");tasbihBackEntry=false;saveNavState();return}if($("noteMenu")?.classList.contains("show")){closeNoteMenu();if($("editor")?.classList.contains("show")){try{history.pushState({amolEditor:true},"",location.href);editorBackEntry=true}catch(e){}}return}if($("editor")?.classList.contains("show")){editorBackEntry=false;cancelEditor()}});
 window.addEventListener("keydown",e=>{if((e.key==="Escape"||e.key==="BrowserBack")&&$("editor")?.classList.contains("show")){e.preventDefault();e.stopPropagation();cancelEditor()}});
 async function init(){
-  await openLocal();const restoreViewingId=restoreNavState();await render();if(restoreViewingId){const savedItems=await allItems();const savedNote=savedItems.find(x=>x.id===restoreViewingId&&x.type==="note"&&!x.deletedAt);if(savedNote)openViewer(savedNote)}checkReminders();setInterval(checkReminders,30000);
+  await openLocal();const restoredNavState=restoreNavState();await render();if(restoredNavState?.viewingId){const savedItems=await allItems();const savedNote=savedItems.find(x=>x.id===restoredNavState.viewingId&&x.type==="note"&&!x.deletedAt);if(savedNote)openViewer(savedNote)}if(restoredNavState?.screen==="daily"){await openDailyAmal();if(restoredNavState.dailyDate){$("dailyAmalDate").value=restoredNavState.dailyDate;dailyCalendarMonth=restoredNavState.dailyCalendarMonth||restoredNavState.dailyDate.slice(0,7);renderDailyAmal()}}else if(restoredNavState?.screen==="tasbih"){await openTasbih()}checkReminders();setInterval(checkReminders,30000);
  $("newFolder").onclick=()=>openEditor("folder");$("newNote").onclick=()=>openEditor("note");$("fab").onclick=()=>openEditor("note");
  $("editorNoteMore").onclick=()=>{if(editing?.item)openNoteMenu(editing.item)};$("cancelEdit").onclick=cancelEditor;$("saveEdit").onclick=saveEditor;$("closeView").onclick=closeViewer;$("openNoteMenu").onclick=()=>openNoteMenu();$("closeNoteMenu").onclick=closeNoteMenu;$("favoriteView").onclick=()=>{closeNoteMenu();toggleViewedFlag("favorite")};$("bookmarkView").onclick=()=>{closeNoteMenu();toggleViewedFlag("bookmarked")};$("pinView").onclick=()=>{closeNoteMenu();toggleViewedFlag("pinned")};$("reminderView").onclick=()=>{closeNoteMenu();openReminder()};$("findView").onclick=()=>{closeNoteMenu();$("findTerm").value="";$("findResult").textContent="";$("findPanel").classList.add("show")};$("copyView").onclick=()=>{closeNoteMenu();makeNoteCopy()};$("shareView").onclick=()=>{closeNoteMenu();$("sharePanel").classList.add("show")};$("cancelReminder").onclick=()=>$("reminderPanel").classList.remove("show");$("saveReminder").onclick=saveReminder;$("clearReminder").onclick=clearReminder;$("closeFind").onclick=()=>$("findPanel").classList.remove("show");$("doFind").onclick=runFind;$("closeShare").onclick=()=>$("sharePanel").classList.remove("show");$("nativeShare").onclick=async()=>{if(!viewing)return;try{if(navigator.share)await navigator.share({title:viewing.title,text:noteShareText()});else{await navigator.clipboard.writeText(noteShareText());toast("লেখা কপি হয়েছে")}}catch(e){if(e.name!=="AbortError")toast("শেয়ার করা যায়নি; অন্য অপশন ব্যবহার করুন")}};$("whatsappShare").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(noteShareText()),"_blank");$("emailShare").onclick=()=>{location.href="mailto:?subject="+encodeURIComponent(viewing?.title||"নোট")+"&body="+encodeURIComponent(noteShareText())};$("copyTextShare").onclick=async()=>{try{await navigator.clipboard.writeText(noteShareText());toast("নোটের লেখা কপি হয়েছে")}catch(e){toast("কপি করা যায়নি; শেয়ার মেনু ব্যবহার করুন")}};
  $("editView").onclick=()=>{let x=viewing;closeNoteMenu();closeViewer();openEditor("note",x)};$("deleteView").onclick=()=>{closeNoteMenu();removeViewed()};
