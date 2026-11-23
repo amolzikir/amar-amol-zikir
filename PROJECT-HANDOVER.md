@@ -123,3 +123,10 @@
 - Service worker cache: `amol-zikir-v116`.
 - Backup files: `backup/index-2026-11-23-before-note-menu-order-v116.html` and `backup/sw-2026-11-23-before-note-menu-order-v116.js` (verified exact).
 - JavaScript syntax validation passed; GitHub files refetched and release markers verified.
+
+
+## v117 — 2026-11-23
+- Folder options modal bottom actions reordered for usability: **সরান** on the left and **বন্ধ** on the right. Existing IDs and behavior unchanged; visual order only.
+- Service worker cache: `amol-zikir-v117`.
+- Backups: `backup/index-2026-11-23-before-folder-menu-order-v117.html` and `backup/sw-2026-11-23-before-folder-menu-order-v117.js`, both exact-content verified.
+- JavaScript syntax validation passed; GitHub release files refetched and verified.
