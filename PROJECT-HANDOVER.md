@@ -116,3 +116,10 @@
 - v115-এ JS syntax check ও GitHub refetch verification পাস। Cache: `amol-zikir-v115`।
 - Backup: `backup/index-2026-11-23-before-pin-disable-v115.html`, `backup/sw-2026-11-23-before-pin-disable-v115.js`; দুই backup exact content দিয়ে যাচাই করা হয়েছে।
 - ব্যবহারকারীর ফোনে on-device confirmation এখনও বাকি।
+
+
+## v116 — 2026-11-23
+- Note options menu bottom actions reordered for usability: **মুছুন → সম্পাদনা → বন্ধ করুন** (left to right). Existing action IDs and handlers are unchanged; only visual order changed.
+- Service worker cache: `amol-zikir-v116`.
+- Backup files: `backup/index-2026-11-23-before-note-menu-order-v116.html` and `backup/sw-2026-11-23-before-note-menu-order-v116.js` (verified exact).
+- JavaScript syntax validation passed; GitHub files refetched and release markers verified.
