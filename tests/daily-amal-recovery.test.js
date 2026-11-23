@@ -45,3 +45,10 @@ test("recovery recognizes alternate IDs only when the record is clearly Daily Am
   assert.equal(context.isDaily({ id: "note-1", title: "সাধারণ নোট", items: [{ name: "লেখা" }] }), false);
   assert.equal(context.isDaily({ id: "old-id", tab: "__system__", title: "দৈনিক আমল", items: [{ name: "যিকির" }] }), true);
 });
+
+
+test("recovery scan includes the guest database without changing its records", () => {
+  assert.match(source, /openLocalDatabase\(GUEST_DB_NAME\)/);
+  assert.match(source, /সাইন-ইন ছাড়া ব্যবহারের ডেটাবেস/);
+  assert.match(source, /guestDb\.close\(\)/);
+});
