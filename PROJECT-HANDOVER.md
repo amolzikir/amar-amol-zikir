@@ -214,3 +214,15 @@
 - Firestore rules reviewed: `users/{userId}/items/{itemId}` permits read/write only when authenticated UID equals `userId`. This rule file is in the repo, but whether it has been published in Firebase Console cannot be verified from GitHub.
 - Limitation: this is a cloud-upload isolation guard, not full multi-account local database partitioning. If the wrong account is active, local-only edits can still enter that browser's shared IndexedDB; avoid editing until the original account is restored. Full account-specific local stores require a separate migration project.
 - Service-worker cache: `amol-zikir-v127`. JavaScript syntax and static guard checks passed; real Firebase Rules Emulator tests and console publication remain pending.
+
+
+## v128 — Firestore Security Rules Emulator Test Setup (২৩ নভেম্বর ২০২৬)
+- বিদ্যমান `firestore.rules`-এর per-user UID access policy অপরিবর্তিত রাখা হয়েছে; কোনো live Firebase Rules deploy করা হয়নি।
+- Local Firebase Emulator Suite test configuration যোগ: `firebase.json` (Firestore emulator port 8080; emulator UI বন্ধ)।
+- `package.json`-এ isolated test dependencies ও `npm run test:rules` command যোগ।
+- `tests/firestore.rules.test.js`-এ পাঁচটি automated case: signed-out read deny, own-user read/write allow, অন্য user-এর read/write deny, অনুমোদিত path-এর বাইরে write deny।
+- Tests emulator-এ `firestore.rules` লোড করে; এটি live Firebase project-এ rules publish বা পরীক্ষা করে না। চালাতে repository-তে `npm install`-এর পর `npm run test:rules` চালাতে হবে।
+- এই release-এ app runtime (`index.html`) ও service worker বদলানো হয়নি; তাই PWA cache version v127-ই আছে।
+- নিরাপত্তার জন্য স্থানীয় IndexedDB এখনো একটিই shared store। Account-specific database migration এখনো করা হয়নি; migration-এর আগে offline edits, startup flow, system records, backup/restore ও account-switch আচরণ আলাদাভাবে পরীক্ষা করা আবশ্যক।
+- Verified backups: `backup/firestore-rules-2026-11-23-before-firestore-emulator-tests-v128.rules` এবং `backup/PROJECT-HANDOVER-2026-11-23-before-firestore-emulator-tests-v128.md`।
+- Emulator tests এই পরিবেশে চালানো হয়নি; setup ও test source যোগ করা হয়েছে, passing result দাবি করা হচ্ছে না।
