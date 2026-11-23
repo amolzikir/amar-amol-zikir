@@ -172,3 +172,11 @@
 - Backups: `backup/index-2026-11-23-before-sync-apply-guard-v122.html` and `backup/sw-2026-11-23-before-sync-apply-guard-v122.js`, exact-content verified.
 - JavaScript syntax and GitHub refetch verification passed. Cache: `amol-zikir-v122`.
 - Multi-device and offline/reconnect device tests remain pending.
+
+
+## v123 — Sync diagnostics ও নিরাপদ পরীক্ষার পরিকল্পনা (2026-11-23)
+- Header-এ live Sync status যোগ: signed-out/offline/syncing/success/retry/error।
+- Firebase error code অনুযায়ী ব্যবহারকারী-বোধ্য বাংলা বার্তা; console diagnostic-এ code/message।
+- Existing transaction conflict resolution, local freshness guard, retry/backoff অক্ষত।
+- `tests/sync-safety-checklist.md`-এ production data না ছুঁয়ে আলাদা test Firebase project-এ synthetic record দিয়ে পরীক্ষা করার কেস ও ধাপ যোগ।
+- যাচাই: JS syntax ও GitHub content refetch আবশ্যক; বাস্তব device/Firebase test এখনো আলাদা করে করতে হবে।
