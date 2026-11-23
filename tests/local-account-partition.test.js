@@ -133,26 +133,26 @@ test("returning to the first account reopens its own saved database", async () =
 test("personal favorites and routines migrate only into their original account", async () => {
   const env = makeEnvironment({ AmolZikirLocal: [] }, {
     "amol-local-cloud-owner-uid": "user-a",
-    "amol-dua-favorites": "[\\"dua-1\\"]",
-    "amol-zikr-routines": "[{\\"id\\":\\"routine-a\\"}]"
+    "amol-dua-favorites": "[\"dua-1\"]",
+    "amol-zikr-routines": "[{\"id\":\"routine-a\"}]"
   });
   await vm.runInNewContext("selectLocalDatabase('user-a')", env.context);
   const state = env.context.inspect();
   assert.equal(state.personalStorageKey("amol-dua-favorites"), "amol-dua-favorites::account::user-a");
-  assert.equal(env.values.get("amol-dua-favorites::account::user-a"), "[\\"dua-1\\"]");
+  assert.equal(env.values.get("amol-dua-favorites::account::user-a"), "[\"dua-1\"]");
   assert.equal(state.personalStorageKey("amol-zikr-routines"), "amol-zikr-routines::account::user-a");
-  assert.equal(env.values.get("amol-zikr-routines::account::user-a"), "[{\\"id\\":\\"routine-a\\"}]");
+  assert.equal(env.values.get("amol-zikr-routines::account::user-a"), "[{\"id\":\"routine-a\"}]");
   await vm.runInNewContext("currentUser={uid:'user-b'};selectLocalDatabase('user-b')", env.context);
   const other = env.context.inspect();
   assert.equal(other.personalStorageKey("amol-dua-favorites"), "amol-dua-favorites::account::user-b");
   assert.equal(env.values.has("amol-dua-favorites::account::user-b"), false);
-  assert.equal(env.values.get("amol-dua-favorites"), "[\\"dua-1\\"]");
+  assert.equal(env.values.get("amol-dua-favorites"), "[\"dua-1\"]");
 });
 
 test("guest personal storage never inherits a signed-in owner's favorites", async () => {
   const env = makeEnvironment({ AmolZikirLocal: [] }, {
     "amol-local-cloud-owner-uid": "user-a",
-    "amol-dua-favorites": "[\\"private-dua\\"]"
+    "amol-dua-favorites": "[\"private-dua\"]"
   });
   await vm.runInNewContext("selectLocalDatabase(null)", env.context);
   const state = env.context.inspect();
