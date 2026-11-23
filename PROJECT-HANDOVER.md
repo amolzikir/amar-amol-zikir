@@ -335,3 +335,13 @@
 - The action uses the existing database enumeration/read-only `getAll()` path; it performs no writes, deletes, migrations, restore, or database switching. Deleted/tombstoned records may appear and are labelled when `deletedAt` is present.
 - Service worker cache marker bumped to `amol-zikir-v140`.
 - Backups created before this change: `backup/index.html-2026-11-24-before-guest-record-list.bak`, `backup/sw.js-2026-11-24-before-guest-record-list.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-before-guest-record-list.bak`.
+
+ 
+## v141 — সব লোকাল ডেটাবেসের read-only recovery export (2026-11-24)
+- Settings-এ নতুন “সব পুরোনো ডেটাবেসের নিরাপদ কপি” action যোগ হয়েছে।
+- এটি একই browser profile-এর বিদ্যমান `AmolZikirLocal`, `AmolZikirLocalGuest`, এবং `AmolZikirLocalAccount_*` IndexedDB database enumerate করে; প্রতিটির `items` store read-only `getAll()` দিয়ে পড়ে।
+- Export JSON-এ সব রেকর্ডের সম্পূর্ণ content (নোটের body-সহ), deleted markers, database name ও count থাকে; এটি কেবল ডাউনলোড হয়, কোনো network upload করে না। ব্যবহারকারী নিজে শেয়ার না করলে নোটের লেখা ChatGPT-তে যায় না।
+- Export path-এ কোনো IndexedDB write/delete/migration/restore/database switching নেই। এটি মূলত normal Chrome profile থেকে legacy/original records উদ্ধার করার জন্য; Incognito profile-এ চালালে শুধু Incognito-র database-ই পাওয়া যাবে।
+- v141 cache: `amol-zikir-v141`.
+- Pre-change exact backups: `backup/index.html-2026-11-24-before-all-local-db-recovery-export-v141.bak`, `backup/sw.js-2026-11-24-before-all-local-db-recovery-export-v141.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-before-all-local-db-recovery-export-v141.bak`.
+- Phone-side export/download and actual note recovery are pending user confirmation; no claim of recovered notes yet.
