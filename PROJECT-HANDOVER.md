@@ -328,3 +328,10 @@
 - User should only run it in the Incognito session used for the backup test; do not run Restore again. Report the complete displayed result before any further change.
 - Pre-change backups (exact source content verified): `backup/index.html-2026-11-24-before-readonly-storage-diagnostics.bak`, `backup/sw.js-2026-11-24-before-readonly-storage-diagnostics.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-before-readonly-storage-diagnostics.bak`.
 - Runtime cache bumped to `amol-zikir-v139`.
+
+
+## v140 — read-only Guest record listing (2026-11-24)
+- Added a Settings action to list Guest IndexedDB record types and titles only, without showing note bodies.
+- The action uses the existing database enumeration/read-only `getAll()` path; it performs no writes, deletes, migrations, restore, or database switching. Deleted/tombstoned records may appear and are labelled when `deletedAt` is present.
+- Service worker cache marker bumped to `amol-zikir-v140`.
+- Backups created before this change: `backup/index.html-2026-11-24-before-guest-record-list.bak`, `backup/sw.js-2026-11-24-before-guest-record-list.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-before-guest-record-list.bak`.
