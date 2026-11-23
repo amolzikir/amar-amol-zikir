@@ -195,3 +195,12 @@
 - Online event আগের মতো syncCloud চালায়; offline event নিজে কোনো Cloud write করে না।
 - Cache version v125। পরিবর্তনের আগে index.html ও sw.js backup নিয়ে হুবহু যাচাই করা হয়েছে।
 - পরবর্তী বাস্তব পরীক্ষা: ফোনে test note offline অবস্থায় তৈরি করে অনলাইনে ফিরে Cloud sync নিশ্চিত করা; assistant ফোনের network toggle বা Firebase account সরাসরি নিয়ন্ত্রণ করে না।
+
+
+## v126 — Manual Sync recovery control (23 November 2026)
+- Added a compact **“↻ এখনই Sync করুন”** control beneath the Sync status for signed-in users.
+- The control calls the existing guarded `syncCloud()` flow; it does not bypass conflict resolution, local race checks, or retry handling.
+- If a sync is already running, the existing `syncBusy/syncAgain` guard queues another pass instead of starting a parallel sync.
+- The control remains hidden until both a signed-in user and Firebase Cloud connection are available.
+- Service-worker cache version: `amol-zikir-v126`.
+- Scope: this is a manual recovery/diagnostic affordance, not encryption, a new backup system, or proof of Firebase rules security. Real multi-account isolation and Firestore integration tests remain separate follow-up work.
