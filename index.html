@@ -202,7 +202,8 @@ const firebaseConfig = {
   measurementId: "G-Z59RLJY6NK"
 };
 const TABS=["আমল","জিকির","দোয়া","নোট","অন্যান্য"];
-const DB_NAME="AmolZikirLocal", STORE="items";
+const DB_NAME="AmolZikirLocal", STORE="items", LOCAL_CLOUD_OWNER_KEY="amol-local-cloud-owner-uid";
+function localCloudAccountAllowed(uid){if(!uid)return false;let owner="";try{owner=localStorage.getItem(LOCAL_CLOUD_OWNER_KEY)||"";if(!owner){localStorage.setItem(LOCAL_CLOUD_OWNER_KEY,uid);return true}return owner===uid}catch(e){console.warn("Local account guard unavailable",e);return false}}
 let dbLocal, activeTab=TABS[0], parentId=null, editing=null, viewing=null, currentUser=null, cloud=null, auth=null, syncBusy=false, syncAgain=false, syncRetryTimer=null, syncRetryDelay=3000, pendingFolderDelete=null, menuFolderId=null, specialView=null, editingFromViewer=false, editorBackEntry=false;
 let tasbihRecord=null,tasbihBackEntry=false,dailyAmalRecord=null,dailyBackEntry=false;
 const $=id=>document.getElementById(id);
@@ -698,6 +699,7 @@ function setSyncStatus(state,detail=""){
 }
 async function syncCloud(){
  if(!currentUser||!cloud){setSyncStatus("signedout");return}
+ if(!localCloudAccountAllowed(currentUser.uid)){setSyncStatus("error","নিরাপত্তার জন্য Sync বন্ধ: এই ব্রাউজারের স্থানীয় তথ্য অন্য Google অ্যাকাউন্টের সঙ্গে যুক্ত। আগের অ্যাকাউন্টে ফিরুন বা আলাদা ব্রাউজার প্রোফাইল ব্যবহার করুন।");return}
  if(!navigator.onLine){setSyncStatus("offline");return}
  if(syncBusy){syncAgain=true;return}
  if(syncRetryTimer){clearTimeout(syncRetryTimer);syncRetryTimer=null}
@@ -1002,7 +1004,7 @@ async function init(){
  if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(console.warn)}
  try{await openLocal();const restoredNavState=restoreNavState();await render();if(restoredNavState?.viewingId){const savedItems=await allItems();const savedNote=savedItems.find(x=>x.id===restoredNavState.viewingId&&x.type==="note"&&!x.deletedAt);if(savedNote)openViewer(savedNote)}if(restoredNavState?.screen==="daily"){await openDailyAmal();if(parseDailyDateKey(restoredNavState.dailyDate)){$("dailyAmalDate").value=restoredNavState.dailyDate;dailyCalendarMonth=validDailyMonth(restoredNavState.dailyCalendarMonth)?restoredNavState.dailyCalendarMonth:restoredNavState.dailyDate.slice(0,7);renderDailyAmal()}}else if(restoredNavState?.screen==="tasbih"){await openTasbih()}checkReminders();checkDailyAmalReminder();setInterval(()=>{checkReminders();checkDailyAmalReminder()},30000)}catch(e){console.error("App startup/storage error",e);toast("অ্যাপের ডেটা চালু করতে সমস্যা হয়েছে। পেজটি আবার লোড করুন।")}
  try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();cloud=firebase.firestore();
- auth.onAuthStateChanged(async u=>{currentUser=u;if(u){$("accountBtn").textContent="✓ "+(u.displayName?.split(" ")[0]||"লগইন");await syncCloud()}else{$("accountBtn").textContent="লগইন করুন";setSyncStatus("signedout")}})
+ auth.onAuthStateChanged(async u=>{currentUser=u;if(u){$("accountBtn").textContent="✓ "+(u.displayName?.split(" ")[0]||"লগইন");if(!localCloudAccountAllowed(u.uid)){setSyncStatus("error","নিরাপত্তার জন্য Cloud Sync বন্ধ: এই ব্রাউজারের স্থানীয় তথ্য প্রথম Google অ্যাকাউন্টের সঙ্গে যুক্ত। আগের অ্যাকাউন্টে ফিরুন বা আলাদা ব্রাউজার প্রোফাইল ব্যবহার করুন।");return}await syncCloud()}else{$("accountBtn").textContent="লগইন করুন";setSyncStatus("signedout")}})
  }catch(e){console.warn("Firebase unavailable; offline local mode remains available",e)}
 }
 Object.assign(I18N,{"মোট সম্পন্ন আমল":["Completed amal items","الأعمال المكتملة","مکمل اعمال"],"সম্পূর্ণ দিন":["Fully completed days","الأيام المكتملة بالكامل","مکمل دن"],"মোট সম্পন্ন আমল":["Completed amal items","الأعمال المكتملة","مکمل اعمال"]});
