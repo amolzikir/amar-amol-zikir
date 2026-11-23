@@ -9,7 +9,7 @@ const start = source.indexOf("function esc(s){");
 const end = source.indexOf("\nfunction saveNavState", start);
 if (start < 0 || end < 0) throw new Error("HTML escaping helper was not found");
 const helper = source.slice(start, end);
-const context = {};
+const context = { URL };
 vm.runInNewContext(helper + "\nglobalThis.escapeValue=esc; globalThis.safeUrl=safeHttpsUrl;", context);
 
 test("HTML escaping neutralizes hostile imported IDs before attribute insertion", () => {
