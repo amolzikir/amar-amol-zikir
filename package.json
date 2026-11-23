@@ -5,11 +5,12 @@
   "description": "Local Firestore security rules tests for Amar Amol o Zikir",
   "scripts": {
     "test:rules": "firebase emulators:exec --only firestore --project amar-amol-zikir-rules-test \"node --test tests/firestore.rules.test.js\"",
-    "test:local": "node --test tests/local-account-partition.test.js"
+    "test:local": "node --test tests/local-account-partition.test.js",
+    "test:security": "node --test tests/dom-security.test.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.3",
     "firebase": "10.12.2",
     "firebase-tools": "^13.35.1"
   }
-}
+}\n
