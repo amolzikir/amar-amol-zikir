@@ -204,3 +204,13 @@
 - The control remains hidden until both a signed-in user and Firebase Cloud connection are available.
 - Service-worker cache version: `amol-zikir-v126`.
 - Scope: this is a manual recovery/diagnostic affordance, not encryption, a new backup system, or proof of Firebase rules security. Real multi-account isolation and Firestore integration tests remain separate follow-up work.
+
+
+## v127 — Local Cloud account binding guard (23 November 2026)
+- Added a browser-origin local owner marker (`amol-local-cloud-owner-uid`) when the first Google account signs in on that browser profile.
+- Cloud sync now refuses to upload/download when a different Google UID is detected in the same browser profile. This prevents an account switch from silently pushing the existing shared IndexedDB dataset into another account's Firestore path.
+- The guard is checked both in the auth-state callback and inside `syncCloud()`, so manual sync and other save-triggered sync calls cannot bypass it.
+- Recovery: return to the original Google account in that browser profile, or use a separate browser/profile for a separate account. Local data is preserved; the guard does not delete or migrate anything.
+- Firestore rules reviewed: `users/{userId}/items/{itemId}` permits read/write only when authenticated UID equals `userId`. This rule file is in the repo, but whether it has been published in Firebase Console cannot be verified from GitHub.
+- Limitation: this is a cloud-upload isolation guard, not full multi-account local database partitioning. If the wrong account is active, local-only edits can still enter that browser's shared IndexedDB; avoid editing until the original account is restored. Full account-specific local stores require a separate migration project.
+- Service-worker cache: `amol-zikir-v127`. JavaScript syntax and static guard checks passed; real Firebase Rules Emulator tests and console publication remain pending.
