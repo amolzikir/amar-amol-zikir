@@ -726,7 +726,16 @@ async function syncCloud(){
     }
     return {action:"none"};
    });
-   if(outcome.action==="pull"||outcome.action==="markDeleted")await putItem(outcome.record);
+   if(outcome.action==="pull"||outcome.action==="markDeleted"){
+    const latestLocal=await getItem(id);
+    const latestLocalStamp=Math.max(Number(latestLocal?.updatedAt)||0,Number(latestLocal?.deletedAt)||0);
+    const incomingStamp=Math.max(Number(outcome.record?.updatedAt)||0,Number(outcome.record?.deletedAt)||0);
+    if(latestLocal&&latestLocalStamp>incomingStamp){
+     syncAgain=true;
+     continue;
+    }
+    await putItem(outcome.record);
+   }
   }
   const refreshedItems=await allItems();
   const refreshedDaily=refreshedItems.find(x=>x.id==="system-daily-amal"&&!x.deletedAt);
