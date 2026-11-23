@@ -582,8 +582,12 @@ async function shareDailyAmalReport(){
  try{if(navigator.share){await navigator.share({title:tr("মাসিক আমল প্রতিবেদন"),text:report});return}if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(report);toast(tr("প্রতিবেদন কপি হয়েছে"));return}}catch(e){if(e&&e.name==="AbortError")return}
  try{const area=document.createElement("textarea");area.value=report;document.body.appendChild(area);area.select();const ok=document.execCommand("copy");area.remove();toast(ok?tr("প্রতিবেদন কপি হয়েছে"):tr("প্রতিবেদন কপি করা যায়নি"))}catch(e){toast(tr("প্রতিবেদন কপি করা যায়নি"))}
 }function shiftDailyAmalDate(delta){const current=$("dailyAmalDate").value||localDateKey(),d=new Date(current+"T12:00:00");d.setDate(d.getDate()+delta);const key=dailyDateKey(d);$("dailyAmalDate").value=key;dailyCalendarMonth=key.slice(0,7);renderDailyAmal()}
+function isDailyAmalRecoveryRecord(record){
+ return !!record&&!record.deletedAt&&Array.isArray(record.items)&&record.items.length>0&&
+  (record.id==="system-daily-amal"||record.type==="daily-amal"||(record.tab==="__system__"&&record.title==="দৈনিক আমল"));
+}
 function chooseDailyAmalRecoveryCandidate(records){
- return records.filter(x=>x&&x.record&&!x.record.deletedAt&&Array.isArray(x.record.items)&&x.record.items.length>0)
+ return records.filter(x=>x&&isDailyAmalRecoveryRecord(x.record))
   .sort((a,b)=>(Number(b.record.updatedAt)||0)-(Number(a.record.updatedAt)||0))[0]||null;
 }
 async function recoverPreviousDailyAmal(){
@@ -591,19 +595,23 @@ async function recoverPreviousDailyAmal(){
  let legacyDb=null;
  try{
   const candidates=[];
+  const addRecords=(source,records)=>records.forEach(record=>{if(isDailyAmalRecoveryRecord(record))candidates.push({source,record})});
   legacyDb=await openLocalDatabase(DB_NAME);
-  try{const old=await getItem("system-daily-amal",legacyDb);if(old)candidates.push({source:"পুরোনো ডিভাইসের ডেটাবেস",record:old})}
+  try{addRecords("পুরোনো ডিভাইসের ডেটাবেস",await databaseItems(legacyDb))}
   finally{legacyDb.close();legacyDb=null}
+  if(dbLocal)addRecords("বর্তমান অ্যাকাউন্টের লোকাল ডেটা",await databaseItems(dbLocal));
   if(currentUser&&cloud&&navigator.onLine){
-   try{const snap=await cloud.collection("users").doc(currentUser.uid).collection("items").doc("system-daily-amal").get();if(snap.exists)candidates.push({source:"ক্লাউড ব্যাকআপ",record:snap.data()})}
-   catch(e){console.warn("Daily Amal recovery cloud read pending",e)}
+   try{
+    const snap=await cloud.collection("users").doc(currentUser.uid).collection("items").get();
+    snap.forEach(doc=>{const data=doc.data()||{};const record={...data,id:data.id||doc.id};if(isDailyAmalRecoveryRecord(record))candidates.push({source:"ক্লাউড ব্যাকআপ",record})});
+   }catch(e){console.warn("Daily Amal recovery cloud scan pending",e)}
   }
   const candidate=chooseDailyAmalRecoveryCandidate(candidates);
-  if(!candidate){toast("পুরোনো ডেটাবেস বা ক্লাউডে আগের আমলের তালিকা পাওয়া যায়নি। কোনো তথ্য পরিবর্তন করা হয়নি।");return}
+  if(!candidate){toast("পুরোনো ডেটাবেস, বর্তমান লোকাল ডেটা বা ক্লাউডে আগের আমলের তালিকা পাওয়া যায়নি। কোনো তথ্য পরিবর্তন করা হয়নি।");return}
   const current=await getItem("system-daily-amal");
   if(current&&Array.isArray(current.items)&&current.items.length){toast("বর্তমান আমলের তালিকায় তথ্য আছে; সেটি অপরিবর্তিত রাখা হয়েছে।");return}
   const record={...candidate.record,id:"system-daily-amal",type:"daily-amal",tab:"__system__",title:"দৈনিক আমল",updatedAt:Date.now()};
-  const names=record.items.slice(0,5).map(x=>String(x.name||"")).filter(Boolean).join("، ");
+  const names=record.items.slice(0,5).map(x=>String(x.name||"নামহীন আমল")).join("، ");
   const more=record.items.length>5?" এবং আরও "+(record.items.length-5)+"টি":"";
   if(!confirm(candidate.source+"-এ "+record.items.length+"টি আমল পাওয়া গেছে: "+names+more+"। এগুলো ফিরিয়ে আনবেন?"))return;
   await putItem(record);dailyAmalRecord=record;
