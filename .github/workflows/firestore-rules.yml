@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - "firestore.rules"
+      - "index.html"
+      - "sw.js"
       - "firebase.json"
       - "package.json"
       - "tests/firestore.rules.test.js"
