@@ -15,6 +15,7 @@ on:
       - "firebase.json"
       - "package.json"
       - "tests/firestore.rules.test.js"
+      - "tests/local-account-partition.test.js"
       - ".github/workflows/firestore-rules.yml"
 
 jobs:
