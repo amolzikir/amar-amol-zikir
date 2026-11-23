@@ -99,7 +99,7 @@ const firebaseConfig = {
 };
 const TABS=["আমল","জিকির","দোয়া","নোট","অন্যান্য"];
 const DB_NAME="AmolZikirLocal", STORE="items";
-let dbLocal, activeTab=TABS[0], parentId=null, editing=null, viewing=null, currentUser=null, cloud=null, auth=null, syncBusy=false, syncAgain=false, pendingFolderDelete=null, menuFolderId=null, specialView=null, editingFromViewer=false, editorBackEntry=false;
+let dbLocal, activeTab=TABS[0], parentId=null, editing=null, viewing=null, currentUser=null, cloud=null, auth=null, syncBusy=false, syncAgain=false, syncRetryTimer=null, syncRetryDelay=3000, pendingFolderDelete=null, menuFolderId=null, specialView=null, editingFromViewer=false, editorBackEntry=false;
 let tasbihRecord=null,tasbihBackEntry=false,dailyAmalRecord=null,dailyBackEntry=false;
 const $=id=>document.getElementById(id);
 
@@ -512,7 +512,7 @@ function closeTasbih(){
  if(tasbihBackEntry){tasbihBackEntry=false;history.back()}
 }
 async function syncCloud(){
- if(!currentUser||!cloud||!navigator.onLine)return;if(syncBusy){syncAgain=true;return}syncBusy=true;
+ if(!currentUser||!cloud||!navigator.onLine)return;if(syncBusy){syncAgain=true;return}if(syncRetryTimer){clearTimeout(syncRetryTimer);syncRetryTimer=null}syncBusy=true;
  try{
   const ref=cloud.collection("users").doc(currentUser.uid).collection("items");
   const local=await allItems(), snap=await ref.get(), remote=new Map();snap.forEach(d=>remote.set(d.id,d.data()));
@@ -544,8 +544,8 @@ async function syncCloud(){
   if($("dailyAmalPanel")?.classList.contains("show")&&dailyAmalRecord)renderDailyAmal();
   if($("tasbihPanel")?.classList.contains("show")&&tasbihRecord)updateTasbihUI();
   $("accountBtn").textContent="✓ "+(currentUser.displayName?.split(" ")[0]||"সিঙ্ক চালু");
-  toast("ইন্টারনেটের সঙ্গে তথ্য মিলেছে");
- }catch(e){console.error(e);toast("সিঙ্ক হয়নি—পরে আবার চেষ্টা হবে")}
+  syncRetryDelay=3000;if(syncRetryTimer){clearTimeout(syncRetryTimer);syncRetryTimer=null}toast("ইন্টারনেটের সঙ্গে তথ্য মিলেছে");
+ }catch(e){console.error(e);toast("সিঙ্ক হয়নি—স্বয়ংক্রিয়ভাবে আবার চেষ্টা হবে");if(currentUser&&navigator.onLine&&!syncRetryTimer){const delay=syncRetryDelay;syncRetryDelay=Math.min(syncRetryDelay*2,300000);syncRetryTimer=setTimeout(()=>{syncRetryTimer=null;syncCloud()},delay)}}
  finally{syncBusy=false;render();if(syncAgain){syncAgain=false;Promise.resolve().then(()=>syncCloud())}}
 }
 async function signIn(){if(!auth){toast("লগইন চালুর জন্য ইন্টারনেট দরকার");return}const p=new firebase.auth.GoogleAuthProvider();try{await auth.signInWithPopup(p)}catch(e){try{await auth.signInWithRedirect(p)}catch(err){toast("লগইন করা যায়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন")}}}
