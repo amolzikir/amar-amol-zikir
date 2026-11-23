@@ -279,3 +279,12 @@
 - একাধিক প্রার্থী থাকলে সর্বশেষ `updatedAt`-এর রেকর্ডটি বেছে নেয়; restore-এর আগে ব্যবহারকারীর সামনে নাম দেখিয়ে confirmation চায়।
 - অন্য Google account-এর database বা Guest database অনুসন্ধান/মিশ্রণ করা হয় না; legacy database read-only থাকে।
 - v134-এর JS syntax, Daily Amal selector tests, deployment ও CI ফলাফল আলাদাভাবে যাচাই করতে হবে; ফোনে ব্যবহারকারী নিশ্চিত না করা পর্যন্ত পুনরুদ্ধার সফল বলা যাবে না।
+
+
+## v135 (guest database Daily Amal recovery)
+- v134 recovery scan covered legacy DB, current active account DB, and the signed-in user's Firestore items, but did not inspect the guest IndexedDB database.
+- v135 adds a read-only scan of `AmolZikirLocalGuest` (the guest DB) and labels any recovered candidate as originating from the signed-out-use database. The user must still confirm the item names before anything is restored.
+- The guest database is only read and closed; no records are changed or deleted by the scan.
+- Existing candidate selection remains newest non-deleted Daily Amal record only; no blind union or cross-account account-DB scanning.
+- Cache version: `amol-zikir-v135`.
+- Pre-change backups are in `backup/*-2026-11-24-v135-before-guest-db-recovery.bak`.
