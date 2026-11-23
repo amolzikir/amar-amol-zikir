@@ -570,7 +570,7 @@ async function resetTasbih(){
  tasbihRecord={...tasbihRecord,count:0,updatedAt:Date.now()};await persistTasbih();toast("গণনা শূন্য করা হয়েছে");
 }
 async function openTasbih(){
- $("tasbihVibration").checked=localStorage.getItem("amol-tasbih-vibration")==="1";$("tasbihSound").checked=localStorage.getItem("amol-tasbih-sound")==="1";
+ $("tasbihVibration").checked=localStorage.getItem("amol-tasbih-vibration")==="on";$("tasbihSound").checked=localStorage.getItem("amol-tasbih-sound")==="1";
  await loadTasbih();
  $("homeMenu").classList.remove("show");$("tasbihPanel").classList.add("show");
  try{history.pushState({amolTasbih:true},"",location.href);tasbihBackEntry=true}catch(e){}
