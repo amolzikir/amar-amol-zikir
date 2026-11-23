@@ -180,3 +180,11 @@
 - Existing transaction conflict resolution, local freshness guard, retry/backoff অক্ষত।
 - `tests/sync-safety-checklist.md`-এ production data না ছুঁয়ে আলাদা test Firebase project-এ synthetic record দিয়ে পরীক্ষা করার কেস ও ধাপ যোগ।
 - যাচাই: JS syntax ও GitHub content refetch আবশ্যক; বাস্তব device/Firebase test এখনো আলাদা করে করতে হবে।
+
+
+## v124 — Sync race-condition guard ও status polish (২৩ নভেম্বর ২০২৬)
+- Transaction চলাকালে Local record বদলে গেলে পুরোনো snapshot দিয়ে Cloud-এ লেখা/Cloud থেকে Local overwrite করার পরপরই reconciliation পুনরায় চালু হবে।
+- Pull/markDeleted এবং keepLocal—দুই ফলাফলের পর IndexedDB-র বর্তমান record-কে transaction snapshot-এর সঙ্গে তুলনা করা হয়; সমসাময়িক পরিবর্তন শনাক্ত হলে syncAgain দিয়ে নতুন snapshot-এ আবার মিল করা হয়।
+- Offline error বার্তায় অনিচ্ছাকৃত Urdu শব্দ সংশোধন করে বাংলা করা হয়েছে; sign-out হলে Sync status-ও signed-out দেখায়।
+- Cache version v124। v123-এর transaction conflict policy অপরিবর্তিত।
+- v124-এ extracted production conflict-resolution branch-এর ৮টি synthetic case pass করেছে; race guard-এর আলাদা পরীক্ষা release verification-এ নথিবদ্ধ। এটি real Firebase integration test নয়।
