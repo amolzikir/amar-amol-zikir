@@ -41,4 +41,5 @@ test("Dua entries use verified source references and retain the existing offline
   assert.ok(source.includes("https://shamela.ws/book/1726/6935"));
   assert.ok(source.includes("https://shamela.ws/book/711/1940"));
   assert.ok(source.includes("function renderDuaLibrary()"));
+  assert.ok(source.includes('<option value="নামাজ ও মসজিদ">নামাজ ও মসজিদ</option>'));
 });
