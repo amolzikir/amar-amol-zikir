@@ -429,7 +429,7 @@ function handleDailyCalendarKeydown(e){
  const key=dailyDateKey(d);$("dailyAmalDate").value=key;dailyCalendarMonth=key.slice(0,7);renderDailyAmal();
  const next=Array.from($("dailyCalGrid").querySelectorAll("[data-calendar-date]")).find(x=>x.dataset.calendarDate===key);if(next)next.focus();
 }
-function shiftDailyCalendar(delta){const p=dailyCalendarMonth.split("-").map(Number),d=new Date(p[0],p[1]-1+delta,1);dailyCalendarMonth=dailyDateKey(d).slice(0,7);renderDailyCalendar()}
+function shiftDailyCalendar(delta){const p=dailyCalendarMonth.split("-").map(Number),current=$("dailyAmalDate").value||localDateKey(),selected=current.split("-").map(Number),d=new Date(p[0],p[1]-1+delta,1),last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(),day=Math.min(selected[2]||1,last),key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");dailyCalendarMonth=key.slice(0,7);$("dailyAmalDate").value=key;renderDailyAmal()}
 
 async function shareDailyAmalReport(){
  if(!dailyAmalRecord)return;
