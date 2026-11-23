@@ -6,7 +6,8 @@
   "scripts": {
     "test:rules": "firebase emulators:exec --only firestore --project amar-amol-zikir-rules-test \"node --test tests/firestore.rules.test.js\"",
     "test:local": "node --test tests/local-account-partition.test.js",
-    "test:security": "node --test tests/dom-security.test.js"
+    "test:security": "node --test tests/dom-security.test.js",
+    "test:daily-recovery": "node --test tests/daily-amal-recovery.test.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.3",
