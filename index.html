@@ -544,6 +544,7 @@ async function saveAmalReminder(){
  toast(enabled?"আমল রিমাইন্ডার চালু হয়েছে":"আমল রিমাইন্ডার বন্ধ হয়েছে");
 }
 async function checkDailyAmalReminder(){
+ if(!dailyAmalRecord)await loadDailyAmal();
  if(!dailyAmalRecord?.reminder?.enabled)return;
  const r=dailyAmalRecord.reminder,now=new Date(),today=localDateKey(),time=String(r.time||"07:00");
  if(r.lastNotifiedDate===today||now.getHours()*60+now.getMinutes()<Number(time.slice(0,2))*60+Number(time.slice(3,5)))return;
