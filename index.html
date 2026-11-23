@@ -232,6 +232,18 @@ async function selectLocalDatabase(uid){
      }finally{legacy.close()}
     }
    }
+  }else{
+   const owner=localStorage.getItem(LOCAL_CLOUD_OWNER_KEY)||"";
+   if(!owner){
+    const legacy=await openLocalDatabase(DB_NAME);
+    try{
+     const [legacyItems,targetItems]=await Promise.all([databaseItems(legacy),databaseItems(target)]);
+     const merged=mergeMigrationItems(legacyItems,targetItems);
+     await writeDatabaseItems(target,merged);
+     const verified=await databaseItems(target),verifiedMap=new Map(verified.map(x=>[x.id,x]));
+     if(verified.length!==merged.length||merged.some(x=>JSON.stringify(verifiedMap.get(x.id))!==JSON.stringify(x)))throw new Error("গেস্ট ডেটাবেসে লোকাল তথ্য কপি যাচাই সম্পন্ন হয়নি");
+    }finally{legacy.close()}
+   }
   }
   if(dbLocal&&dbLocal!==target)dbLocal.close();
   dbLocal=target;activeLocalDbName=targetName;
