@@ -709,8 +709,8 @@ function openQuranTracker(){$("homeMenu").classList.remove("show");$("quranTrack
 function closeQuranTracker(){$("quranTracker").classList.remove("show")}
 async function saveQuranEntry(){
  const date=$("quranDate").value||localDateKey(),surah=$("quranSurah").value.trim(),from=$("quranAyahFrom").value,to=$("quranAyahTo").value,pages=$("quranPageCount").value,minutes=$("quranMinutesInput").value;
- const validNum=(v,max)=>v===""||(Number.isInteger(Number(v))&&Number(v)>=0&&Number(v)<=max);
- if(!date||!validNum(pages,604)||!validNum(minutes,1440)||!validNum(from,6236)||!validNum(to,6236)||((from==="")!==(to===""))||(from!==""&&Number(to)<Number(from))||(!surah&&!from&&!(Number(pages)>0)&&!(Number(minutes)>0))){toast("তথ্যগুলো সঠিকভাবে পূরণ করুন");return}
+ const validNum=(v,max,min=0)=>v===""||(Number.isInteger(Number(v))&&Number(v)>=min&&Number(v)<=max);
+ if(!date||!validNum(pages,604)||!validNum(minutes,1440)||!validNum(from,6236,1)||!validNum(to,6236,1)||((from==="")!==(to===""))||(from!==""&&Number(to)<Number(from))||(!surah&&!from&&!(Number(pages)>0)&&!(Number(minutes)>0))){toast("তথ্যগুলো সঠিকভাবে পূরণ করুন");return}
  if(!quranTrackerRecord)await loadQuranTracker();
  const entry={entryId:uid(),date,surah,ayahFrom:from?Number(from):null,ayahTo:to?Number(to):null,pages:pages?Number(pages):0,minutes:minutes?Number(minutes):0,createdAt:Date.now()};
  quranTrackerRecord={...quranTrackerRecord,entries:[...(quranTrackerRecord.entries||[]),entry],updatedAt:Date.now()};await putItem(quranTrackerRecord);$("quranSurah").value="";$("quranAyahFrom").value="";$("quranAyahTo").value="";$("quranPageCount").value="";$("quranMinutesInput").value="";renderQuranTracker();if(currentUser&&navigator.onLine)syncCloud();toast("তিলাওয়াত সংরক্ষণ হয়েছে");
