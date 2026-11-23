@@ -308,3 +308,13 @@
 - পুরোনো v120 status ও v118-কেন্দ্রিক next-step তালিকা সরিয়ে বাস্তব pending কাজগুলো সাজানো হয়েছে: Android backup/restore, account isolation, offline/online sync, app lock, live Firestore rules confirmation, Hijri/দোয়া যাচাই এবং feature regression.
 - এটি documentation-only maintenance; app runtime code বা service-worker cache পরিবর্তন করা হয়নি।
 - Pre-change exact backup: `backup/PROJECT-HANDOVER.md-2026-11-24-before-v137-project-status-refresh.bak`.
+
+
+## v138 — Guest database restore persistence fix (2026-11-24)
+- Root cause addressed: when Firebase auth initialization timed out, offline fallback could write into the legacy AmolZikirLocal database; when auth later resolved to signed-out, the app switched to AmolZikirLocalGuest without carrying over those unowned legacy records. This could make a just-restored backup appear briefly and then disappear after refresh.
+- When signed-out auth state is confirmed and no original account owner UID is recorded, selectLocalDatabase(null) now merges legacy records into the Guest DB using the existing timestamp/deletion-aware merge, then reads back and verifies the complete merged result. The legacy DB is left intact. If an original account owner UID exists, no legacy-to-guest copy occurs, preserving account separation.
+- Added regression tests for delayed auth/fallback restore migration and for preventing an identified account owner's legacy records from entering Guest DB.
+- GitHub Actions workflow now runs the regression suite when index.html or sw.js changes.
+- Service worker cache: amol-zikir-v138.
+- Pre-change exact backups: backup/index.html-2026-11-24-before-v137-guest-migration-fix.bak, backup/sw.js-2026-11-24-before-v137-guest-migration-fix.bak, backup/tests-local-account-partition-2026-11-24-before-v137-guest-migration-fix.bak, backup/PROJECT-HANDOVER-2026-11-24-before-v137-guest-migration-fix.bak, backup/firestore-rules-2026-11-24-before-v137-guest-migration-fix.bak.
+- Verification status at edit time: CI, deployment, JS syntax, and live Android restore must be checked after commit; do not claim phone-side success until the user retests.
