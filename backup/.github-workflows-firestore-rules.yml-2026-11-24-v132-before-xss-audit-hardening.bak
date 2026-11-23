@@ -1,0 +1,40 @@
+name: Firestore security rules
+
+on:
+  push:
+    paths:
+      - "firestore.rules"
+      - "firebase.json"
+      - "package.json"
+      - "tests/firestore.rules.test.js"
+      - "tests/local-account-partition.test.js"
+      - "tests/dom-security.test.js"
+      - ".github/workflows/firestore-rules.yml"
+  pull_request:
+    paths:
+      - "firestore.rules"
+      - "firebase.json"
+      - "package.json"
+      - "tests/firestore.rules.test.js"
+      - "tests/local-account-partition.test.js"
+      - "tests/dom-security.test.js"
+      - ".github/workflows/firestore-rules.yml"
+
+jobs:
+  firestore-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install test dependencies
+        run: npm install
+      - name: Run local account partition tests
+        run: npm run test:local
+      - name: Run DOM security tests
+        run: npm run test:security
+      - name: Run Firestore emulator security tests
+        run: npm run test:rules
