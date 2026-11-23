@@ -51,16 +51,16 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ প্রকাশিত release: **v117**; service worker cache string: `amol-zikir-v117`।
+- সর্বশেষ প্রকাশিত release: **v118**; service worker cache string: `amol-zikir-v118`।
 - Backup v2-তে `zikrRoutines` যুক্ত হয়েছে; restore v1/v2 গ্রহণ করে এবং routine merge করে।
-- সর্বশেষ যাচাইকৃত GitHub fetch (২৩-১১-২০২৬, v117-এর পর):
-  - `index.html` blob SHA: `a63752e81e7243e1e3ede999455e592a3eb577d0`
-  - `sw.js` blob SHA: `eebdb0cf309ea83e1cc72895830f71f022d6f9b2`
+- সর্বশেষ যাচাইকৃত GitHub fetch (২৩-১১-২০২৬, v118-এর পর):
+  - `index.html` blob SHA: `e8d7a559511b66594e7dc1f1a33301625a8bff4d` (v118-এর আগে; নতুন SHA নিচের release log-এ যাচাই করে যুক্ত করতে হবে)
+  - `sw.js` blob SHA: `eebdb0cf309ea83e1cc72895830f71f022d6f9b2` (v118-এর আগে; নতুন SHA নিচের release log-এ যাচাই করে যুক্ত করতে হবে)
 - SHA-গুলো কেবল এই নথি হালনাগাদের সময়ের রেফারেন্স; প্রতিটি update-এর আগে নতুন করে fetch করতে হবে।
 - Backup/restore-এর কোডে JSON export, v1/v2 import, record merge ও zikr routine merge আছে; ব্যবহারকারীর ফোনে download/restore test এখনও নিশ্চিত নয়।
 
 ## ৫. পরবর্তী কাজের অগ্রাধিকার
-1. **ডেটা-সুরক্ষা অগ্রাধিকার:** Backup/Restore flow-এর পূর্ণ কোড অডিট; malformed/অবিশ্বস্ত JSON, duplicate ID, timestamp merge এবং zikr routine restore-এর edge case পরীক্ষা। ব্যবহারকারীর আসল ডেটা ঝুঁকিতে ফেলে কোনো live restore test নয়।
+1. **ডেটা-সুরক্ষা অগ্রাধিকার:** v118-এ malformed JSON, record schema, nested unsafe keys, duplicate ID এবং timestamp merge validation শক্ত করা হয়েছে; IndexedDB record writes এক read-write transaction-এ batch করা হয়েছে। পরবর্তী ধাপে backup/restore regression audit ও নিরাপদ test data দিয়ে পরীক্ষা।
 2. ব্যবহারকারীর সুবিধামতো JSON backup download হয়েছে কি না নিশ্চিত করা; restore পরীক্ষা কেবল আলাদা/নিরাপদ test data দিয়ে।
 3. Firebase sync, edit/delete ও offline-to-online sync-এর conflict ও tombstone আচরণ অডিট; on-device test ছাড়া সফল দাবি নয়।
 4. PIN/biometric/১০ মিনিট idle lock এবং lock বন্ধ/পুনরায় চালুর on-device আচরণ ব্যবহারকারীর কাছ থেকে নিশ্চিত করা; UI lock-কে data encryption বলা যাবে না।
@@ -130,3 +130,14 @@
 - Service worker cache: `amol-zikir-v117`.
 - Backups: `backup/index-2026-11-23-before-folder-menu-order-v117.html` and `backup/sw-2026-11-23-before-folder-menu-order-v117.js`, both exact-content verified.
 - JavaScript syntax validation passed; GitHub release files refetched and verified.
+
+
+## v118 — 2026-11-23
+- Backup restore validation hardened: JSON envelope/version, record count, ID/type/title/tab/parent/timestamps, nested object depth/size and unsafe property names validated before writes.
+- Allowed record types are `note`, `folder`, `daily-amal`, `counter`, and `quran-tracker`; optional legacy type remains accepted.
+- Duplicate IDs inside an incoming backup are deduplicated, keeping the record with the newest `updatedAt`; local records are replaced only when incoming `updatedAt` is newer.
+- IndexedDB restore writes are batched in one read-write transaction, reducing risk of partial record imports if a write fails.
+- Zikr routine records receive stricter validation and merge remains additive by ID.
+- Backups: `backup/index-2026-11-23-before-safe-restore-v118.html` and `backup/sw-2026-11-23-before-safe-restore-v118.js`, exact-content verified.
+- JavaScript syntax check passed; GitHub files were refetched and v118/cache markers verified. Cache: `amol-zikir-v118`.
+- Important: actual Android-device restore and quota/failure behavior still require safe test data and user confirmation; no live user data was used for testing.
