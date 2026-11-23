@@ -238,3 +238,5 @@
 - এই ধাপ IndexedDB items (নোট, ফোল্ডার, দৈনিক আমল, তাসবিহ কাউন্টার, কুরআন ট্র্যাকার) আলাদা করে। localStorage-এ থাকা app preferences, Dua favorites ও Zikr routines এখনো browser-profile shared; এগুলো account-partition করা এই release-এর অংশ নয়।
 - Verified backups: `backup/index-2026-11-23-before-local-account-partition-v129.html`, `backup/sw-2026-11-23-before-local-account-partition-v129.js`, `backup/PROJECT-HANDOVER-2026-11-23-before-local-account-partition-v129.md`।
 - Static/synthetic checks ছাড়া বাস্তব Android IndexedDB account-switch পরীক্ষা করা হয়নি; user confirmation আবশ্যক। কোনো পুরোনো DB বা record মুছে ফেলা হয়নি।
+
+- v129 test coverage: `tests/local-account-partition.test.js`-এ চারটি automated test যোগ; GitHub Actions-এ local partition tests ও Firestore Emulator tests দুটোই চালানো হবে। বাস্তব Android IndexedDB account-switch পরীক্ষা এখনো user confirmation-এর অপেক্ষায়।
