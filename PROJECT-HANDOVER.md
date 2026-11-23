@@ -51,11 +51,11 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ প্রকাশিত release: **v119**; service worker cache string: `amol-zikir-v119`।
+- সর্বশেষ প্রকাশিত release: **v120**; service worker cache string: `amol-zikir-v120`।
 - Backup v2-তে `zikrRoutines` যুক্ত হয়েছে; restore v1/v2 গ্রহণ করে এবং routine merge করে।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৩-১১-২০২৬, v118-এর পর):
-  - `index.html` blob SHA: `99029e3766dc34793a843ec28175a46a049a53eb`
-  - `sw.js` blob SHA: `4944d4c7def5b2d9de9f5f8a38838868dec98030`
+  - `index.html` blob SHA: `1578ab85b21246cb33f1b0182bcefd8c08341962`
+  - `sw.js` blob SHA: `c2e8d21981b92af5bb5a7e05fc4e6d43ba94ab70`
 - SHA-গুলো কেবল এই নথি হালনাগাদের সময়ের রেফারেন্স; প্রতিটি update-এর আগে নতুন করে fetch করতে হবে।
 - Backup/restore-এর কোডে JSON export, v1/v2 import, record merge ও zikr routine merge আছে; ব্যবহারকারীর ফোনে download/restore test এখনও নিশ্চিত নয়।
 
@@ -149,3 +149,11 @@
 - Backup files: `backup/index-2026-11-23-before-cloud-tombstone-v119.html` and `backup/sw-2026-11-23-before-cloud-tombstone-v119.js`, exact-content verified.
 - JavaScript syntax passed; files refetched and verified; cache `amol-zikir-v119`.
 - On-device and multi-device concurrent-edit testing still required. Existing user data was not modified or tested.
+
+
+## v120 — 2026-11-23
+- Cloud sync conflict handling now uses Firestore `runTransaction` per record, re-reading the latest cloud document inside the transaction before comparing `updatedAt`/`deletedAt` and deciding whether to pull or write. This reduces stale-snapshot overwrite races between devices.
+- v119 tombstone retention and deletion-wins-on-timestamp-tie semantics preserved.
+- Backups: `backup/index-2026-11-23-before-transactional-sync-v120.html` and `backup/sw-2026-11-23-before-transactional-sync-v120.js`, exact-content verified.
+- JavaScript syntax passed; GitHub files refetched and v120 cache verified.
+- Firestore transaction behavior still needs real multi-device testing using safe test records; no claim of device-level verification.
