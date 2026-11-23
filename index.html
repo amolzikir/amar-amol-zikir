@@ -535,6 +535,14 @@ async function syncCloud(){
    if(l?.deletedAt){await ref.doc(id).delete();continue}
    if(!l||Number(r.updatedAt||0)>Number(l.updatedAt||0))await putItem(r)
   }
+  // Refresh in-memory system records after reconciliation to prevent stale panels overwriting newer cloud data.
+  const refreshedItems=await allItems();
+  const refreshedDaily=refreshedItems.find(x=>x.id==="system-daily-amal"&&!x.deletedAt);
+  const refreshedTasbih=refreshedItems.find(x=>x.id==="system-tasbih-counter"&&!x.deletedAt);
+  if(refreshedDaily)dailyAmalRecord=refreshedDaily;
+  if(refreshedTasbih)tasbihRecord=refreshedTasbih;
+  if($("dailyAmalPanel")?.classList.contains("show")&&dailyAmalRecord)renderDailyAmal();
+  if($("tasbihPanel")?.classList.contains("show")&&tasbihRecord)updateTasbihUI();
   $("accountBtn").textContent="✓ "+(currentUser.displayName?.split(" ")[0]||"সিঙ্ক চালু");
   toast("ইন্টারনেটের সঙ্গে তথ্য মিলেছে");
  }catch(e){console.error(e);toast("সিঙ্ক হয়নি—পরে আবার চেষ্টা হবে")}
