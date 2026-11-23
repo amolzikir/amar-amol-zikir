@@ -7,6 +7,7 @@ on:
       - "firebase.json"
       - "package.json"
       - "tests/firestore.rules.test.js"
+      - "tests/local-account-partition.test.js"
       - ".github/workflows/firestore-rules.yml"
   pull_request:
     paths:
@@ -28,5 +29,7 @@ jobs:
           node-version: 20
       - name: Install test dependencies
         run: npm install
+      - name: Run local account partition tests
+        run: npm run test:local
       - name: Run Firestore emulator security tests
         run: npm run test:rules
