@@ -5,11 +5,11 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 
 const source = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
-const start = source.indexOf("function chooseDailyAmalRecoveryCandidate");
+const start = source.indexOf("function isDailyAmalRecoveryRecord");
 const end = source.indexOf("\nasync function recoverPreviousDailyAmal", start);
 if (start < 0 || end < 0) throw new Error("Daily Amal recovery selector was not found");
 const context = {};
-vm.runInNewContext(source.slice(start, end) + "\nglobalThis.choose=chooseDailyAmalRecoveryCandidate;", context);
+vm.runInNewContext(source.slice(start, end) + "\nglobalThis.choose=chooseDailyAmalRecoveryCandidate; globalThis.isDaily=isDailyAmalRecoveryRecord;", context);
 
 test("recovery chooses the newest non-deleted record that contains saved items", () => {
   const older = { id: "system-daily-amal", updatedAt: 10, items: [{ id: "a", name: "পুরোনো" }] };
@@ -38,4 +38,10 @@ test("recovery does not combine records and thereby avoids reviving removed entr
   const selected = context.choose([a, b]);
   assert.equal(selected, b);
   assert.deepEqual(Array.from(selected.record.items, x => x.id), ["newer"]);
+});
+
+test("recovery recognizes alternate IDs only when the record is clearly Daily Amal", () => {
+  assert.equal(context.isDaily({ id: "old-id", type: "daily-amal", items: [{ name: "ফজর" }] }), true);
+  assert.equal(context.isDaily({ id: "note-1", title: "সাধারণ নোট", items: [{ name: "লেখা" }] }), false);
+  assert.equal(context.isDaily({ id: "old-id", tab: "__system__", title: "দৈনিক আমল", items: [{ name: "যিকির" }] }), true);
 });
