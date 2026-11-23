@@ -227,3 +227,14 @@
 - Verified backups: `backup/firestore-rules-2026-11-23-before-firestore-emulator-tests-v128.rules` এবং `backup/PROJECT-HANDOVER-2026-11-23-before-firestore-emulator-tests-v128.md`।
 - Emulator tests এই পরিবেশে চালানো হয়নি; setup ও test source যোগ করা হয়েছে, passing result দাবি করা হচ্ছে না।
 - GitHub Actions workflow `.github/workflows/firestore-rules.yml` যোগ করা হয়েছে; সংশ্লিষ্ট rules/config/test ফাইল বদলালে GitHub Actions-এ স্বয়ংক্রিয়ভাবে emulator test চালানোর চেষ্টা করবে। Workflow run-এর ফলাফল আলাদাভাবে যাচাই করতে হবে।
+
+## v129 — অ্যাকাউন্টভিত্তিক লোকাল ডেটাবেসের প্রথম ধাপ (২৩ নভেম্বর ২০২৬)
+- `AmolZikirLocalAccount_<uid>` নামে পৃথক IndexedDB store ব্যবহার করা হয়েছে; signed-out অবস্থায় `AmolZikirLocalGuest` ব্যবহৃত হয়।
+- প্রথম Google অ্যাকাউন্টে প্রবেশের সময় পুরোনো `AmolZikirLocal` ডেটা নতুন account DB-তে কপি ও read-back যাচাই করা হয়; পুরোনো DB মুছে ফেলা হয় না।
+- পূর্বে নির্ধারিত owner UID-র সঙ্গে মিলে গেলে migration করা হয়; অন্য UID-র জন্য পুরোনো shared ডেটা কপি করা হয় না। অন্য অ্যাকাউন্ট নিজের পৃথক DB ও নিজস্ব Firestore path ব্যবহার করে।
+- Migration-এ একই ID থাকলে `updatedAt/deletedAt`-এর সর্বশেষ রেকর্ড রাখা হয়; target DB-র নতুন রেকর্ড অক্ষত থাকে।
+- Account switch চলাকালে UI pointer input সাময়িক বন্ধ; sync চলাকালে account context বদলালে পুরোনো sync নতুন DB-তে লিখতে পারে না।
+- Offline/Firebase unavailable fallback-এ পূর্বের owner DB (migration সম্পন্ন থাকলে) বা পুরোনো DB খোলা হয়; signed-out কিন্তু Firebase auth state জানা থাকলে Guest DB ব্যবহৃত হয়।
+- এই ধাপ IndexedDB items (নোট, ফোল্ডার, দৈনিক আমল, তাসবিহ কাউন্টার, কুরআন ট্র্যাকার) আলাদা করে। localStorage-এ থাকা app preferences, Dua favorites ও Zikr routines এখনো browser-profile shared; এগুলো account-partition করা এই release-এর অংশ নয়।
+- Verified backups: `backup/index-2026-11-23-before-local-account-partition-v129.html`, `backup/sw-2026-11-23-before-local-account-partition-v129.js`, `backup/PROJECT-HANDOVER-2026-11-23-before-local-account-partition-v129.md`।
+- Static/synthetic checks ছাড়া বাস্তব Android IndexedDB account-switch পরীক্ষা করা হয়নি; user confirmation আবশ্যক। কোনো পুরোনো DB বা record মুছে ফেলা হয়নি।
