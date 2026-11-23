@@ -681,7 +681,7 @@ function closeTasbih(){
 }
 function syncErrorLabel(e){
  const code=String(e?.code||"").toLowerCase();
- if(!navigator.onLine||code.includes("unavailable")||code.includes("network"))return "ইন্টারনেট সংযোগ নেই—ডিভাইসে তথ্য محفوظ আছে";
+ if(!navigator.onLine||code.includes("unavailable")||code.includes("network"))return "ইন্টারনেট সংযোগ নেই—ডিভাইসে তথ্য সংরক্ষিত আছে";
  if(code.includes("permission-denied"))return "Cloud অনুমতি সমস্যা—Firebase Rules পরীক্ষা দরকার";
  if(code.includes("unauthenticated"))return "লগইন সেশন শেষ—আবার লগইন করুন";
  if(code.includes("resource-exhausted"))return "Cloud সীমা সাময়িকভাবে পূর্ণ—পরে আবার চেষ্টা হবে";
@@ -747,8 +747,12 @@ async function syncCloud(){
     const latestLocal=await getItem(id);
     const latestLocalStamp=Math.max(Number(latestLocal?.updatedAt)||0,Number(latestLocal?.deletedAt)||0);
     const incomingStamp=Math.max(Number(outcome.record?.updatedAt)||0,Number(outcome.record?.deletedAt)||0);
-    if(latestLocal&&latestLocalStamp>incomingStamp){syncAgain=true;continue}
+    const changedDuringTransaction=latestLocal&&JSON.stringify(latestLocal)!==JSON.stringify(l);
+    if(changedDuringTransaction||(latestLocal&&latestLocalStamp>incomingStamp)){syncAgain=true;continue}
     await putItem(outcome.record);
+   }else if(outcome.action==="keepLocal"){
+    const latestLocal=await getItem(id);
+    if(JSON.stringify(latestLocal??null)!==JSON.stringify(l??null)){syncAgain=true;continue}
    }
   }
   const refreshedItems=await allItems();
@@ -994,7 +998,7 @@ async function init(){
  if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(console.warn)}
  try{await openLocal();const restoredNavState=restoreNavState();await render();if(restoredNavState?.viewingId){const savedItems=await allItems();const savedNote=savedItems.find(x=>x.id===restoredNavState.viewingId&&x.type==="note"&&!x.deletedAt);if(savedNote)openViewer(savedNote)}if(restoredNavState?.screen==="daily"){await openDailyAmal();if(parseDailyDateKey(restoredNavState.dailyDate)){$("dailyAmalDate").value=restoredNavState.dailyDate;dailyCalendarMonth=validDailyMonth(restoredNavState.dailyCalendarMonth)?restoredNavState.dailyCalendarMonth:restoredNavState.dailyDate.slice(0,7);renderDailyAmal()}}else if(restoredNavState?.screen==="tasbih"){await openTasbih()}checkReminders();checkDailyAmalReminder();setInterval(()=>{checkReminders();checkDailyAmalReminder()},30000)}catch(e){console.error("App startup/storage error",e);toast("অ্যাপের ডেটা চালু করতে সমস্যা হয়েছে। পেজটি আবার লোড করুন।")}
  try{firebase.initializeApp(firebaseConfig);auth=firebase.auth();cloud=firebase.firestore();
- auth.onAuthStateChanged(async u=>{currentUser=u;if(u){$("accountBtn").textContent="✓ "+(u.displayName?.split(" ")[0]||"লগইন");await syncCloud()}else{$("accountBtn").textContent="লগইন করুন"}})
+ auth.onAuthStateChanged(async u=>{currentUser=u;if(u){$("accountBtn").textContent="✓ "+(u.displayName?.split(" ")[0]||"লগইন");await syncCloud()}else{$("accountBtn").textContent="লগইন করুন";setSyncStatus("signedout")}})
  }catch(e){console.warn("Firebase unavailable; offline local mode remains available",e)}
 }
 Object.assign(I18N,{"মোট সম্পন্ন আমল":["Completed amal items","الأعمال المكتملة","مکمل اعمال"],"সম্পূর্ণ দিন":["Fully completed days","الأيام المكتملة بالكامل","مکمل دن"],"মোট সম্পন্ন আমল":["Completed amal items","الأعمال المكتملة","مکمل اعمال"]});
