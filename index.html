@@ -678,30 +678,44 @@ function closeTasbih(){
  if(tasbihBackEntry){tasbihBackEntry=false;history.back()}
 }
 async function syncCloud(){
- if(!currentUser||!cloud||!navigator.onLine)return;if(syncBusy){syncAgain=true;return}if(syncRetryTimer){clearTimeout(syncRetryTimer);syncRetryTimer=null}syncBusy=true;
+ if(!currentUser||!cloud||!navigator.onLine)return;
+ if(syncBusy){syncAgain=true;return}
+ if(syncRetryTimer){clearTimeout(syncRetryTimer);syncRetryTimer=null}
+ syncBusy=true;
  try{
   const ref=cloud.collection("users").doc(currentUser.uid).collection("items");
-  const local=await allItems(), snap=await ref.get(), remote=new Map();snap.forEach(d=>remote.set(d.id,d.data()));
-  // Delete marked notes from Firestore first. Keep the local tombstone so an old
-  // remote copy cannot be uploaded again during a later sync on this device.
-  for(const x of local){
-   if(x.deletedAt){if(remote.has(x.id))await ref.doc(x.id).delete();continue}
-   const r=remote.get(x.id);
-   if(!r||Number(x.updatedAt||0)>Number(r.updatedAt||0)){await ref.doc(x.id).set(x)}
-  }
-  // Also clean up old cloud tombstones left by earlier versions of the app.
-  for(const [id,r] of remote){
-   const l=local.find(x=>x.id===id);
-   if(r.deletedAt){
-    if(l&&!l.deletedAt)await putItem({...l,deletedAt:Number(r.deletedAt)||Date.now(),updatedAt:Number(r.updatedAt)||Date.now()});
-    else if(!l)await putItem(r);
-    await ref.doc(id).delete();
+  const localItems=await allItems(),snap=await ref.get(),local=new Map(localItems.map(x=>[x.id,x])),remote=new Map();
+  snap.forEach(d=>remote.set(d.id,d.data()));
+  const ids=new Set([...local.keys(),...remote.keys()]);
+  for(const id of ids){
+   const l=local.get(id),r=remote.get(id);
+   if(!l){if(r)await putItem(r);continue}
+   if(!r){
+    if(l.deletedAt){
+     const stamp=Math.max(Number(l.updatedAt)||0,Number(l.deletedAt)||0,Date.now());
+     await ref.doc(id).set({id:l.id,type:l.type||"note",tab:l.tab||"",parentId:l.parentId||null,title:l.title||"",deletedAt:stamp,updatedAt:stamp});
+    }else await ref.doc(id).set(l);
     continue;
    }
-   if(l?.deletedAt){await ref.doc(id).delete();continue}
-   if(!l||Number(r.updatedAt||0)>Number(l.updatedAt||0))await putItem(r)
+   const localTime=Math.max(Number(l.updatedAt)||0,Number(l.deletedAt)||0);
+   const remoteTime=Math.max(Number(r.updatedAt)||0,Number(r.deletedAt)||0);
+   const localDeleted=!!l.deletedAt,remoteDeleted=!!r.deletedAt;
+   const remoteWins=remoteTime>localTime||(remoteTime===localTime&&remoteDeleted&&!localDeleted);
+   const localWins=localTime>remoteTime||(localTime===remoteTime&&localDeleted&&!remoteDeleted);
+   if(remoteWins){
+    if(remoteDeleted)await putItem({...l,deletedAt:Number(r.deletedAt)||remoteTime,updatedAt:Math.max(Number(r.updatedAt)||0,remoteTime)});
+    else await putItem(r);
+   }else if(localWins){
+    if(localDeleted){
+     const stamp=Math.max(Number(l.deletedAt)||0,Number(l.updatedAt)||0);
+     await ref.doc(id).set({id:l.id,type:l.type||r.type||"note",tab:l.tab||r.tab||"",parentId:l.parentId||r.parentId||null,title:l.title||r.title||"",deletedAt:stamp,updatedAt:stamp});
+    }else await ref.doc(id).set(l);
+   }else if(localDeleted||remoteDeleted){
+    const stamp=Math.max(localTime,remoteTime),winner=localDeleted?l:r;
+    await ref.doc(id).set({id,type:winner.type||l.type||r.type||"note",tab:winner.tab||"",parentId:winner.parentId||null,title:winner.title||"",deletedAt:stamp,updatedAt:stamp});
+    if(!localDeleted)await putItem({...l,deletedAt:stamp,updatedAt:stamp});
+   }
   }
-  // Refresh in-memory system records after reconciliation to prevent stale panels overwriting newer cloud data.
   const refreshedItems=await allItems();
   const refreshedDaily=refreshedItems.find(x=>x.id==="system-daily-amal"&&!x.deletedAt);
   const refreshedTasbih=refreshedItems.find(x=>x.id==="system-tasbih-counter"&&!x.deletedAt);
@@ -710,9 +724,15 @@ async function syncCloud(){
   if($("dailyAmalPanel")?.classList.contains("show")&&dailyAmalRecord)renderDailyAmal();
   if($("tasbihPanel")?.classList.contains("show")&&tasbihRecord)updateTasbihUI();
   $("accountBtn").textContent="✓ "+(currentUser.displayName?.split(" ")[0]||"সিঙ্ক চালু");
-  syncRetryDelay=3000;if(syncRetryTimer){clearTimeout(syncRetryTimer);syncRetryTimer=null}toast("ইন্টারনেটের সঙ্গে তথ্য মিলেছে");
- }catch(e){console.error(e);toast("সিঙ্ক হয়নি—স্বয়ংক্রিয়ভাবে আবার চেষ্টা হবে");if(currentUser&&navigator.onLine&&!syncRetryTimer){const delay=syncRetryDelay;syncRetryDelay=Math.min(syncRetryDelay*2,300000);syncRetryTimer=setTimeout(()=>{syncRetryTimer=null;syncCloud()},delay)}}
- finally{syncBusy=false;render();if(syncAgain){syncAgain=false;Promise.resolve().then(()=>syncCloud())}}
+  syncRetryDelay=3000;if(syncRetryTimer){clearTimeout(syncRetryTimer);syncRetryTimer=null}
+  toast("ইন্টারনেটের সঙ্গে তথ্য মিলেছে");
+ }catch(e){
+  console.error(e);toast("সিঙ্ক হয়নি—স্বয়ংক্রিয়ভাবে আবার চেষ্টা হবে");
+  if(currentUser&&navigator.onLine&&!syncRetryTimer){const delay=syncRetryDelay;syncRetryDelay=Math.min(syncRetryDelay*2,300000);syncRetryTimer=setTimeout(()=>{syncRetryTimer=null;syncCloud()},delay)}
+ }finally{
+  syncBusy=false;render();
+  if(syncAgain){syncAgain=false;Promise.resolve().then(()=>syncCloud())}
+ }
 }
 async function signIn(){if(!auth){toast("লগইন চালুর জন্য ইন্টারনেট দরকার");return}const p=new firebase.auth.GoogleAuthProvider();try{await auth.signInWithPopup(p)}catch(e){try{await auth.signInWithRedirect(p)}catch(err){toast("লগইন করা যায়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন")}}}
 window.addEventListener("popstate",()=>{if($("dailyAmalPanel")?.classList.contains("show")){$("dailyAmalPanel").classList.remove("show");dailyBackEntry=false;saveNavState();return}if($("tasbihPanel")?.classList.contains("show")){$("tasbihPanel").classList.remove("show");tasbihBackEntry=false;saveNavState();return}if($("noteMenu")?.classList.contains("show")){closeNoteMenu();if($("editor")?.classList.contains("show")){try{history.pushState({amolEditor:true},"",location.href);editorBackEntry=true}catch(e){}}return}if($("editor")?.classList.contains("show")){editorBackEntry=false;cancelEditor()}});
