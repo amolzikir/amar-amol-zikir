@@ -157,3 +157,10 @@
 - Backups: `backup/index-2026-11-23-before-transactional-sync-v120.html` and `backup/sw-2026-11-23-before-transactional-sync-v120.js`, exact-content verified.
 - JavaScript syntax passed; GitHub files refetched and v120 cache verified.
 - Firestore transaction behavior still needs real multi-device testing using safe test records; no claim of device-level verification.
+
+## v121 — 2026-11-23
+- Cloud sync now re-reads each record from IndexedDB immediately before its Firestore transaction, instead of relying only on the initial local snapshot. This reduces the chance that an edit made during a long sync is uploaded using an older in-memory copy.
+- Existing offline-first storage, reconnect-triggered sync, visibility-triggered sync, retry backoff, v120 Firestore transactions, and v119 deletion tombstones are preserved.
+- Backups: `backup/index-2026-11-23-before-local-fresh-sync-v121.html` and `backup/sw-2026-11-23-before-local-fresh-sync-v121.js`, exact-content verified.
+- JavaScript syntax and GitHub refetch verification passed. Cache: `amol-zikir-v121`.
+- Real concurrent editing across devices and offline/reconnect behavior still require on-device testing; no claim of device-level verification.
