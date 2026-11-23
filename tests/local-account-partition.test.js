@@ -69,7 +69,7 @@ function makeEnvironment(seed = {}, storageSeed = {}) {
     setItem(key, value) { values.set(key, String(value)); }
   };
   const context = { indexedDB, localStorage, console, Promise, Map, String, Number, JSON, Error, queueMicrotask };
-  const code = `let dbLocal=null,dailyAmalRecord=null,tasbihRecord=null,quranTrackerRecord=null;\n${helpers}\nglobalThis.inspect=()=>({dbLocal,activeLocalDbName,localCloudAccountAllowed});`;
+  const code = `let dbLocal=null,dailyAmalRecord=null,tasbihRecord=null,quranTrackerRecord=null,currentUser=null;\n${helpers}\nglobalThis.inspect=()=>({dbLocal,activeLocalDbName,localCloudAccountAllowed,personalStorageKey});`;
   vm.runInNewContext(code, context);
   return { context, databases, values };
 }
@@ -128,4 +128,34 @@ test("returning to the first account reopens its own saved database", async () =
   const state = env.context.inspect();
   assert.equal(state.activeLocalDbName, "AmolZikirLocalAccount_user-a");
   assert.equal(env.databases.get("AmolZikirLocalAccount_user-a").items.has("a-only"), true);
+});
+
+test("personal favorites and routines migrate only into their original account", async () => {
+  const env = makeEnvironment({ AmolZikirLocal: [] }, {
+    "amol-local-cloud-owner-uid": "user-a",
+    "amol-dua-favorites": "[\\"dua-1\\"]",
+    "amol-zikr-routines": "[{\\"id\\":\\"routine-a\\"}]"
+  });
+  await vm.runInNewContext("selectLocalDatabase('user-a')", env.context);
+  const state = env.context.inspect();
+  assert.equal(state.personalStorageKey("amol-dua-favorites"), "amol-dua-favorites::account::user-a");
+  assert.equal(env.values.get("amol-dua-favorites::account::user-a"), "[\\"dua-1\\"]");
+  assert.equal(state.personalStorageKey("amol-zikr-routines"), "amol-zikr-routines::account::user-a");
+  assert.equal(env.values.get("amol-zikr-routines::account::user-a"), "[{\\"id\\":\\"routine-a\\"}]");
+  await vm.runInNewContext("currentUser={uid:'user-b'};selectLocalDatabase('user-b')", env.context);
+  const other = env.context.inspect();
+  assert.equal(other.personalStorageKey("amol-dua-favorites"), "amol-dua-favorites::account::user-b");
+  assert.equal(env.values.has("amol-dua-favorites::account::user-b"), false);
+  assert.equal(env.values.get("amol-dua-favorites"), "[\\"dua-1\\"]");
+});
+
+test("guest personal storage never inherits a signed-in owner's favorites", async () => {
+  const env = makeEnvironment({ AmolZikirLocal: [] }, {
+    "amol-local-cloud-owner-uid": "user-a",
+    "amol-dua-favorites": "[\\"private-dua\\"]"
+  });
+  await vm.runInNewContext("selectLocalDatabase(null)", env.context);
+  const state = env.context.inspect();
+  assert.equal(state.personalStorageKey("amol-dua-favorites"), "amol-dua-favorites::guest");
+  assert.equal(env.values.has("amol-dua-favorites::guest"), false);
 });
