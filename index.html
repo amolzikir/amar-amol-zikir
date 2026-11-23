@@ -772,7 +772,7 @@ async function deleteQuranEntry(id){
 async function exportAppBackup(){
  try{
   const items=await allItems();
-  const payload={format:"amar-amol-zikir-backup",version:1,createdAt:new Date().toISOString(),itemCount:items.length,items};
+  const routines=readZikrRoutines();const payload={format:"amar-amol-zikir-backup",version:2,createdAt:new Date().toISOString(),itemCount:items.length,items,localData:{zikrRoutines:routines}};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob),a=document.createElement("a");
   const day=new Date().toISOString().slice(0,10);
@@ -786,8 +786,10 @@ async function importAppBackup(file){
  try{
   if(file.size>20*1024*1024)throw new Error("ফাইলটি ২০ মেগাবাইটের বেশি");
   const data=JSON.parse(await file.text());
-  if(!data||data.format!=="amar-amol-zikir-backup"||data.version!==1||!Array.isArray(data.items))throw new Error("ব্যাকআপ ফাইলটি সঠিক নয়");
-  if(data.items.length>50000||!data.items.every(x=>x&&typeof x==="object"&&typeof x.id==="string"&&x.id.length>0))throw new Error("ব্যাকআপের তথ্য যাচাই করা যায়নি");
+  if(!data||data.format!=="amar-amol-zikir-backup"||![1,2].includes(data.version)||!Array.isArray(data.items))throw new Error("ব্যাকআপ ফাইলটি সঠিক নয়");
+  if(data.items.length>50000||!data.items.every(x=>x&&typeof x==="object"&&typeof x.id==="string"&&x.id.length>0&&(!x.type||typeof x.type==="string")))throw new Error("ব্যাকআপের তথ্য যাচাই করা যায়নি");
+  const backupRoutines=data.version>=2?data.localData?.zikrRoutines:undefined;
+  if(backupRoutines!==undefined&&(!Array.isArray(backupRoutines)||backupRoutines.length>1000||!backupRoutines.every(r=>r&&typeof r.id==="string"&&typeof r.phrase==="string"&&Number.isInteger(Number(r.target))&&Number(r.target)>=1&&Number(r.target)<=100000)))throw new Error("ব্যাকআপের জিকির রুটিন যাচাই করা যায়নি");
   if(!confirm("ব্যাকআপে "+data.items.length+"টি রেকর্ড আছে। বর্তমান তথ্য মুছে না দিয়ে একত্র করা হবে। চালিয়ে যাবেন?"))return;
   const local=await allItems(),byId=new Map(local.map(x=>[x.id,x]));let added=0,updated=0,kept=0;
   for(const incoming of data.items){
@@ -796,8 +798,9 @@ async function importAppBackup(file){
    if(Number(incoming.updatedAt||0)>Number(current.updatedAt||0)){await putItem(incoming);byId.set(incoming.id,incoming);updated++}
    else kept++;
   }
+  let routineAdded=0;if(Array.isArray(backupRoutines)){const existing=readZikrRoutines(),ids=new Set(existing.map(r=>r.id));for(const r of backupRoutines){if(!ids.has(r.id)){existing.push(r);ids.add(r.id);routineAdded++}}saveZikrRoutines(existing)}
   await render();if(currentUser&&navigator.onLine)await syncCloud();
-  toast("পুনরুদ্ধার সম্পন্ন: নতুন "+added+", হালনাগাদ "+updated+", অপরিবর্তিত "+kept);
+  toast("পুনরুদ্ধার সম্পন্ন: নতুন "+added+", হালনাগাদ "+updated+", অপরিবর্তিত "+kept+(routineAdded?" · নতুন জিকির রুটিন "+routineAdded:""));
  }catch(e){console.error(e);toast(e.message==="ফাইলটি ২০ মেগাবাইটের বেশি"||e.message==="ব্যাকআপ ফাইলটি সঠিক নয়"||e.message==="ব্যাকআপের তথ্য যাচাই করা যায়নি"?e.message:"ব্যাকআপ পড়া যায়নি")}
 }
 
