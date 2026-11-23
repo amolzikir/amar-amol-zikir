@@ -147,7 +147,7 @@ body.dark .quran-stats>div{background:#203d32}
 .amal-reminder-box .action{width:100%}
 body.dark .amal-reminder-box{background:#1b2a23}
 
-</style>
+.sync-status{font-size:11px;line-height:1.4;margin:7px 0 0 54px;opacity:.9;min-height:14px}.sync-status[data-state="error"],.sync-status[data-state="retry"]{color:#ffe0a6}.sync-status[data-state="success"]{color:#d9ffe8}\n</style>
 </head>
 <body>
 <header>
@@ -678,11 +678,27 @@ function closeTasbih(){
  $("tasbihPanel").classList.remove("show");saveNavState();
  if(tasbihBackEntry){tasbihBackEntry=false;history.back()}
 }
+function syncErrorLabel(e){
+ const code=String(e?.code||"").toLowerCase();
+ if(!navigator.onLine||code.includes("unavailable")||code.includes("network"))return "ইন্টারনেট সংযোগ নেই—ডিভাইসে তথ্য محفوظ আছে";
+ if(code.includes("permission-denied"))return "Cloud অনুমতি সমস্যা—Firebase Rules পরীক্ষা দরকার";
+ if(code.includes("unauthenticated"))return "লগইন সেশন শেষ—আবার লগইন করুন";
+ if(code.includes("resource-exhausted"))return "Cloud সীমা সাময়িকভাবে পূর্ণ—পরে আবার চেষ্টা হবে";
+ if(code.includes("deadline-exceeded")||code.includes("timeout"))return "Cloud উত্তর দিতে দেরি করছে—আবার চেষ্টা হবে";
+ return "সিঙ্কে সমস্যা—স্বয়ংক্রিয়ভাবে আবার চেষ্টা হবে";
+}
+function setSyncStatus(state,detail=""){
+ const el=$("syncStatus");if(!el)return;
+ const labels={offline:"অফলাইন • ডিভাইসে সংরক্ষিত",syncing:"সিঙ্ক হচ্ছে…",success:"সিঙ্ক সম্পন্ন",retry:"আবার চেষ্টা হবে",error:"সিঙ্কে সমস্যা",signedout:"লগইন করলে Cloud Sync চালু হবে"};
+ el.textContent=detail||labels[state]||"";
+ el.dataset.state=state;
+}
 async function syncCloud(){
- if(!currentUser||!cloud||!navigator.onLine)return;
+ if(!currentUser||!cloud){setSyncStatus("signedout");return}
+ if(!navigator.onLine){setSyncStatus("offline");return}
  if(syncBusy){syncAgain=true;return}
  if(syncRetryTimer){clearTimeout(syncRetryTimer);syncRetryTimer=null}
- syncBusy=true;
+ syncBusy=true;setSyncStatus("syncing");
  try{
   const ref=cloud.collection("users").doc(currentUser.uid).collection("items");
   const localItems=await allItems(),snap=await ref.get(),local=new Map(localItems.map(x=>[x.id,x])),remote=new Map();
@@ -730,10 +746,7 @@ async function syncCloud(){
     const latestLocal=await getItem(id);
     const latestLocalStamp=Math.max(Number(latestLocal?.updatedAt)||0,Number(latestLocal?.deletedAt)||0);
     const incomingStamp=Math.max(Number(outcome.record?.updatedAt)||0,Number(outcome.record?.deletedAt)||0);
-    if(latestLocal&&latestLocalStamp>incomingStamp){
-     syncAgain=true;
-     continue;
-    }
+    if(latestLocal&&latestLocalStamp>incomingStamp){syncAgain=true;continue}
     await putItem(outcome.record);
    }
   }
@@ -746,9 +759,10 @@ async function syncCloud(){
   if($("tasbihPanel")?.classList.contains("show")&&tasbihRecord)updateTasbihUI();
   $("accountBtn").textContent="✓ "+(currentUser.displayName?.split(" ")[0]||"সিঙ্ক চালু");
   syncRetryDelay=3000;if(syncRetryTimer){clearTimeout(syncRetryTimer);syncRetryTimer=null}
-  toast("ইন্টারনেটের সঙ্গে তথ্য মিলেছে");
+  setSyncStatus("success");toast("ইন্টারনেটের সঙ্গে তথ্য মিলেছে");
  }catch(e){
-  console.error(e);toast("সিঙ্ক হয়নি—স্বয়ংক্রিয়ভাবে আবার চেষ্টা হবে");
+  console.error("Cloud sync diagnostic:",{code:e?.code||"unknown",message:e?.message||String(e)});
+  const label=syncErrorLabel(e);setSyncStatus("retry",label);toast(label);
   if(currentUser&&navigator.onLine&&!syncRetryTimer){const delay=syncRetryDelay;syncRetryDelay=Math.min(syncRetryDelay*2,300000);syncRetryTimer=setTimeout(()=>{syncRetryTimer=null;syncCloud()},delay)}
  }finally{
   syncBusy=false;render();
