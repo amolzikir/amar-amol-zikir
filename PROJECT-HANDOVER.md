@@ -89,3 +89,13 @@
 - **গুরুত্বপূর্ণ সীমাবদ্ধতা:** এটি UI/app-screen lock; IndexedDB বা ব্রাউজারের ডেটা এনক্রিপ্ট করে না। ফোন/ব্রাউজারের নিজস্ব নিরাপত্তা ও ডেটা ব্যাকআপ বজায় রাখতে হবে।
 - v112 কোড GitHub-এ প্রকাশিত; JS syntax check ও পুনরায় fetch verification পাস করেছে। Cache: `amol-zikir-v112`।
 - ব্যবহারকারীর ফোনে PIN সেট করা, লক হওয়া ও আনলক পরীক্ষা এখনও বাকি; ব্যবহারকারী নিশ্চিত না করা পর্যন্ত on-device success বলা যাবে না।
+
+
+## ১০. v113 — PIN নিষ্ক্রিয়তা টাইমআউট (২৩ নভেম্বর ২০২৬)
+- ব্যবহারকারীর অনুরোধে PIN auto-lock সময় ১০ মিনিট নিষ্ক্রিয়তা নির্ধারণ করা হয়েছে।
+- রিফ্রেশ করলে সঙ্গে সঙ্গে PIN চাইবে না; সর্বশেষ activity timestamp localStorage-এ রেখে reload-এর পর অবশিষ্ট idle সময় গণনা করে।
+- Pointer/touch/keyboard/scroll/click activity idle timer নতুন করে শুরু করে।
+- ১০ মিনিট নিষ্ক্রিয় হলে, অথবা app background থেকে foreground-এ ফিরলে সময়সীমা পার হয়ে থাকলে, PIN lock দেখায়।
+- Settings-এর “এখনই লক করুন” আগের মতো তাৎক্ষণিক কাজ করে।
+- Cache: `amol-zikir-v113`; JavaScript syntax check ও GitHub refetch verification পাস।
+- ব্যবহারকারীর ফোনে রিফ্রেশ/১০ মিনিট idle/আনলক আচরণ পরীক্ষা এখনও বাকি।
