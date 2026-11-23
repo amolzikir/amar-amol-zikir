@@ -226,3 +226,4 @@
 - নিরাপত্তার জন্য স্থানীয় IndexedDB এখনো একটিই shared store। Account-specific database migration এখনো করা হয়নি; migration-এর আগে offline edits, startup flow, system records, backup/restore ও account-switch আচরণ আলাদাভাবে পরীক্ষা করা আবশ্যক।
 - Verified backups: `backup/firestore-rules-2026-11-23-before-firestore-emulator-tests-v128.rules` এবং `backup/PROJECT-HANDOVER-2026-11-23-before-firestore-emulator-tests-v128.md`।
 - Emulator tests এই পরিবেশে চালানো হয়নি; setup ও test source যোগ করা হয়েছে, passing result দাবি করা হচ্ছে না।
+- GitHub Actions workflow `.github/workflows/firestore-rules.yml` যোগ করা হয়েছে; সংশ্লিষ্ট rules/config/test ফাইল বদলালে GitHub Actions-এ স্বয়ংক্রিয়ভাবে emulator test চালানোর চেষ্টা করবে। Workflow run-এর ফলাফল আলাদাভাবে যাচাই করতে হবে।
