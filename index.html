@@ -688,33 +688,44 @@ async function syncCloud(){
   snap.forEach(d=>remote.set(d.id,d.data()));
   const ids=new Set([...local.keys(),...remote.keys()]);
   for(const id of ids){
-   const l=local.get(id),r=remote.get(id);
-   if(!l){if(r)await putItem(r);continue}
-   if(!r){
-    if(l.deletedAt){
-     const stamp=Math.max(Number(l.updatedAt)||0,Number(l.deletedAt)||0,Date.now());
-     await ref.doc(id).set({id:l.id,type:l.type||"note",tab:l.tab||"",parentId:l.parentId||null,title:l.title||"",deletedAt:stamp,updatedAt:stamp});
-    }else await ref.doc(id).set(l);
-    continue;
-   }
-   const localTime=Math.max(Number(l.updatedAt)||0,Number(l.deletedAt)||0);
-   const remoteTime=Math.max(Number(r.updatedAt)||0,Number(r.deletedAt)||0);
-   const localDeleted=!!l.deletedAt,remoteDeleted=!!r.deletedAt;
-   const remoteWins=remoteTime>localTime||(remoteTime===localTime&&remoteDeleted&&!localDeleted);
-   const localWins=localTime>remoteTime||(localTime===remoteTime&&localDeleted&&!remoteDeleted);
-   if(remoteWins){
-    if(remoteDeleted)await putItem({...l,deletedAt:Number(r.deletedAt)||remoteTime,updatedAt:Math.max(Number(r.updatedAt)||0,remoteTime)});
-    else await putItem(r);
-   }else if(localWins){
-    if(localDeleted){
-     const stamp=Math.max(Number(l.deletedAt)||0,Number(l.updatedAt)||0);
-     await ref.doc(id).set({id:l.id,type:l.type||r.type||"note",tab:l.tab||r.tab||"",parentId:l.parentId||r.parentId||null,title:l.title||r.title||"",deletedAt:stamp,updatedAt:stamp});
-    }else await ref.doc(id).set(l);
-   }else if(localDeleted||remoteDeleted){
-    const stamp=Math.max(localTime,remoteTime),winner=localDeleted?l:r;
-    await ref.doc(id).set({id,type:winner.type||l.type||r.type||"note",tab:winner.tab||"",parentId:winner.parentId||null,title:winner.title||"",deletedAt:stamp,updatedAt:stamp});
-    if(!localDeleted)await putItem({...l,deletedAt:stamp,updatedAt:stamp});
-   }
+   const l=local.get(id);
+   const docRef=ref.doc(id);
+   const outcome=await firebase.firestore().runTransaction(async tx=>{
+    const fresh=await tx.get(docRef),r=fresh.exists?fresh.data():null;
+    if(!l&&!r)return {action:"none"};
+    if(!l&&r)return {action:"pull",record:r};
+    if(l&&!r){
+     if(l.deletedAt){
+      const stamp=Math.max(Number(l.updatedAt)||0,Number(l.deletedAt)||0,Date.now());
+      tx.set(docRef,{id:l.id,type:l.type||"note",tab:l.tab||"",parentId:l.parentId||null,title:l.title||"",deletedAt:stamp,updatedAt:stamp});
+      return {action:"keepLocal"};
+     }
+     tx.set(docRef,l);return {action:"keepLocal"};
+    }
+    const lt=Math.max(Number(l.updatedAt)||0,Number(l.deletedAt)||0);
+    const rt=Math.max(Number(r.updatedAt)||0,Number(r.deletedAt)||0);
+    const ld=!!l.deletedAt,rd=!!r.deletedAt;
+    const remoteWins=rt>lt||(rt===lt&&rd&&!ld);
+    const localWins=lt>rt||(lt===rt&&ld&&!rd);
+    if(remoteWins){
+     if(rd)return {action:"markDeleted",record:{...l,deletedAt:Number(r.deletedAt)||rt,updatedAt:Math.max(Number(r.updatedAt)||0,rt)}};
+     return {action:"pull",record:r};
+    }
+    if(localWins){
+     if(ld){
+      const stamp=Math.max(Number(l.deletedAt)||0,Number(l.updatedAt)||0);
+      tx.set(docRef,{id:l.id,type:l.type||r.type||"note",tab:l.tab||r.tab||"",parentId:l.parentId||r.parentId||null,title:l.title||r.title||"",deletedAt:stamp,updatedAt:stamp});
+     }else tx.set(docRef,l);
+     return {action:"keepLocal"};
+    }
+    if(ld||rd){
+     const stamp=Math.max(lt,rt),winner=ld?l:r;
+     tx.set(docRef,{id,type:winner.type||l.type||r.type||"note",tab:winner.tab||"",parentId:winner.parentId||null,title:winner.title||"",deletedAt:stamp,updatedAt:stamp});
+     return ld?{action:"keepLocal"}:{action:"markDeleted",record:{...l,deletedAt:stamp,updatedAt:stamp}};
+    }
+    return {action:"none"};
+   });
+   if(outcome.action==="pull"||outcome.action==="markDeleted")await putItem(outcome.record);
   }
   const refreshedItems=await allItems();
   const refreshedDaily=refreshedItems.find(x=>x.id==="system-daily-amal"&&!x.deletedAt);
