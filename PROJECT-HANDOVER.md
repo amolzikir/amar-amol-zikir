@@ -240,3 +240,14 @@
 - Static/synthetic checks ছাড়া বাস্তব Android IndexedDB account-switch পরীক্ষা করা হয়নি; user confirmation আবশ্যক। কোনো পুরোনো DB বা record মুছে ফেলা হয়নি।
 
 - v129 test coverage: `tests/local-account-partition.test.js`-এ চারটি automated test যোগ; GitHub Actions-এ local partition tests ও Firestore Emulator tests দুটোই চালানো হবে। বাস্তব Android IndexedDB account-switch পরীক্ষা এখনো user confirmation-এর অপেক্ষায়।
+
+
+## v130 — personal localStorage isolation (2026-11-23)
+- Dua favorites and personal Zikr Routines now use account-specific localStorage keys, aligned with the active IndexedDB account.
+- Existing legacy favorites/routines migrate only to the account whose UID matches `amol-local-cloud-owner-uid`; guest storage does not inherit an existing owner's personal data.
+- For a profile with no prior owner, legacy values migrate into guest-scoped keys.
+- Language, theme, editor size, and sound preferences remain browser-wide settings.
+- Existing legacy keys are preserved; this change does not delete any stored values.
+- Added automated tests for original-owner migration and guest/account separation.
+- Service worker cache: `amol-zikir-v130`.
+- Pre-change verified backups: `backup/index.html-2026-11-23-v129-before-personal-storage-isolation.bak`, `backup/sw.js-2026-11-23-v129-before-personal-storage-isolation.bak`, `backup/PROJECT-HANDOVER.md-2026-11-23-v129-before-personal-storage-isolation.bak`, `backup/tests-local-account-partition.test.js-2026-11-23-v129-before-personal-storage-isolation.bak`.
