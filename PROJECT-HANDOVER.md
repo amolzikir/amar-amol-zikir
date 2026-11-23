@@ -51,11 +51,11 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ প্রকাশিত release: **v118**; service worker cache string: `amol-zikir-v118`।
+- সর্বশেষ প্রকাশিত release: **v119**; service worker cache string: `amol-zikir-v119`।
 - Backup v2-তে `zikrRoutines` যুক্ত হয়েছে; restore v1/v2 গ্রহণ করে এবং routine merge করে।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৩-১১-২০২৬, v118-এর পর):
-  - `index.html` blob SHA: `02e65a680308416c40800788b52f144431481d4a`
-  - `sw.js` blob SHA: `ddffd7c7e731db06377b7d4e4ae24017e9ca5d19`
+  - `index.html` blob SHA: `02e65a680308416c40800788b52f144431481d4a` (v118; v119 SHA release log-এ)
+  - `sw.js` blob SHA: `ddffd7c7e731db06377b7d4e4ae24017e9ca5d19` (v118; v119 SHA release log-এ)
 - SHA-গুলো কেবল এই নথি হালনাগাদের সময়ের রেফারেন্স; প্রতিটি update-এর আগে নতুন করে fetch করতে হবে।
 - Backup/restore-এর কোডে JSON export, v1/v2 import, record merge ও zikr routine merge আছে; ব্যবহারকারীর ফোনে download/restore test এখনও নিশ্চিত নয়।
 
@@ -141,3 +141,11 @@
 - Backups: `backup/index-2026-11-23-before-safe-restore-v118.html` and `backup/sw-2026-11-23-before-safe-restore-v118.js`, exact-content verified.
 - JavaScript syntax check passed; GitHub files were refetched and v118/cache markers verified. Cache: `amol-zikir-v118`.
 - Important: actual Android-device restore and quota/failure behavior still require safe test data and user confirmation; no live user data was used for testing.
+
+
+## v119 — 2026-11-23
+- Cloud sync fix: Firestore deletion tombstones are now retained instead of immediately deleted. This prevents an offline device's stale local copy from being uploaded again and resurrecting a deleted note/folder.
+- Sync reconciles the union of local and remote IDs using updatedAt/deletedAt timestamps; newer changes win and deletion wins timestamp ties. Tombstone cloud documents retain only metadata (id/type/tab/parentId/title/deletedAt/updatedAt), not note body content.
+- Backup files: `backup/index-2026-11-23-before-cloud-tombstone-v119.html` and `backup/sw-2026-11-23-before-cloud-tombstone-v119.js`, exact-content verified.
+- JavaScript syntax passed; files refetched and verified; cache `amol-zikir-v119`.
+- On-device and multi-device concurrent-edit testing still required. Existing user data was not modified or tested.
