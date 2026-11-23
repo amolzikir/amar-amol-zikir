@@ -1,6 +1,6 @@
 # আমার আমল ও জিকির — প্রকল্প হস্তান্তর নথি
 
-**সর্বশেষ হালনাগাদ:** ২৩ নভেম্বর ২০২৬  
+**সর্বশেষ হালনাগাদ:** ২৪ নভেম্বর ২০২৬  
 **উদ্দেশ্য:** ChatGPT-এর পুরোনো চ্যাট হারালেও অন্য ফোন বা অন্য ChatGPT অ্যাকাউন্ট থেকে প্রকল্পের কাজ নিরাপদে চালিয়ে যাওয়া।
 
 ## ১. প্রকল্প পরিচিতি
@@ -51,21 +51,24 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ প্রকাশিত release: **v120**; service worker cache string: `amol-zikir-v120`।
-- Backup v2-তে `zikrRoutines` যুক্ত হয়েছে; restore v1/v2 গ্রহণ করে এবং routine merge করে।
-- সর্বশেষ যাচাইকৃত GitHub fetch (২৩-১১-২০২৬, v118-এর পর):
-  - `index.html` blob SHA: `1578ab85b21246cb33f1b0182bcefd8c08341962`
-  - `sw.js` blob SHA: `c2e8d21981b92af5bb5a7e05fc4e6d43ba94ab70`
+- সর্বশেষ প্রকাশিত release: **v136**; service worker cache string: `amol-zikir-v136`।
+- v136-এ Backup v2 export-এ account-scoped Dua favorites যুক্ত; restore v1/v2 গ্রহণ করে, records ও favorites merge করে এবং local write read-back যাচাই করে।
+- v136-এ চারটি সূত্র-উল্লেখসহ দোয়া যোগ হয়েছে: ঘর থেকে বের হওয়া, সকাল-সন্ধ্যার আফিয়াত, মসজিদে প্রবেশ ও মসজিদ থেকে বের হওয়া।
+- সর্বশেষ যাচাইকৃত GitHub fetch (২৪-১১-২০২৬): `index.html` blob SHA `65a44f0240a2110d3fec1b5f019dfc614f1a84ba`; `sw.js` blob SHA `316a388da4e09b71303df9ff978c9128657110d4`।
+- v136-এর GitHub Actions Firestore/security workflow এবং GitHub Pages build/deploy—দুটিই success (workflow run IDs `45258727072`, `45258729967`)।
 - SHA-গুলো কেবল এই নথি হালনাগাদের সময়ের রেফারেন্স; প্রতিটি update-এর আগে নতুন করে fetch করতে হবে।
-- Backup/restore-এর কোডে JSON export, v1/v2 import, record merge ও zikr routine merge আছে; ব্যবহারকারীর ফোনে download/restore test এখনও নিশ্চিত নয়।
+- Automated tests pass করলেও Android ফোনে backup download/restore, account switch, offline sync, app lock/biometric-এর বাস্তব পরীক্ষা এখনও ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়।
 
-## ৫. পরবর্তী কাজের অগ্রাধিকার
-1. **ডেটা-সুরক্ষা অগ্রাধিকার:** v118-এ malformed JSON, record schema, nested unsafe keys, duplicate ID এবং timestamp merge validation শক্ত করা হয়েছে; IndexedDB record writes এক read-write transaction-এ batch করা হয়েছে। পরবর্তী ধাপে backup/restore regression audit ও নিরাপদ test data দিয়ে পরীক্ষা।
-2. ব্যবহারকারীর সুবিধামতো JSON backup download হয়েছে কি না নিশ্চিত করা; restore পরীক্ষা কেবল আলাদা/নিরাপদ test data দিয়ে।
-3. Firebase sync, edit/delete ও offline-to-online sync-এর conflict ও tombstone আচরণ অডিট; on-device test ছাড়া সফল দাবি নয়।
-4. PIN/biometric/১০ মিনিট idle lock এবং lock বন্ধ/পুনরায় চালুর on-device আচরণ ব্যবহারকারীর কাছ থেকে নিশ্চিত করা; UI lock-কে data encryption বলা যাবে না।
-5. Calendar, Daily Amal, Tasbih, Dua/Dhikr, Quran tracker ও Zikr routines-এর ধাপে ধাপে regression audit।
-6. Hijri date-এর হার্ডকোড করা মাস-শুরুর তারিখ নির্ভরযোগ্য বাংলাদেশি সূত্রে পুনরায় যাচাই; নিশ্চিত সূত্র ছাড়া নির্দিষ্ট তারিখকে চূড়ান্ত বলা যাবে না।
+## ৫. পরবর্তী কাজের অগ্রাধিকার (v136-এর পর)
+1. **Android বাস্তব ডেটা-সুরক্ষা পরীক্ষা:** ফোনে Settings থেকে JSON backup ডাউনলোড করে ফাইলটি আছে কি না নিশ্চিত করা; restore কেবল একটি আলাদা নিরাপদ test record/backup দিয়ে পরীক্ষা করা। নিজের আসল backup অক্ষত রাখতে হবে।
+2. **অ্যাকাউন্ট বিচ্ছিন্নতা পরীক্ষা:** একই ফোন/ব্রাউজারে প্রথম Google account থেকে sign-out করে দ্বিতীয় account-এ প্রবেশ, আলাদা local notes/favorites/routines যাচাই, তারপর প্রথম account-এ ফিরে তার ডেটা অক্ষত আছে কি না দেখা। কোনো account বদলের আগে backup নিতে হবে; অন্যের/দ্বিতীয় account না থাকলে পরীক্ষা স্থগিত।
+3. **Offline/online ও conflict বাস্তব পরীক্ষা:** নেট বন্ধ রেখে test note তৈরি/সম্পাদনা/মুছে ফেলা, পরে নেট চালু করে sync status ও অন্য session-এ ফল যাচাই; আসল নোটে destructive পরীক্ষা নয়।
+4. **App Lock বাস্তব পরীক্ষা:** PIN lock/unlock, ১০ মিনিট idle, biometric fallback এবং lock disable/re-enable পরীক্ষা। এটি UI lock—ডেটা encryption নয়।
+5. **Firebase Rules প্রকাশ যাচাই:** GitHub-এর emulator test pass করেছে; Firebase Console-এ একই rules live deploy হয়েছে কি না এই repository থেকে নিশ্চিত করা যায় না। Console-এ বর্তমান rules মিলিয়ে দেখা প্রয়োজন।
+6. **Hijri date ও ধর্মীয় কনটেন্ট যাচাই:** বাংলাদেশে প্রচলিত নির্ভরযোগ্য ক্যালেন্ডার/চাঁদ দেখার তথ্যের সঙ্গে Hijri date তুলনা; নতুন দোয়ার আরবি, উচ্চারণ ও অর্থ আলাদা নির্ভরযোগ্য উৎসে যাচাই।
+7. **বিস্তৃত regression audit:** Calendar, Daily Amal, Tasbih, Quran tracker, reminders, search ও navigation—ধাপে ধাপে পরীক্ষা; কোনো সমস্যা প্রমাণিত না হলে শুধু নতুন release তৈরির জন্য কোড পরিবর্তন নয়।
+
+**নিরাপদ পরীক্ষার নিয়ম:** ব্যবহারকারীর ফোনে বাস্তব পরীক্ষা না হলে সেটিকে pending বলতে হবে; আসল ডেটা মুছে/ওভাররাইট করার মতো পরীক্ষা করা যাবে না।
 
 ## ৬. Backup ও নিরাপত্তা
 - ব্যবহারকারী নিয়মিত অ্যাপের Settings থেকে JSON backup নামিয়ে ফোনের বাইরে নিরাপদ জায়গায় (যেমন Google Drive) রাখতে পারেন।
@@ -298,3 +301,10 @@
 - Service worker cache: amol-zikir-v136.
 - Pre-change backups created and exact-content verified for index.html, sw.js, PROJECT-HANDOVER.md, package.json, local-account, DOM-security, Firestore rules tests, and workflow under `backup/*-2026-11-24-before-three-track-upgrade.bak`.
 - Verification: JavaScript syntax and automated CI results must be checked after commit. Android-device restore and account-switch tests remain user-side checks. The Dua additions are not a substitute for scholarly review of translation/pronunciation.
+
+
+## v137 — প্রকল্পের অবস্থা ও পরবর্তী অগ্রাধিকার হালনাগাদ (2026-11-24)
+- v136-এর release, cache version, সর্বশেষ file SHAs এবং GitHub Actions success run IDs নথিতে হালনাগাদ করা হয়েছে।
+- পুরোনো v120 status ও v118-কেন্দ্রিক next-step তালিকা সরিয়ে বাস্তব pending কাজগুলো সাজানো হয়েছে: Android backup/restore, account isolation, offline/online sync, app lock, live Firestore rules confirmation, Hijri/দোয়া যাচাই এবং feature regression.
+- এটি documentation-only maintenance; app runtime code বা service-worker cache পরিবর্তন করা হয়নি।
+- Pre-change exact backup: `backup/PROJECT-HANDOVER.md-2026-11-24-before-v137-project-status-refresh.bak`.
