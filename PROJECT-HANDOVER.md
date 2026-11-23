@@ -48,24 +48,24 @@
 - Dua/Dhikr-এর আরবি text-to-speech; এটি ফোনের TTS, কোনো ক্বারির রেকর্ডিং নয়।
 - Personal Zikr Routine: নিজস্ব জিকির, লক্ষ্য, দৈনিক গণনা ও অগ্রগতি।
 - Hijri date display; স্থানীয় চাঁদ দেখার কারণে একদিন পার্থক্য হতে পারে।
-- App Lock & Privacy ফিচারটি ব্যবহারকারীর নির্বাচিত তালিকায় ছিল; পূর্ণ PIN lock বাস্তবায়ন/যাচাই পরবর্তী কাজের তালিকায় আছে।
+- App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- পরিচিত release: v111; service worker cache string: `amol-zikir-v111` (পরবর্তী release-এ বাড়াতে হবে)।
+- সর্বশেষ প্রকাশিত release: **v117**; service worker cache string: `amol-zikir-v117`।
 - Backup v2-তে `zikrRoutines` যুক্ত হয়েছে; restore v1/v2 গ্রহণ করে এবং routine merge করে।
-- সর্বশেষ যাচাইকৃত GitHub fetch (২৩-১১-২০২৬):
-  - `index.html` blob SHA: `88283d77241bc0655bb5daeb1e41beddc4962368`
-  - `sw.js` blob SHA: `e198898f6298cce29e121203f406c304ae8b7cf4`
-- SHA-গুলো ভবিষ্যতে বদলাবে; এগুলো কেবল এই নথি তৈরির সময়ের রেফারেন্স। প্রতিবার update-এর আগে নতুন করে fetch করতে হবে।
-- Backup/restore-এর কোড যাচাই হয়েছে, কিন্তু ব্যবহারকারীর ফোনে backup download ও restore test এখনও ব্যবহারকারী নিশ্চিত করেননি।
+- সর্বশেষ যাচাইকৃত GitHub fetch (২৩-১১-২০২৬, v117-এর পর):
+  - `index.html` blob SHA: `a63752e81e7243e1e3ede999455e592a3eb577d0`
+  - `sw.js` blob SHA: `eebdb0cf309ea83e1cc72895830f71f022d6f9b2`
+- SHA-গুলো কেবল এই নথি হালনাগাদের সময়ের রেফারেন্স; প্রতিটি update-এর আগে নতুন করে fetch করতে হবে।
+- Backup/restore-এর কোডে JSON export, v1/v2 import, record merge ও zikr routine merge আছে; ব্যবহারকারীর ফোনে download/restore test এখনও নিশ্চিত নয়।
 
 ## ৫. পরবর্তী কাজের অগ্রাধিকার
-1. ব্যবহারকারীকে অ্যাপ থেকে JSON backup download করতে বলুন; ফাইলটি ফোনে আছে কি না নিশ্চিত করুন।
-2. নিরাপদভাবে restore test-এর পরিকল্পনা করুন; আসল ডেটা ঝুঁকিতে ফেলা যাবে না। Restore merge করে, তবুও আগে backup থাকা আবশ্যক।
-3. Firebase sync, edit/delete ও offline-to-online sync ব্যবহারকারীর সঙ্গে যাচাই করুন।
-4. App Lock & Privacy-এর PIN lock বাস্তবায়ন/পরীক্ষা করুন; PIN নিরাপদভাবে সংরক্ষণ ও ভুলে গেলে recovery আচরণ স্পষ্ট করুন।
-5. পূর্ণ feature audit: Calendar, Daily Amal, Tasbih, Dua/Dhikr, Quran tracker, Zikr routines।
-6. Hijri date-এর হার্ডকোড করা মাস-শুরুর তারিখ ভবিষ্যতে যাচাই করা দরকার; স্থানীয় চাঁদ দেখার পার্থক্য স্পষ্টভাবে দেখাতে হবে। নিশ্চিত সূত্র ছাড়া নির্দিষ্ট হিজরি তারিখকে চূড়ান্ত বলবেন না।
+1. **ডেটা-সুরক্ষা অগ্রাধিকার:** Backup/Restore flow-এর পূর্ণ কোড অডিট; malformed/অবিশ্বস্ত JSON, duplicate ID, timestamp merge এবং zikr routine restore-এর edge case পরীক্ষা। ব্যবহারকারীর আসল ডেটা ঝুঁকিতে ফেলে কোনো live restore test নয়।
+2. ব্যবহারকারীর সুবিধামতো JSON backup download হয়েছে কি না নিশ্চিত করা; restore পরীক্ষা কেবল আলাদা/নিরাপদ test data দিয়ে।
+3. Firebase sync, edit/delete ও offline-to-online sync-এর conflict ও tombstone আচরণ অডিট; on-device test ছাড়া সফল দাবি নয়।
+4. PIN/biometric/১০ মিনিট idle lock এবং lock বন্ধ/পুনরায় চালুর on-device আচরণ ব্যবহারকারীর কাছ থেকে নিশ্চিত করা; UI lock-কে data encryption বলা যাবে না।
+5. Calendar, Daily Amal, Tasbih, Dua/Dhikr, Quran tracker ও Zikr routines-এর ধাপে ধাপে regression audit।
+6. Hijri date-এর হার্ডকোড করা মাস-শুরুর তারিখ নির্ভরযোগ্য বাংলাদেশি সূত্রে পুনরায় যাচাই; নিশ্চিত সূত্র ছাড়া নির্দিষ্ট তারিখকে চূড়ান্ত বলা যাবে না।
 
 ## ৬. Backup ও নিরাপত্তা
 - ব্যবহারকারী নিয়মিত অ্যাপের Settings থেকে JSON backup নামিয়ে ফোনের বাইরে নিরাপদ জায়গায় (যেমন Google Drive) রাখতে পারেন।
