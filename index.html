@@ -796,10 +796,11 @@ async function syncCloud(){
     if(!contextValid())throw Object.assign(new Error("অ্যাকাউন্ট পরিবর্তিত হয়েছে"),{code:"account-changed"});
     await putItem(outcome.record,syncDb);
    }else if(outcome.action==="keepLocal"){
-    const latestLocal=await getItem(id);
+    const latestLocal=await getItem(id,syncDb);
     if(JSON.stringify(latestLocal??null)!==JSON.stringify(l??null)){syncAgain=true;continue}
    }
   }
+  if(!contextValid())throw Object.assign(new Error("অ্যাকাউন্ট পরিবর্তিত হয়েছে"),{code:"account-changed"});
   const refreshedItems=await allItems(syncDb);
   const refreshedDaily=refreshedItems.find(x=>x.id==="system-daily-amal"&&!x.deletedAt);
   const refreshedTasbih=refreshedItems.find(x=>x.id==="system-tasbih-counter"&&!x.deletedAt);
