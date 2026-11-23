@@ -599,6 +599,12 @@ async function recoverPreviousDailyAmal(){
   legacyDb=await openLocalDatabase(DB_NAME);
   try{addRecords("পুরোনো ডিভাইসের ডেটাবেস",await databaseItems(legacyDb))}
   finally{legacyDb.close();legacyDb=null}
+  let guestDb=null;
+  try{
+   guestDb=await openLocalDatabase(GUEST_DB_NAME);
+   try{addRecords("সাইন-ইন ছাড়া ব্যবহারের ডেটাবেস",await databaseItems(guestDb))}
+   finally{guestDb.close();guestDb=null}
+  }catch(e){console.warn("Guest Daily Amal recovery scan unavailable",e);if(guestDb){guestDb.close();guestDb=null}}
   if(dbLocal)addRecords("বর্তমান অ্যাকাউন্টের লোকাল ডেটা",await databaseItems(dbLocal));
   if(currentUser&&cloud&&navigator.onLine){
    try{
