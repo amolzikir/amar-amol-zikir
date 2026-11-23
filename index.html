@@ -582,6 +582,41 @@ async function shareDailyAmalReport(){
  try{if(navigator.share){await navigator.share({title:tr("মাসিক আমল প্রতিবেদন"),text:report});return}if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(report);toast(tr("প্রতিবেদন কপি হয়েছে"));return}}catch(e){if(e&&e.name==="AbortError")return}
  try{const area=document.createElement("textarea");area.value=report;document.body.appendChild(area);area.select();const ok=document.execCommand("copy");area.remove();toast(ok?tr("প্রতিবেদন কপি হয়েছে"):tr("প্রতিবেদন কপি করা যায়নি"))}catch(e){toast(tr("প্রতিবেদন কপি করা যায়নি"))}
 }function shiftDailyAmalDate(delta){const current=$("dailyAmalDate").value||localDateKey(),d=new Date(current+"T12:00:00");d.setDate(d.getDate()+delta);const key=dailyDateKey(d);$("dailyAmalDate").value=key;dailyCalendarMonth=key.slice(0,7);renderDailyAmal()}
+function chooseDailyAmalRecoveryCandidate(records){
+ return records.filter(x=>x&&x.record&&!x.record.deletedAt&&Array.isArray(x.record.items)&&x.record.items.length>0)
+  .sort((a,b)=>(Number(b.record.updatedAt)||0)-(Number(a.record.updatedAt)||0))[0]||null;
+}
+async function recoverPreviousDailyAmal(){
+ const button=$("recoverDailyAmal");if(button)button.disabled=true;
+ let legacyDb=null;
+ try{
+  const candidates=[];
+  legacyDb=await openLocalDatabase(DB_NAME);
+  try{const old=await getItem("system-daily-amal",legacyDb);if(old)candidates.push({source:"পুরোনো ডিভাইসের ডেটাবেস",record:old})}
+  finally{legacyDb.close();legacyDb=null}
+  if(currentUser&&cloud&&navigator.onLine){
+   try{const snap=await cloud.collection("users").doc(currentUser.uid).collection("items").doc("system-daily-amal").get();if(snap.exists)candidates.push({source:"ক্লাউড ব্যাকআপ",record:snap.data()})}
+   catch(e){console.warn("Daily Amal recovery cloud read pending",e)}
+  }
+  const candidate=chooseDailyAmalRecoveryCandidate(candidates);
+  if(!candidate){toast("পুরোনো ডেটাবেস বা ক্লাউডে আগের আমলের তালিকা পাওয়া যায়নি। কোনো তথ্য পরিবর্তন করা হয়নি।");return}
+  const current=await getItem("system-daily-amal");
+  if(current&&Array.isArray(current.items)&&current.items.length){toast("বর্তমান আমলের তালিকায় তথ্য আছে; সেটি অপরিবর্তিত রাখা হয়েছে।");return}
+  const record={...candidate.record,id:"system-daily-amal",type:"daily-amal",tab:"__system__",title:"দৈনিক আমল",updatedAt:Date.now()};
+  const names=record.items.slice(0,5).map(x=>String(x.name||"")).filter(Boolean).join("، ");
+  const more=record.items.length>5?" এবং আরও "+(record.items.length-5)+"টি":"";
+  if(!confirm(candidate.source+"-এ "+record.items.length+"টি আমল পাওয়া গেছে: "+names+more+"। এগুলো ফিরিয়ে আনবেন?"))return;
+  await putItem(record);dailyAmalRecord=record;
+  let cloudSaved=false;
+  if(currentUser&&cloud&&navigator.onLine){
+   try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(record.id).set(record);cloudSaved=true}
+   catch(e){console.warn("Recovered Daily Amal cloud save pending",e)}
+  }
+  renderDailyAmal();
+  toast(cloudSaved?"আলহামদুলিল্লাহ, আগের আমলগুলো ফিরেছে এবং ক্লাউডে সংরক্ষিত হয়েছে।":"আলহামদুলিল্লাহ, আগের আমলগুলো এই ডিভাইসে ফিরেছে। অনলাইনে এলে আবার সিঙ্ক করুন।");
+ }catch(e){console.error("Daily Amal recovery failed",e);toast("আগের আমল খুঁজতে সমস্যা হয়েছে; কোনো পুরোনো ডেটাবেস মুছে ফেলা হয়নি।")}
+ finally{if(button&&button.isConnected)button.disabled=false}
+}
 function renderDailyAmal(){
  if(!dailyAmalRecord)return;
  const date=$("dailyAmalDate").value||localDateKey(),done=dailyAmalRecord.days?.[date]||{};
@@ -591,7 +626,7 @@ function renderDailyAmal(){
  $("dailyAmalSummary").insertAdjacentHTML("beforeend", '<button type="button" class="action daily-filter-toggle" id="dailyFilterToggle">'+tr(window.dailyShowIncomplete?"সব আমল দেখান":"শুধু বাকি আমল দেখান")+'</button><button type="button" class="action daily-report-share" id="dailyReportShare">'+tr("প্রতিবেদন শেয়ার করুন")+'</button>');
 
  const list=$("dailyAmalList");
- if(!total){list.innerHTML='<div class="daily-amal-empty">'+tr("এখনো কোনো আমল যোগ করেননি। নিচে নিজের আমল বা জিকিরের নাম লিখে যোগ করুন।")+'</div>';saveNavState();return}
+ if(!total){list.innerHTML='<div class="daily-amal-empty">'+tr("এখনো কোনো আমল যোগ করেননি। নিচে নিজের আমল বা জিকিরের নাম লিখে যোগ করুন।")+'</div><button type="button" class="action" id="recoverDailyAmal" style="width:100%;margin:10px 0">আগের আমল খুঁজুন ও ফিরিয়ে আনুন</button>';$("recoverDailyAmal").onclick=recoverPreviousDailyAmal;saveNavState();return}
  const query=($("dailyAmalSearch")?.value||"").trim().normalize("NFC").toLocaleLowerCase(currentLocale());const visibleItems=dailyAmalRecord.items.map((x,i)=>({x,i})).filter(({x})=>{const target=Math.max(1,Number(x.target)||1),count=Math.max(0,Math.min(target,Number(done[x.id]===true?target:done[x.id]||0))),matches=!query||String(x.name||"").normalize("NFC").toLocaleLowerCase(currentLocale()).includes(query);return matches&&(!window.dailyShowIncomplete||count<target)});if(!visibleItems.length){list.innerHTML='<div class="daily-amal-empty">'+tr(query?"কোনো মিল পাওয়া যায়নি":window.dailyShowIncomplete?"কোনো বাকি আমল নেই":"কোনো মিল পাওয়া যায়নি")+"</div>";saveNavState();return}list.innerHTML=visibleItems.map(({x,i})=>{const target=Math.max(1,Number(x.target)||1),count=Math.max(0,Math.min(target,Number(done[x.id]===true?target:done[x.id]||0)));const control=target>1?'<div class="daily-amal-count"><button type="button" data-daily-delta="-1" data-daily-id="'+esc(x.id)+'" aria-label="'+tr("এক কমান")+'">−</button><strong>'+count.toLocaleString(currentLocale())+' / '+target.toLocaleString(currentLocale())+'</strong><button type="button" data-daily-delta="1" data-daily-id="'+esc(x.id)+'" aria-label="'+tr("এক বাড়ান")+'">＋</button></div>':'<input type="checkbox" data-daily-check="'+esc(x.id)+'" '+(count>=target?"checked":"")+' aria-label="'+esc(x.name)+'">';const order='<div class="daily-amal-order"><button type="button" data-daily-up="'+esc(x.id)+'" aria-label="'+tr("উপরে নিন")+'" '+(i===0?"disabled":"")+ '>↑</button><button type="button" data-daily-down="'+esc(x.id)+'" aria-label="'+tr("নিচে নিন")+'" '+(i===dailyAmalRecord.items.length-1?"disabled":"")+ '>↓</button></div>';return '<div class="daily-amal-row '+(count>=target?"done":"")+'" role="group" aria-label="'+esc(x.name)+'">'+control+'<span class="daily-amal-name">'+esc(x.name)+'</span><button type="button" class="daily-amal-edit" data-daily-edit="'+esc(x.id)+'" aria-label="'+tr("আমলের নাম সম্পাদনা করুন")+'">✎</button>'+order+'<button type="button" class="daily-amal-remove" data-daily-delete="'+esc(x.id)+'" aria-label="'+tr("তালিকা থেকে বাদ দিন")+'">×</button></div>'}).join("");saveNavState();
 }
 
