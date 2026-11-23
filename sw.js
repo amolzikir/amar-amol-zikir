@@ -1,4 +1,4 @@
-const CACHE="amol-zikir-v74";
+const CACHE="amol-zikir-v75";
 const FILES=["./","./index.html","./manifest.webmanifest"];
 const FIREBASE=[
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
@@ -10,6 +10,9 @@ self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promis
 self.addEventListener("fetch",e=>{
  const u=new URL(e.request.url);
  if(e.request.method!=="GET")return;
+ if(u.origin===location.origin&& (e.request.mode==="navigate"||u.pathname.endsWith("/index.html")||u.pathname.endsWith("/"))){
+  e.respondWith(fetch(new Request(e.request,{cache:"no-store"})).then(resp=>{if(resp.ok){const copy=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return resp}).catch(()=>caches.match(e.request).then(r=>r||caches.match("./index.html"))));return;
+ }
  if(u.origin===location.origin||u.hostname==="www.gstatic.com"){
   e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{let copy=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return resp}).catch(()=>caches.match("./index.html"))));
  }
