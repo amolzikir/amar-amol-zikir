@@ -395,6 +395,7 @@ Object.assign(I18N,{"দৈনিক আমলের প্রতিবেদন
 Object.assign(I18N,{"মাসিক আমল প্রতিবেদন":["Monthly Amal Report","تقرير الأعمال الشهري","ماہانہ اعمال کی رپورٹ"],"মাসিক প্রতিবেদন শেয়ার করুন":["Share monthly report","مشاركة التقرير الشهري","ماہانہ رپورٹ شیئر کریں"],"মোট সম্পন্ন":["Total completed","إجمالي المكتمل","کل مکمل"]});
 function dailyDayCount(date){const done=dailyAmalRecord?.days?.[date]||{};return (dailyAmalRecord?.items||[]).filter(x=>Number(done[x.id]===true?x.target||1:done[x.id]||0)>=(Number(x.target)||1)).length}
 function dailyIsComplete(date){const items=dailyAmalRecord?.items||[];return items.length>0&&dailyDayCount(date)===items.length}
+function dailyDayHasProgress(date){const done=dailyAmalRecord?.days?.[date]||{};return (dailyAmalRecord?.items||[]).some(x=>{const value=done[x.id];return value===true||Number(value||0)>0})}
 function renderDailyWeekly(){
  const grid=$("dailyWeeklyGrid");if(!grid)return;const today=new Date(),selectedKey=$("dailyAmalDate")?.value||dailyDateKey(today),anchorParts=selectedKey.split("-").map(Number),anchor=new Date(anchorParts[0],anchorParts[1]-1,anchorParts[2]),days=[];
  for(let i=6;i>=0;i--){const d=new Date(anchor.getFullYear(),anchor.getMonth(),anchor.getDate()-i),key=dailyDateKey(d),total=(dailyAmalRecord.items||[]).length,done=dailyDayCount(key),pct=total?Math.round(done/total*100):0;days.push({d,key,pct,done,total,selected:key===selectedKey})}
@@ -408,11 +409,11 @@ function renderDailyCalendar(){
  $("dailyCalMonth").textContent=first.toLocaleDateString(currentLocale(),{month:"long",year:"numeric"});$("dailyCalJump").value=dailyCalendarMonth;
  $("dailyCalWeek").innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(2024,0,7+((weekStart+i)%7));return "<span>"+d.toLocaleDateString(currentLocale(),{weekday:"short"})+"</span>"}).join("");
  const days=new Date(yy,mm,0).getDate(),nowParts=today.split("-").map(Number),todayMonth=nowParts[0]===yy&&nowParts[1]===mm,monthIsFuture=yy>nowParts[0]||(yy===nowParts[0]&&mm>nowParts[1]),elapsed=monthIsFuture?0:todayMonth?nowParts[2]:days;let active=0,completedTotal=0;
- for(let n=1;n<=elapsed;n++){const key=yy+"-"+String(mm).padStart(2,"0")+"-"+String(n).padStart(2,"0"),finished=dailyDayCount(key);completedTotal+=finished;if(finished>0)active++}
+ for(let n=1;n<=elapsed;n++){const key=yy+"-"+String(mm).padStart(2,"0")+"-"+String(n).padStart(2,"0"),finished=dailyDayCount(key);completedTotal+=finished;if(dailyDayHasProgress(key))active++}
  const possible=elapsed*items.length,rate=possible?Math.round(completedTotal/possible*100):0;
  $("dailyMonthDone").textContent=completedTotal.toLocaleString(currentLocale());$("dailyMonthActive").textContent=active.toLocaleString(currentLocale());$("dailyMonthRate").textContent=rate.toLocaleString(currentLocale())+"%";$("dailyMonthProgress").setAttribute("role","progressbar");$("dailyMonthProgress").setAttribute("aria-valuemin","0");$("dailyMonthProgress").setAttribute("aria-valuemax","100");$("dailyMonthProgress").setAttribute("aria-valuenow",String(rate));$("dailyMonthProgress").setAttribute("aria-label",tr("মাসিক অগ্রগতি"));$("dailyMonthProgress").style.width=Math.min(100,rate)+"%";
  let html="";
- for(let i=0;i<42;i++){const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i),key=dailyDateKey(d),inside=d.getMonth()===mm-1,finished=dailyDayCount(key),cls=[inside?"":"muted",key===selected?"selected":"",key===today?"today":"",finished&&finished===items.length?"done":finished?"partial":""].filter(Boolean).join(" ");const accessibleDate=d.toLocaleDateString(currentLocale(),{weekday:"long",year:"numeric",month:"long",day:"numeric"}),localizedCount=finished.toLocaleString(currentLocale())+"/"+items.length.toLocaleString(currentLocale()),progressLabel=tr("সম্পন্ন")+" "+localizedCount;html+='<button type="button" class="daily-cal-cell '+cls+'" data-calendar-date="'+key+'" aria-current="'+(key===today?"date":"false")+'" aria-pressed="'+(key===selected)+'" aria-label="'+accessibleDate+", "+progressLabel+'" title="'+accessibleDate+" · "+progressLabel+'"><span>'+d.getDate().toLocaleString(currentLocale())+'</span><i class="cal-mark"></i></button>'}
+ for(let i=0;i<42;i++){const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i),key=dailyDateKey(d),inside=d.getMonth()===mm-1,finished=dailyDayCount(key),cls=[inside?"":"muted",key===selected?"selected":"",key===today?"today":"",items.length>0&&finished===items.length?"done":dailyDayHasProgress(key)?"partial":""].filter(Boolean).join(" ");const accessibleDate=d.toLocaleDateString(currentLocale(),{weekday:"long",year:"numeric",month:"long",day:"numeric"}),localizedCount=finished.toLocaleString(currentLocale())+"/"+items.length.toLocaleString(currentLocale()),progressLabel=tr("সম্পন্ন")+" "+localizedCount;html+='<button type="button" class="daily-cal-cell '+cls+'" data-calendar-date="'+key+'" aria-current="'+(key===today?"date":"false")+'" aria-pressed="'+(key===selected)+'" aria-label="'+accessibleDate+", "+progressLabel+'" title="'+accessibleDate+" · "+progressLabel+'"><span>'+d.getDate().toLocaleString(currentLocale())+'</span><i class="cal-mark"></i></button>'}
  $("dailyCalGrid").innerHTML=html;
 }
 function handleDailyCalendarKeydown(e){
@@ -445,7 +446,7 @@ async function shareDailyAmalReport(){
  let doneTotal=0,active=0,lines=[];
  for(let n=1;n<=elapsed;n++){
   const key=yy+"-"+String(mm).padStart(2,"0")+"-"+String(n).padStart(2,"0"),done=dailyDayCount(key),pct=items.length?Math.round(done/items.length*100):0,dateLabel=new Date(key+"T12:00:00").toLocaleDateString(currentLocale(),{day:"numeric",month:"short"});
-  doneTotal+=done;if(done>0)active++;
+  doneTotal+=done;if(dailyDayHasProgress(key))active++;
   lines.push(dateLabel+" — "+done.toLocaleString(currentLocale())+"/"+items.length.toLocaleString(currentLocale())+" ("+pct.toLocaleString(currentLocale())+"%)");
  }
  const possible=elapsed*items.length,rate=possible?Math.round(doneTotal/possible*100):0;
