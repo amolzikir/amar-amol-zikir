@@ -188,3 +188,10 @@
 - Offline error বার্তায় অনিচ্ছাকৃত Urdu শব্দ সংশোধন করে বাংলা করা হয়েছে; sign-out হলে Sync status-ও signed-out দেখায়।
 - Cache version v124। v123-এর transaction conflict policy অপরিবর্তিত।
 - v124-এ extracted production conflict-resolution branch-এর ১৪টি isolated verification check pass করেছে—৬টি production conflict-branch case, ২টি race-guard check, ৪টি error mapping, বাংলা offline message এবং পূর্ণ inline JavaScript syntax। এটি real Firebase integration test নয়।
+
+
+## v125 — Offline/online status test support (২৩ নভেম্বর ২০২৬)
+- Browser offline event listener যোগ করা হয়েছে: নেটওয়ার্ক বিচ্ছিন্ন হলে Sync status তাৎক্ষণিকভাবে offline দেখাবে এবং লোকাল-সেভিং বার্তা দেখাবে।
+- Online event আগের মতো syncCloud চালায়; offline event নিজে কোনো Cloud write করে না।
+- Cache version v125। পরিবর্তনের আগে index.html ও sw.js backup নিয়ে হুবহু যাচাই করা হয়েছে।
+- পরবর্তী বাস্তব পরীক্ষা: ফোনে test note offline অবস্থায় তৈরি করে অনলাইনে ফিরে Cloud sync নিশ্চিত করা; assistant ফোনের network toggle বা Firebase account সরাসরি নিয়ন্ত্রণ করে না।
