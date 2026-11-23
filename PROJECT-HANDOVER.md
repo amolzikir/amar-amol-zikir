@@ -288,3 +288,13 @@
 - Existing candidate selection remains newest non-deleted Daily Amal record only; no blind union or cross-account account-DB scanning.
 - Cache version: `amol-zikir-v135`.
 - Pre-change backups are in `backup/*-2026-11-24-v135-before-guest-db-recovery.bak`.
+
+
+## v136 — নিরাপত্তা, ব্যাকআপ ও দোয়া লাইব্রেরি উন্নয়ন (2026-11-24)
+- Security review: existing per-account IndexedDB, UID-bound Firestore rules, HTML escaping and HTTPS-only Dua links retained; PIN warning continues to clarify that app lock is not data encryption. No live Firestore rules deployment or security claim beyond these controls.
+- Backup v2 remains backward compatible with v1 and v2 files. New exports also include account-scoped Dua favorites alongside Zikr routines; restore validates optional favorite IDs and itemCount, merges favorites without removing current choices, and reads back written records/preferences for verification. Cloud sync errors are isolated from local restore success messaging.
+- Added five source-checked Dua entries: leaving home (Sunan Abi Dawud 5095), morning/evening request for pardon and well-being (Sunan Abi Dawud 5074), entering and leaving the mosque (Sahih Muslim 713). Original source links point to the verified Shamela pages.
+- Added automated backup/restore helper and library-reference regression tests; included them in the existing GitHub Actions security workflow.
+- Service worker cache: amol-zikir-v136.
+- Pre-change backups created and exact-content verified for index.html, sw.js, PROJECT-HANDOVER.md, package.json, local-account, DOM-security, Firestore rules tests, and workflow under `backup/*-2026-11-24-before-three-track-upgrade.bak`.
+- Verification: JavaScript syntax and automated CI results must be checked after commit. Android-device restore and account-switch tests remain user-side checks. The Dua additions are not a substitute for scholarly review of translation/pronunciation.
