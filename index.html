@@ -147,12 +147,13 @@ body.dark .quran-stats>div{background:#203d32}
 .amal-reminder-box .action{width:100%}
 body.dark .amal-reminder-box{background:#1b2a23}
 
-.sync-status{font-size:11px;line-height:1.4;margin:7px 0 0 54px;opacity:.9;min-height:14px}.sync-status[data-state="error"],.sync-status[data-state="retry"]{color:#ffe0a6}.sync-status[data-state="success"]{color:#d9ffe8}\n</style>
+.sync-status{font-size:11px;line-height:1.4;margin:7px 0 0 54px;opacity:.9;min-height:14px}.sync-status[data-state="error"],.sync-status[data-state="retry"]{color:#ffe0a6}.sync-status[data-state="success"]{color:#d9ffe8}.sync-now-btn{margin:5px 0 0 54px;padding:5px 10px;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--text);font-size:11px}.sync-now-btn[hidden]{display:none}.sync-now-btn:disabled{opacity:.55}\n</style>
 </head>
 <body>
 <header>
  <div class="top"><div class="top-left"><button class="home-menu-btn" id="homeMenuBtn" aria-label="প্রধান মেনু">☰</button><div><div class="brand">🌿 আমার আমল ও জিকির</div><div class="sub">আপনার ব্যক্তিগত আমলনামা ও নোটবুক</div></div></div><button class="pill" id="accountBtn">লগইন করুন</button></div>
 <div id="syncStatus" class="sync-status" role="status" aria-live="polite">লগইন করলে Cloud Sync চালু হবে</div>
+<button type="button" id="syncNowBtn" class="sync-now-btn" hidden>↻ এখনই Sync করুন</button>
 </header>
 <main>
  <section id="homeDashboard" class="home-dashboard" aria-label="ব্যক্তিগত হোম ড্যাশবোর্ড"><div class="dashboard-top"><h2>🌿 আজকের সারসংক্ষেপ</h2><span class="dashboard-date" id="dashboardDate"></span></div><div class="dashboard-stats"><div class="dashboard-stat"><strong id="dashboardNotes">০</strong><span>নোট</span></div><div class="dashboard-stat"><strong id="dashboardFolders">০</strong><span>ফোল্ডার</span></div><div class="dashboard-stat"><strong id="dashboardFavorites">০</strong><span>ফেভারিট</span></div><div class="dashboard-stat"><strong id="dashboardReminders">০</strong><span>সক্রিয় রিমাইন্ডার</span></div></div><div class="dashboard-shortcuts"><button type="button" data-dashboard-action="daily">🗓️ দৈনিক আমল</button><button type="button" data-dashboard-action="tasbih">📿 তাসবিহ কাউন্টার</button></div></section>
@@ -693,6 +694,7 @@ function setSyncStatus(state,detail=""){
  const labels={offline:"অফলাইন • ডিভাইসে সংরক্ষিত",syncing:"সিঙ্ক হচ্ছে…",success:"সিঙ্ক সম্পন্ন",retry:"আবার চেষ্টা হবে",error:"সিঙ্কে সমস্যা",signedout:"লগইন করলে Cloud Sync চালু হবে"};
  el.textContent=detail||labels[state]||"";
  el.dataset.state=state;
+ const retryButton=$("syncNowBtn");if(retryButton)retryButton.hidden=!(currentUser&&cloud);
 }
 async function syncCloud(){
  if(!currentUser||!cloud){setSyncStatus("signedout");return}
@@ -993,6 +995,7 @@ async function init(){
  $("languageSelect").onchange=e=>applyLanguage(e.target.value);$("toggleArabicFields").onclick=()=>{const box=$("arabicFields");box.style.display=box.style.display==="none"?"block":"none";if(box.style.display==="block")$("arabicText").focus()};$("noteFontSize").onchange=e=>applyNoteFontSize(e.target.value);applyNoteFontSize(localStorage.getItem("amol-note-font-size")||"normal");languageObserver.observe(document.body,{subtree:true,childList:true,characterData:true});applyLanguage(currentLang);$("homeMenuBtn").onclick=()=> $("homeMenu").classList.add("show");$("closeHomeMenu").onclick=()=> $("homeMenu").classList.remove("show");$("homeMenu").querySelectorAll("[data-home-view]").forEach(b=>b.onclick=()=>{const v=b.dataset.homeView;$("homeMenu").classList.remove("show");if(v==="settings"){$("settingsPanel").classList.add("show");return}if(v==="about"){toast("আমার আমল ও জিকির — ব্যক্তিগত আমল ও নোটবুক");return}specialView=v==="home"?null:v;parentId=null;if(v==="home")activeTab=TABS[0];render()});$("saveAppPin").onclick=saveAppPin;$("removeAppPin").onclick=removeAppPin;$("lockAppNow").onclick=()=>{$("settingsPanel").classList.remove("show");lockApp()};$("unlockAppButton").onclick=unlockApp;$("unlockAppBiometric").onclick=unlockAppBiometric;$("setupAppBiometric").onclick=setupAppBiometric;$("removeAppBiometric").onclick=removeAppBiometric;$("unlockAppPin").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();unlockApp()}};startAppPinSession();$("exportBackup").onclick=exportAppBackup;$("chooseBackup").onclick=()=>$("backupFile").click();$("backupFile").onchange=async e=>{const f=e.target.files?.[0];e.target.value="";await importAppBackup(f)};$("closeSettings").onclick=()=> $("settingsPanel").classList.remove("show");$("themeToggle").onclick=()=>{document.body.classList.toggle("dark");localStorage.setItem("amol-dark",document.body.classList.contains("dark")?"1":"0");$("themeToggle").textContent=tr(document.body.classList.contains("dark")?"ডার্ক মোড বন্ধ করুন":"ডার্ক মোড চালু করুন")};if(localStorage.getItem("amol-dark")==="1")document.body.classList.add("dark");$("accountBtn").onclick=()=>currentUser?toast("আপনি লগইন করা আছেন"):signIn();
  $("homeDashboard").onclick=e=>{const action=e.target.closest("[data-dashboard-action]")?.dataset.dashboardAction;if(action==="daily")openDailyAmal();else if(action==="tasbih")openTasbih()};
  $("search").oninput=render;
+ $("syncNowBtn").onclick=()=>{if(!currentUser||!cloud){toast("আগে Google অ্যাকাউন্টে লগইন করুন");return}syncCloud()};
  window.addEventListener("online",()=>{toast("ইন্টারনেট এসেছে—সিঙ্ক হচ্ছে");syncCloud()});
  window.addEventListener("offline",()=>{setSyncStatus("offline");toast("ইন্টারনেট নেই—তথ্য ডিভাইসে সংরক্ষণ হচ্ছে")});
  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&navigator.onLine&&currentUser&&!$("editor")?.classList.contains("show"))syncCloud()});
