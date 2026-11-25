@@ -86,3 +86,10 @@ test("an uncached same-origin asset never receives the app HTML as a fallback", 
   assert.equal(response.status, 503);
   assert.equal(await response.text(), "");
 });
+
+test("navigation returns a clear offline response when no app shell was cached", async () => {
+  const dispatch = makeWorker();
+  const response = await dispatch(new FakeRequest("https://app.test/app/", { mode: "navigate" }));
+  assert.equal(response.status, 503);
+  assert.match(await response.text(), /অফলাইন/);
+});
