@@ -773,63 +773,61 @@ async function saveAmalReminder(){
  if(!dailyAmalRecord)await loadDailyAmal();
  const enabled=$("amalReminderEnabled").checked,time=$("amalReminderTime").value;
  if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){toast("সঠিক সময় নির্বাচন করুন");return}
- if(enabled&&"Notification" in window&&Notification.permission==="default"){
-  try{await Notification.requestPermission()}catch(e){console.warn("Notification permission unavailable",e)}
- }
- dailyAmalRecord={...dailyAmalRecord,reminder:{...(dailyAmalRecord.reminder||{}),enabled,time,lastNotifiedDate:dailyAmalRecord.reminder?.lastNotifiedDate||""},updatedAt:Date.now()};
- await persistDailyAmal();renderAmalReminderSettings();
- $("amalReminderStatus").textContent=enabled?(("Notification" in window&&Notification.permission==="granted")?"নির্ধারিত সময়ে নোটিফিকেশন দেওয়ার অনুমতি আছে। অ্যাপ বন্ধ থাকলে নিশ্চয়তা নেই।":"অ্যাপ খোলা থাকলে নির্ধারিত সময়ে মনে করিয়ে দেবে।"):"রিমাইন্ডার বন্ধ আছে।";
- toast(enabled?"আমল রিমাইন্ডার চালু হয়েছে":"আমল রিমাইন্ডার বন্ধ হয়েছে");
+ if(enabled&&"Notification" in window&&Notification.permission==="default"){try{await Notification.requestPermission()}catch(e){console.warn("Notification permission unavailable",e)}}
+ const next=JSON.parse(JSON.stringify(dailyAmalRecord));next.reminder={...(next.reminder||{}),enabled,time,lastNotifiedDate:next.reminder?.lastNotifiedDate||""};
+ if(!await persistDailyAmal(next)){renderAmalReminderSettings();return}
+ renderAmalReminderSettings();$("amalReminderStatus").textContent=enabled?(("Notification" in window&&Notification.permission==="granted")?"নির্ধারিত সময়ে নোটিফিকেশন দেওয়ার অনুমতি আছে। অ্যাপ বন্ধ থাকলে নিশ্চয়তা নেই।":"অ্যাপ খোলা থাকলে নির্ধারিত সময়ে মনে করিয়ে দেবে।"):"রিমাইন্ডার বন্ধ আছে।";toast(enabled?"আমল রিমাইন্ডার চালু হয়েছে":"আমল রিমাইন্ডার বন্ধ হয়েছে");
 }
 async function checkDailyAmalReminder(){
- if(!dailyAmalRecord)await loadDailyAmal();
- if(!dailyAmalRecord?.reminder?.enabled)return;
+ if(!dailyAmalRecord)await loadDailyAmal();if(!dailyAmalRecord?.reminder?.enabled)return;
  const r=dailyAmalRecord.reminder,now=new Date(),today=localDateKey(),time=String(r.time||"07:00");
  if(r.lastNotifiedDate===today||now.getHours()*60+now.getMinutes()<Number(time.slice(0,2))*60+Number(time.slice(3,5)))return;
- dailyAmalRecord={...dailyAmalRecord,reminder:{...r,lastNotifiedDate:today},updatedAt:Date.now()};
- await putItem(dailyAmalRecord);
- if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(dailyAmalRecord.id).set(dailyAmalRecord)}catch(e){console.warn("Amal reminder sync pending",e)}}
+ const next=JSON.parse(JSON.stringify(dailyAmalRecord));next.reminder={...r,lastNotifiedDate:today};if(!await persistDailyAmal(next))return;
  const title="আমার আমল ও জিকির",body="আজকের আমল ও জিকিরের তালিকাটি দেখে নিন।";
  if("Notification" in window&&Notification.permission==="granted"){try{new Notification(title,{body,tag:"daily-amal-reminder"})}catch(e){toast(body)}}else toast("🔔 "+body);
 }
 
-async function persistDailyAmal(){
- if(!dailyAmalRecord)return;
- dailyAmalRecord.updatedAt=Date.now();await putItem(dailyAmalRecord);
- if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(dailyAmalRecord.id).set(dailyAmalRecord)}catch(e){console.warn("Daily amal sync pending",e)}}
+let dailyAmalSaving=false;
+async function persistDailyAmal(nextRecord){
+ if(!dailyAmalRecord||dailyAmalSaving)return false;dailyAmalSaving=true;
+ try{
+  const candidate=nextRecord||JSON.parse(JSON.stringify(dailyAmalRecord));candidate.updatedAt=Date.now();await putItem(candidate);dailyAmalRecord=candidate;
+  if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(candidate.id).set(candidate)}catch(e){console.warn("Daily amal sync pending",e)}}
+  return true;
+ }catch(e){console.error("Daily Amal local save failed",e);toast("দৈনিক আমল সংরক্ষণ হয়নি—আগের তথ্য অক্ষত আছে, আবার চেষ্টা করুন।");return false}
+ finally{dailyAmalSaving=false}
 }
 async function addDailyAmal(){
- const name=$("dailyAmalNew").value.trim();if(!name){toast("একটি আমলের নাম লিখুন");return}
- if(!dailyAmalRecord)await loadDailyAmal();
- dailyAmalRecord.items=dailyAmalRecord.items||[];
- const normalizedName=name.normalize("NFC").toLocaleLowerCase(currentLocale());if(dailyAmalRecord.items.some(x=>String(x.name||"").trim().normalize("NFC").toLocaleLowerCase(currentLocale())===normalizedName)){toast("এই আমলটি তালিকায় আছে");return}
- const target=Number($("dailyAmalTarget").value);if(!Number.isInteger(target)||target<1||target>100000){toast(tr("লক্ষ্য ১ থেকে ১০০০০০-এর মধ্যে পূর্ণসংখ্যা দিন"));return}dailyAmalRecord.items.push({id:uid(),name,target});
- $("dailyAmalNew").value="";$("dailyAmalTarget").value="1";await persistDailyAmal();renderDailyAmal();toast("আমল যোগ হয়েছে");
+ const name=$("dailyAmalNew").value.trim();if(!name){toast("একটি আমলের নাম লিখুন");return}if(!dailyAmalRecord)await loadDailyAmal();
+ const next=JSON.parse(JSON.stringify(dailyAmalRecord));next.items=next.items||[];const normalizedName=name.normalize("NFC").toLocaleLowerCase(currentLocale());
+ if(next.items.some(x=>String(x.name||"").trim().normalize("NFC").toLocaleLowerCase(currentLocale())===normalizedName)){toast("এই আমলটি তালিকায় আছে");return}
+ const target=Number($("dailyAmalTarget").value);if(!Number.isInteger(target)||target<1||target>100000){toast(tr("লক্ষ্য ১ থেকে ১০০০০০-এর মধ্যে পূর্ণসংখ্যা দিন"));return}
+ next.items.push({id:uid(),name,target});if(!await persistDailyAmal(next))return;$("dailyAmalNew").value="";$("dailyAmalTarget").value="1";renderDailyAmal();toast("আমল যোগ হয়েছে");
 }
 async function toggleDailyAmal(id,checked){
- if(!dailyAmalRecord)return;
- const date=$("dailyAmalDate").value||localDateKey();dailyAmalRecord.days=dailyAmalRecord.days||{};dailyAmalRecord.days[date]=dailyAmalRecord.days[date]||{};
- const item=dailyAmalRecord.items.find(x=>x.id===id);dailyAmalRecord.days[date][id]=checked?(Number(item?.target)||1):0;await persistDailyAmal();renderDailyAmal();
+ if(!dailyAmalRecord)return;const next=JSON.parse(JSON.stringify(dailyAmalRecord)),date=$("dailyAmalDate").value||localDateKey();next.days=next.days||{};next.days[date]=next.days[date]||{};
+ const item=next.items.find(x=>x.id===id);if(!item)return;next.days[date][id]=checked?(Number(item.target)||1):0;if(await persistDailyAmal(next))renderDailyAmal();
 }
-async function changeDailyAmalCount(id,delta){if(!dailyAmalRecord)return;const date=$("dailyAmalDate").value||localDateKey(),item=dailyAmalRecord.items.find(x=>x.id===id);if(!item)return;dailyAmalRecord.days= dailyAmalRecord.days||{};dailyAmalRecord.days[date]=dailyAmalRecord.days[date]||{};const old=dailyAmalRecord.days[date][id]===true?(Number(item.target)||1):Number(dailyAmalRecord.days[date][id]||0);dailyAmalRecord.days[date][id]=Math.max(0,Math.min(Number(item.target)||1,old+delta));await persistDailyAmal();renderDailyAmal();
+async function changeDailyAmalCount(id,delta){
+ if(!dailyAmalRecord)return;const next=JSON.parse(JSON.stringify(dailyAmalRecord)),date=$("dailyAmalDate").value||localDateKey(),item=next.items.find(x=>x.id===id);if(!item)return;
+ next.days=next.days||{};next.days[date]=next.days[date]||{};const old=next.days[date][id]===true?(Number(item.target)||1):Number(next.days[date][id]||0);
+ next.days[date][id]=Math.max(0,Math.min(Number(item.target)||1,old+delta));if(await persistDailyAmal(next))renderDailyAmal();
 }
 async function editDailyAmal(id){
- const item=dailyAmalRecord?.items?.find(x=>x.id===id);if(!item)return;
- const name=prompt(tr("আমলের নতুন নাম লিখুন"),item.name);if(name===null)return;const clean=name.trim();if(!clean){toast(tr("একটি নাম লিখুন"));return}
- const normalizedName=clean.normalize("NFC").toLocaleLowerCase(currentLocale());if(dailyAmalRecord.items.some(x=>x.id!==id&&String(x.name||"").trim().normalize("NFC").toLocaleLowerCase(currentLocale())===normalizedName)){toast(tr("এই আমলটি তালিকায় আছে"));return}
- const targetText=prompt(tr("আমলের লক্ষ্যসংখ্যা লিখুন"),String(Math.max(1,Number(item.target)||1)));if(targetText===null)return;
- const target=Number(targetText.trim());if(!Number.isInteger(target)||target<1||target>100000){toast(tr("লক্ষ্য ১ থেকে ১০০০০০-এর মধ্যে পূর্ণসংখ্যা দিন"));return}
- item.name=clean;const oldTarget=Math.max(1,Number(item.target)||1);for(const day of Object.values(dailyAmalRecord.days||{})){if(!day||day[id]===undefined)continue;const raw=day[id]===true?oldTarget:Number(day[id])||0;day[id]=Math.max(0,Math.min(target,raw))}item.target=target;await persistDailyAmal();renderDailyAmal();toast(tr("আমলের তথ্য আপডেট হয়েছে"));
+ const item=dailyAmalRecord?.items?.find(x=>x.id===id);if(!item)return;const name=prompt(tr("আমলের নতুন নাম লিখুন"),item.name);if(name===null)return;const clean=name.trim();if(!clean){toast("একটি নাম লিখুন");return}
+ const normalizedName=clean.normalize("NFC").toLocaleLowerCase(currentLocale());if(dailyAmalRecord.items.some(x=>x.id!==id&&String(x.name||"").trim().normalize("NFC").toLocaleLowerCase(currentLocale())===normalizedName)){toast("এই আমলটি তালিকায় আছে");return}
+ const targetText=prompt(tr("আমলের লক্ষ্যসংখ্যা লিখুন"),String(Math.max(1,Number(item.target)||1)));if(targetText===null)return;const target=Number(targetText.trim());if(!Number.isInteger(target)||target<1||target>100000){toast(tr("লক্ষ্য ১ থেকে ১০০০০০-এর মধ্যে পূর্ণসংখ্যা দিন"));return}
+ const next=JSON.parse(JSON.stringify(dailyAmalRecord)),nextItem=next.items.find(x=>x.id===id);if(!nextItem)return;nextItem.name=clean;const oldTarget=Math.max(1,Number(nextItem.target)||1);
+ for(const day of Object.values(next.days||{})){if(!day||day[id]===undefined)continue;const raw=day[id]===true?oldTarget:Number(day[id])||0;day[id]=Math.max(0,Math.min(target,raw))}nextItem.target=target;
+ if(!await persistDailyAmal(next))return;renderDailyAmal();toast(tr("আমলের তথ্য আপডেট হয়েছে"));
 }
 async function moveDailyAmal(id,delta){
- if(!dailyAmalRecord)return;const items=dailyAmalRecord.items||[],i=items.findIndex(x=>x.id===id),j=i+delta;if(i<0||j<0||j>=items.length)return;
- [items[i],items[j]]=[items[j],items[i]];await persistDailyAmal();renderDailyAmal();
+ if(!dailyAmalRecord)return;const next=JSON.parse(JSON.stringify(dailyAmalRecord)),items=next.items||[],i=items.findIndex(x=>x.id===id),j=i+delta;if(i<0||j<0||j>=items.length)return;
+ [items[i],items[j]]=[items[j],items[i]];if(await persistDailyAmal(next))renderDailyAmal();
 }
 async function removeDailyAmal(id){
- if(!dailyAmalRecord||!confirm(tr("এই আমলটি তালিকা থেকে বাদ দেবেন?")))return;
- dailyAmalRecord.items=(dailyAmalRecord.items||[]).filter(x=>x.id!==id);
- for(const day of Object.keys(dailyAmalRecord.days||{}))delete dailyAmalRecord.days[day][id];
- await persistDailyAmal();renderDailyAmal();toast("আমল তালিকা থেকে বাদ দেওয়া হয়েছে");
+ if(!dailyAmalRecord||!confirm(tr("এই আমলটি তালিকা থেকে বাদ দেবেন?")))return;const next=JSON.parse(JSON.stringify(dailyAmalRecord));next.items=(next.items||[]).filter(x=>x.id!==id);
+ for(const day of Object.keys(next.days||{}))if(next.days[day])delete next.days[day][id];if(!await persistDailyAmal(next))return;renderDailyAmal();toast("আমল তালিকা থেকে বাদ দেওয়া হয়েছে");
 }
 async function openDailyAmal(){
  await loadDailyAmal();$("homeMenu").classList.remove("show");$("dailyAmalPanel").classList.add("show");
