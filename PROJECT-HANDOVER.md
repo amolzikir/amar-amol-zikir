@@ -353,3 +353,12 @@
 - JSON-এ সব Firestore item record থাকে; ব্যক্তিগত নোট থাকতে পারে, তাই ফাইল গোপন রাখতে হবে।
 - v141-এর `index.html` ও `sw.js` ব্যাকআপ `backups/`-এ সংরক্ষিত।
 - ফোনে বাস্তব export ও ফাইল যাচাই ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়।
+
+
+## v143 — ব্যাকআপ পুনরুদ্ধারে মুছে-ফেলার সময়ের সুরক্ষা (২৫ নভেম্বর ২০২৬)
+- Backup import merge এখন updatedAt ও deletedAt—দুটির সর্বোচ্চ timestamp তুলনা করে।
+- একই timestamp হলে deleted tombstone-কে active record-এর ওপর অগ্রাধিকার দেয়; পুরোনো active backup দিয়ে deleted note পুনরুজ্জীবিত হওয়ার ঝুঁকি কমায়।
+- Backup regression tests-এ timestamp ordering ও tombstone tie-break কভার করা হয়েছে; pull request workflow-তেও backup tests যুক্ত।
+- Service worker cache: amol-zikir-v143.
+- পরিবর্তনের আগে index.html, sw.js, tests/backup-restore.test.js, workflow এবং এই handover-এর exact backup `backup/*-2026-11-25-before-v143-backup-merge-safety.bak` নামে রাখা হয়েছে।
+- কোনো ব্যবহারকারীর local বা Firestore data পড়া/লেখা/মোছা হয়নি। ফোনে live regression এখনো চালানো হয়নি।
