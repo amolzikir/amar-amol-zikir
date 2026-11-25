@@ -51,6 +51,7 @@ on:
       - "assets/app-icon-maskable.svg"
       - "tests/pwa-installability.test.js"
       - "tests/dua-source-links.test.js"
+      - "tests/daily-hadith.test.js"
       - "firebase.json"
       - "package.json"
       - "tests/service-worker-offline.test.js"
