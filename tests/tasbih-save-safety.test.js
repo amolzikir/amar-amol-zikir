@@ -57,3 +57,48 @@ test("overlapping Tasbih writes are rejected without overwriting the first", asy
   assert.equal(context.tasbihRecord.count, 13);
   assert.equal(context.isSaving(), false);
 });
+
+const loadStart = source.indexOf("async function loadTasbih(){");
+const loadEnd = source.indexOf("\\nI18N[", loadStart);
+if (loadStart < 0 || loadEnd < 0) throw new Error("Tasbih loader was not found");
+const loadSource = source.slice(loadStart, loadEnd);
+
+function makeLoadContext({ local, remote, putItem }) {
+  const context = {
+    tasbihRecord: null,
+    allItems: async () => local ? [local] : [],
+    putItem,
+    currentUser: null,
+    cloud: null,
+    navigator: { onLine: false },
+    toast: () => {},
+    updateTasbihUI: () => {},
+    console: { error: () => {}, warn: () => {} },
+    Date
+  };
+  if (remote) {
+    context.currentUser = { uid: "test-user" };
+    context.navigator.onLine = true;
+    context.cloud = { collection: () => ({ doc: () => ({ collection: () => ({ doc: () => ({
+      get: async () => ({ exists: true, data: () => remote }),
+      set: async () => {}
+    }) }) }) }) };
+  }
+  vm.runInNewContext(loadSource + "\\nglobalThis.load=loadTasbih;", context);
+  return context;
+}
+
+test("failed local persistence of newer cloud count keeps the older local record active", async () => {
+  const local = { id: "system-tasbih-counter", count: 7, updatedAt: 10 };
+  const remote = { id: "system-tasbih-counter", count: 19, updatedAt: 20 };
+  const context = makeLoadContext({ local, remote, putItem: async () => { throw new Error("disk full"); } });
+  assert.equal(await context.load(), true);
+  assert.equal(context.tasbihRecord, local);
+  assert.equal(context.tasbihRecord.count, 7);
+});
+
+test("failed creation of initial local counter does not expose an unsaved zero record", async () => {
+  const context = makeLoadContext({ local: null, remote: null, putItem: async () => { throw new Error("disk full"); } });
+  assert.equal(await context.load(), false);
+  assert.equal(context.tasbihRecord, null);
+});
