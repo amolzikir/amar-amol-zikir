@@ -575,4 +575,4 @@
   - `backup/tests-pwa-installability-test-js-2026-11-25-before-v172-daily-hadith-library.bak` — `6ecfe7eb31f7777d5467ded62eb194a1c828aa88`
   - `backup/tests-pwa-update-notice-test-js-2026-11-25-before-v172-daily-hadith-library.bak` — `1acff8ab800099f7ea187a205def6c891875a187`
   - `backup/PROJECT-HANDOVER-2026-11-25-before-v172-daily-hadith-library.bak` — `9598549a38d4bf69b81cc34ad785e0fa9170a02b`
-- No user notes, IndexedDB records, Firestore records, or existing hadith-related user data were changed. CI/Pages and Android runtime remain to be checked before marking v172 complete.
+- No user notes, IndexedDB records, Firestore records, or existing hadith-related user data were changed. Pages deployment run `45669143340` succeeded on handover commit `8c3337136b95376128150f71cc39d1da2817b61c`; the v172 code is now published. CI run `45669078162` is still in progress at dependency installation, so automated tests are not yet confirmed. Android runtime remains unverified.
