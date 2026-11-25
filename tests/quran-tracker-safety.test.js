@@ -29,14 +29,14 @@ function makeContext({ local = null, remote = null, putItem = async () => {} } =
     console: { error: () => {}, warn: () => {} },
     Date
   };
-  vm.runInNewContext(helperSource + "\nglobalThis.persist=persistQuranTracker; globalThis.load=loadQuranTracker; globalThis.isSaving=()=>quranTrackerSaving; globalThis.record=()=>quranTrackerRecord;", context);
+  vm.runInNewContext(helperSource + "\nglobalThis.persist=persistQuranTracker; globalThis.load=loadQuranTracker; globalThis.isSaving=()=>quranTrackerSaving; globalThis.record=()=>quranTrackerRecord; globalThis.setRecord=(v)=>quranTrackerRecord=v;", context);
   return context;
 }
 
 test("failed Quran tracker write preserves the previous record", async () => {
   const original = { id: "system-quran-tracker", entries: [{ entryId: "old", pages: 3 }] };
   const context = makeContext({ putItem: async () => { throw new Error("disk full"); } });
-  context.quranTrackerRecord = original;
+  context.setRecord(original);
   const draft = { ...original, entries: [...original.entries, { entryId: "new", pages: 2 }] };
   assert.equal(await context.persist(draft), false);
   assert.equal(context.record(), original);
@@ -48,7 +48,7 @@ test("successful Quran tracker write commits only after IndexedDB succeeds", asy
   let stored;
   const context = makeContext({ putItem: async value => { stored = value; } });
   const original = { id: "system-quran-tracker", entries: [] };
-  context.quranTrackerRecord = original;
+  context.setRecord(original);
   const draft = { ...original, entries: [{ entryId: "new", pages: 4 }] };
   assert.equal(await context.persist(draft), true);
   assert.equal(stored, draft);
@@ -59,7 +59,7 @@ test("overlapping Quran tracker writes are rejected", async () => {
   let release;
   const context = makeContext({ putItem: () => new Promise(resolve => { release = resolve; }) });
   const original = { id: "system-quran-tracker", entries: [] };
-  context.quranTrackerRecord = original;
+  context.setRecord(original);
   const first = context.persist({ ...original, entries: [{ entryId: "first" }] });
   await Promise.resolve();
   assert.equal(await context.persist({ ...original, entries: [{ entryId: "second" }] }), false);
