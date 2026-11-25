@@ -392,3 +392,13 @@
 - Service worker cache: `amol-zikir-v156`.
 - Exact pre-change backups: `backup/index-html-2026-11-25-before-v156-tracker-load-safety.bak`, `backup/sw-js-2026-11-25-before-v156-tracker-load-safety.bak`, `backup/package-json-2026-11-25-before-v156-tracker-load-safety.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v156-tracker-load-safety.bak`, `backup/tests-daily-amal-save-safety-test-js-2026-11-25-before-v156-tracker-load-safety.bak`, `backup/tests-tasbih-save-safety-test-js-2026-11-25-before-v156-tracker-load-safety.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v156-tracker-load-safety.bak`.
 - CI and Pages verification required before release completion; Android phone-side behavior remains unverified until the user tests it.
+
+
+
+## v157 — কিবোর্ড ফোকাস দৃশ্যমানতা (২৫ নভেম্বর ২০২৬)
+- অ্যাপের সব সাধারণ interactive control—button, link, input, select, textarea ও tabindex element—কিবোর্ডে focus হলে স্পষ্ট ৩px gold outline এবং ৩px offset দেখায়।
+- বিদ্যমান component-specific focus styles অক্ষত; touch interaction বা data behavior পরিবর্তন করা হয়নি।
+- Added `tests/keyboard-focus-accessibility.test.js` and `npm run test:keyboard-focus`; GitHub Actions workflow now runs this regression test.
+- Service worker cache: `amol-zikir-v157`.
+- Exact pre-change backups: `backup/index-html-2026-11-25-before-v157-keyboard-focus.bak`, `backup/sw-js-2026-11-25-before-v157-keyboard-focus.bak`, `backup/package-json-2026-11-25-before-v157-keyboard-focus.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v157-keyboard-focus.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v157-keyboard-focus.bak`.
+- CI, Pages, JavaScript syntax and live Android behavior must be verified before calling this release complete.
