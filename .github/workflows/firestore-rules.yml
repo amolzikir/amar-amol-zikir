@@ -11,6 +11,7 @@ on:
       - "firebase.json"
       - "package.json"
       - "tests/indexeddb-transaction.test.js"
+      - "tests/cloud-sync-retry.test.js"
       - "tests/firestore.rules.test.js"
       - "tests/local-account-partition.test.js"
       - "tests/dom-security.test.js"
@@ -31,6 +32,8 @@ on:
       - "firebase.json"
       - "package.json"
       - "tests/service-worker-offline.test.js"
+      - "tests/indexeddb-transaction.test.js"
+      - "tests/cloud-sync-retry.test.js"
       - "tests/firestore.rules.test.js"
       - "tests/local-account-partition.test.js"
       - "tests/dom-security.test.js"
@@ -54,6 +57,8 @@ jobs:
         run: npm run test:offline-shell
       - name: Run IndexedDB transaction commit tests
         run: npm run test:indexeddb-commit
+      - name: Run Cloud sync retry tests
+        run: npm run test:cloud-retry
       - name: Run local account partition tests
         run: npm run test:local
       - name: Run DOM security tests
