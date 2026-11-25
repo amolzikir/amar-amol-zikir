@@ -362,3 +362,12 @@
 - Service worker cache: amol-zikir-v143.
 - পরিবর্তনের আগে index.html, sw.js, tests/backup-restore.test.js, workflow এবং এই handover-এর exact backup `backup/*-2026-11-25-before-v143-backup-merge-safety.bak` নামে রাখা হয়েছে।
 - কোনো ব্যবহারকারীর local বা Firestore data পড়া/লেখা/মোছা হয়নি। ফোনে live regression এখনো চালানো হয়নি।
+
+
+## v154 — IndexedDB write-commit confirmation (২৫ নভেম্বর ২০২৬)
+- Root cause: the single-record `putItem` and `delLocal` helpers resolved when an individual IndexedDB request succeeded, before the enclosing read-write transaction had necessarily committed. Callers could therefore report a local save/delete as successful before transaction completion.
+- Both helpers now resolve only on transaction `complete` and reject on transaction error/abort (or synchronous setup failure). This aligns their success signal with transaction completion; batch and migration helpers already used transaction completion.
+- Added focused regression tests proving the promise remains pending until transaction completion and rejects on abort.
+- Service worker cache: `amol-zikir-v154`.
+- Exact pre-change backups: `backup/index.html-2026-11-25-before-v154-indexeddb-commit-safety.bak`, `backup/sw.js-2026-11-25-before-v154-indexeddb-commit-safety.bak`, `backup/PROJECT-HANDOVER.md-2026-11-25-before-v154-indexeddb-commit-safety.bak`, `backup/package.json-2026-11-25-before-v154-indexeddb-commit-safety.bak`, and `backup/.github-workflows-firestore-rules.yml-2026-11-25-before-v154-indexeddb-commit-safety.bak`.
+- This improves local transaction success reporting; it does not by itself prove offline-to-cloud sync or phone-side behavior. CI and Pages must pass before calling the release complete.
