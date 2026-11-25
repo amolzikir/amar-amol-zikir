@@ -5,7 +5,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const source = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 const start = source.indexOf("function validateBackupTree(");
-const end = source.indexOf("\nfunction backupRecordTimestamp", start);
+const end = source.indexOf("\nasync function importAppBackup", start);
 if (start < 0 || end < 0) throw new Error("Backup validators were not found");
 const mergeStart = source.indexOf("function mergeBackupIds(");
 const mergeEnd = source.indexOf("\nfunction renderZikrRoutines", mergeStart);
