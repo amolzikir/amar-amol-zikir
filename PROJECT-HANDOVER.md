@@ -1,6 +1,6 @@
 # আমার আমল ও জিকির — প্রকল্প হস্তান্তর নথি
 
-**সর্বশেষ হালনাগাদ:** ২৪ নভেম্বর ২০২৬  
+**সর্বশেষ হালনাগাদ:** ২৫ নভেম্বর ২০২৬  
 **উদ্দেশ্য:** ChatGPT-এর পুরোনো চ্যাট হারালেও অন্য ফোন বা অন্য ChatGPT অ্যাকাউন্ট থেকে প্রকল্পের কাজ নিরাপদে চালিয়ে যাওয়া।
 
 ## ১. প্রকল্প পরিচিতি
@@ -51,7 +51,7 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ প্রকাশিত release: **v136**; service worker cache string: `amol-zikir-v136`।
+- সর্বশেষ প্রকাশিত release: **v142**; service worker cache string: `amol-zikir-v142`।
 - v136-এ Backup v2 export-এ account-scoped Dua favorites যুক্ত; restore v1/v2 গ্রহণ করে, records ও favorites merge করে এবং local write read-back যাচাই করে।
 - v136-এ চারটি সূত্র-উল্লেখসহ দোয়া যোগ হয়েছে: ঘর থেকে বের হওয়া, সকাল-সন্ধ্যার আফিয়াত, মসজিদে প্রবেশ ও মসজিদ থেকে বের হওয়া।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৪-১১-২০২৬): `index.html` blob SHA `65a44f0240a2110d3fec1b5f019dfc614f1a84ba`; `sw.js` blob SHA `316a388da4e09b71303df9ff978c9128657110d4`।
@@ -345,3 +345,11 @@
 - v141 cache: `amol-zikir-v141`.
 - Pre-change exact backups: `backup/index.html-2026-11-24-before-all-local-db-recovery-export-v141.bak`, `backup/sw.js-2026-11-24-before-all-local-db-recovery-export-v141.bak`, `backup/PROJECT-HANDOVER.md-2026-11-24-before-all-local-db-recovery-export-v141.bak`.
 - Phone-side export/download and actual note recovery are pending user confirmation; no claim of recovered notes yet.
+
+### v142 — শুধু-পড়া Firestore recovery export (২৫ নভেম্বর ২০২৬)
+- Settings → ব্যাকআপ ও পুনরুদ্ধারে `☁️ Firestore ক্লাউডের নিরাপদ কপি` যোগ করা হয়েছে।
+- কেবল লগইন করা ব্যবহারকারীর `users/{uid}/items` সংগ্রহে `.get()` চালায়; কোনো Firestore write/delete, local write, Sync বা Restore করে না।
+- অ্যাকাউন্ট বদল ধরা পড়লে export বাতিল করে; offline বা sign-out অবস্থায় কাজ করে না।
+- JSON-এ সব Firestore item record থাকে; ব্যক্তিগত নোট থাকতে পারে, তাই ফাইল গোপন রাখতে হবে।
+- v141-এর `index.html` ও `sw.js` ব্যাকআপ `backups/`-এ সংরক্ষিত।
+- ফোনে বাস্তব export ও ফাইল যাচাই ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়।
