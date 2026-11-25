@@ -41,25 +41,25 @@ test("folder delete and reorder use one IndexedDB batch write, not per-record wr
 });
 
 test("folder metadata save guards duplicate writes and preserves prior state on failure",()=>{
- const fn=source.slice(source.indexOf("async function saveFolderPatch("),source.indexOf("\\nfunction buildFolderDeleteWrites"));
- assert.match(fn,/if\\(!menuFolderId\\|\\|saveFolderPatch\\.saving\\)return false/);
- assert.match(fn,/saveFolderPatch\\.saving=true/);
- assert.match(fn,/await putItem\\(candidate\\)/);
+ const fn=source.slice(source.indexOf("async function saveFolderPatch("),source.indexOf("\nfunction buildFolderDeleteWrites"));
+ assert.ok(fn.includes("if(!menuFolderId||saveFolderPatch.saving)return false"));
+ assert.ok(fn.includes("saveFolderPatch.saving=true"));
+ assert.ok(fn.includes("await putItem(candidate)"));
  assert.ok(fn.indexOf("catch(e)")<fn.indexOf("await render()"));
- assert.match(fn,/আগের তথ্য অক্ষত আছে, আবার চেষ্টা করুন/);
+ assert.ok(fn.includes("আগের তথ্য অক্ষত আছে, আবার চেষ্টা করুন"));
 });
 test("folder reorder is guarded and reports batch failure without rendering success",()=>{
- const fn=source.slice(source.indexOf("async function reorderFolder("),source.indexOf("\\nasync function folderMenuAction"));
- assert.match(fn,/if\\(reorderFolder\\.saving\\)return false/);
- assert.match(fn,/await putItemsBatch\\(buildFolderReorderWrites/);
+ const fn=source.slice(source.indexOf("async function reorderFolder("),source.indexOf("\nasync function folderMenuAction"));
+ assert.ok(fn.includes("if(reorderFolder.saving)return false"));
+ assert.ok(fn.includes("await putItemsBatch(buildFolderReorderWrites(siblings,Date.now()))"));
  assert.ok(fn.indexOf("catch(e)")<fn.indexOf("await render()"));
- assert.match(fn,/আগের ক্রম অক্ষত আছে, আবার চেষ্টা করুন/);
+ assert.ok(fn.includes("আগের ক্রম অক্ষত আছে, আবার চেষ্টা করুন"));
 });
 test("folder move revalidates destination and rejects descendant cycles",()=>{
- const fn=source.slice(source.indexOf("async function moveFolderToSelected("),source.indexOf('\\n$("moveFolderNow").onclick'));
- assert.match(fn,/if\\(!target\\|\\|descendants\\.has\\(newParent\\)\\)/);
- assert.match(fn,/moveFolderToSelected\\.saving/);
+ const fn=source.slice(source.indexOf("async function moveFolderToSelected("),source.indexOf('\n$("moveFolderNow").onclick'));
+ assert.ok(fn.includes("if(!target||descendants.has(newParent))"));
+ assert.ok(fn.includes("moveFolderToSelected.saving"));
  assert.ok(fn.indexOf("await putItem(candidate)")<fn.indexOf("closeFolderMenu()"));
  assert.ok(fn.indexOf("catch(e)")<fn.indexOf("closeFolderMenu()"));
- assert.match(fn,/আগের অবস্থান অক্ষত আছে, আবার চেষ্টা করুন/);
+ assert.ok(fn.includes("আগের অবস্থান অক্ষত আছে, আবার চেষ্টা করুন"));
 });
