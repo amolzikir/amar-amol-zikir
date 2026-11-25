@@ -549,3 +549,30 @@
   - `backup/tests-pwa-installability-2026-11-25-before-v171-daily-hadith-rotation.bak` — `37d2436228ccac7c95a505bca89d9d9584d4c2fe`
   - `backup/PROJECT-HANDOVER-2026-11-25-before-v171-daily-hadith-rotation.bak` — `05f44954f7598e11c3aae9f444bfbf220ca9f2b3`
 - Final candidate commit: `cfee5d505ed716fbabf63219066aa52a49ce2640`. CI run `45667421683` and Pages run `45667421858` were still running at this handover update; do not call v171 complete until both succeed. Earlier in-flight runs from sequential commits were cancelled/superseded. Android display remains unverified.
+
+
+## v171 — প্রথম দৈনিক হাদিস-ঘূর্ণন (২৫ নভেম্বর ২০২৬) — প্রকাশিত
+- তিনটি যাচাইকৃত হাদিস স্থানীয় তারিখ অনুযায়ী দৈনিক ঘুরিয়ে দেখানোর প্রথম সংস্করণ। প্রতিদিনের সূচি স্থির ছিল, তবে সংগ্রহটি মাত্র তিনটি হওয়ায় দীর্ঘমেয়াদি পুনরাবৃত্তিহীন ব্যবস্থা ছিল না।
+- CI run `45667421683` এবং Pages run `45667421858` উভয়ই সফল; পরবর্তী Pages run `45667535081`-ও সফল। v171 প্রকাশিত, Android-এ সরাসরি প্রদর্শন এখনো ব্যবহারকারী পরীক্ষা করেননি।
+
+## v172 — বড় দৈনিক হাদিস সংগ্রহ ও পুনরাবৃত্তিহীন অগ্রগতি (২৫ নভেম্বর ২০২৬) — CI/Pages যাচাই বাকি
+- দৈনিক সংগ্রহ ৩ থেকে ৯টি করা হয়েছে। ছয়টি নতুন হাদিসের মূল আরবি পাঠ ও নম্বর Dalail-এ সহিহ বুখারি/মুসলিমের নির্দিষ্ট পৃষ্ঠা খুলে যাচাই করা হয়েছে:
+  - সহিহ মুসলিম ৫৫ — `https://shamela.ws/book/711/206`
+  - সহিহ বুখারি ৫৬৫১ — `https://shamela.ws/book/735/9073`
+  - সহিহ মুসলিম ৪৬ — `https://shamela.ws/book/711/178`
+  - সহিহ মুসলিম ২৫৮০ — `https://shamela.ws/book/711/7858`
+  - সহিহ মুসলিম ৭৮৩ — `https://shamela.ws/book/711/2142`
+  - সহিহ বুখারি ৬৯ — `https://shamela.ws/book/735/136`
+- বাংলা লেখা সহজ ভাবার্থ; কোনো অনিশ্চিত তৃতীয়-পক্ষ বাংলা অনুবাদ কপি করা হয়নি। UI-তে এই বিষয়টি স্পষ্ট করে “বাংলা অর্থ (সহজ ভাবার্থ)” লেখা হয়েছে।
+- দৈনিক সূচি এখন localStorage-এ তারিখ, দেখা হাদিসের সূচি ও পরবর্তী অবস্থান রাখে। একই দিনে একই হাদিস থাকে; সংগ্রহের ৯টি শেষ না হওয়া পর্যন্ত নতুন দিনে পুরোনো হাদিস পুনরায় আসে না; সব শেষ হলে নতুন চক্র শুরু হয়। ইতিহাসটি এই ডিভাইসের ব্রাউজার-স্টোরেজে থাকে; ব্রাউজারের সাইট ডেটা মুছে ফেললে সেই ইতিহাসও মুছে যাবে।
+- Service Worker cache marker `amol-zikir-v172`; daily hadith test-এ ৯টি entry, distinct text/source links, same-day stability, no-repeat cycle এবং reset যাচাই যুক্ত হয়েছে। PWA cache assertions-ও v172-তে উন্নীত।
+- Exact pre-v172 backups fetched back and SHA-verified:
+  - `backup/index-html-2026-11-25-before-v172-daily-hadith-library.bak` — `510b35573942a7770d245c32987fa964f1e871b9`
+  - `backup/sw-js-2026-11-25-before-v172-daily-hadith-library.bak` — `3146be2546a4ea4c715f87287b310fad8d32658b`
+  - `backup/package-json-2026-11-25-before-v172-daily-hadith-library.bak` — `f426540d967cc2ad9fda4fdc0e5c78a4320e1d9c`
+  - `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v172-daily-hadith-library.bak` — `ab24574132491a108b8312b8f9a3546658a659fa`
+  - `backup/tests-daily-hadith-test-js-2026-11-25-before-v172-daily-hadith-library.bak` — `0ce317c93f1d89a4d5c83168649a6258ae548d04`
+  - `backup/tests-pwa-installability-test-js-2026-11-25-before-v172-daily-hadith-library.bak` — `6ecfe7eb31f7777d5467ded62eb194a1c828aa88`
+  - `backup/tests-pwa-update-notice-test-js-2026-11-25-before-v172-daily-hadith-library.bak` — `1acff8ab800099f7ea187a205def6c891875a187`
+  - `backup/PROJECT-HANDOVER-2026-11-25-before-v172-daily-hadith-library.bak` — `9598549a38d4bf69b81cc34ad785e0fa9170a02b`
+- No user notes, IndexedDB records, Firestore records, or existing hadith-related user data were changed. CI/Pages and Android runtime remain to be checked before marking v172 complete.
