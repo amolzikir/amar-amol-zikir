@@ -610,17 +610,27 @@ async function removeViewed(){if(!viewing||removeViewed.saving)return;if(!confir
 function localDateKey(d=new Date()){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return y+"-"+m+"-"+day}
 async function loadDailyAmal(){
  const id="system-daily-amal";
- let local=(await allItems()).find(x=>x.id===id&&!x.deletedAt)||null;
+ let local=(await allItems()).find(x=>x.id===id&&!x.deletedAt)||null,cloudReadFailed=false;
  if(currentUser&&cloud&&navigator.onLine){
-  try{const ref=cloud.collection("users").doc(currentUser.uid).collection("items").doc(id),snap=await ref.get(),remote=snap.exists?snap.data():null;
-   if(remote&&(!local||Number(remote.updatedAt||0)>Number(local.updatedAt||0))){local=remote;await putItem(local)}
-   else if(local&&!remote)await ref.set(local)
-  }catch(e){console.warn("Daily amal cloud load pending",e)}
+  try{
+   const ref=cloud.collection("users").doc(currentUser.uid).collection("items").doc(id),snap=await ref.get(),remote=snap.exists?snap.data():null;
+   if(remote&&(!local||Number(remote.updatedAt||0)>Number(local.updatedAt||0))){
+    await putItem(remote);local=remote;
+   }else if(local&&!remote){
+    try{await ref.set(local)}catch(e){console.warn("Daily amal cloud seed pending",e);scheduleCloudSyncRetry()}
+   }
+  }catch(e){cloudReadFailed=true;console.warn("Daily amal cloud load pending",e);scheduleCloudSyncRetry()}
  }
- if(!local){local={id,type:"daily-amal",tab:"__system__",title:"দৈনিক আমল",items:[],days:{},updatedAt:Date.now()};await putItem(local)}
+ if(!local){
+  if(cloudReadFailed){toast("ক্লাউডের আমল যাচাই করা যায়নি—নিরাপত্তার জন্য নতুন খালি তালিকা তৈরি করা হয়নি।");return false}
+  local={id,type:"daily-amal",tab:"__system__",title:"দৈনিক আমল",items:[],days:{},updatedAt:Date.now()};
+  try{await putItem(local)}catch(e){console.error("Daily Amal initial local save failed",e);toast("দৈনিক আমল চালু করা যায়নি—স্থানীয় সংরক্ষণ ব্যর্থ হয়েছে।");return false}
+  if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(id).set(local)}catch(e){console.warn("Daily amal initial cloud save pending",e);scheduleCloudSyncRetry()}}
+ }
  dailyAmalRecord=local;
  $("dailyAmalDate").value=localDateKey();
  renderDailyAmal();
+ return true;
 }
 
 let dailyCalendarMonth=localDateKey().slice(0,7);
@@ -770,7 +780,7 @@ function renderAmalReminderSettings(){
  $("amalReminderEnabled").checked=!!r.enabled;$("amalReminderTime").value=/^([01]\d|2[0-3]):[0-5]\d$/.test(r.time||"")?r.time:"07:00";
 }
 async function saveAmalReminder(){
- if(!dailyAmalRecord)await loadDailyAmal();
+ if(!dailyAmalRecord&&!(await loadDailyAmal()))return;
  const enabled=$("amalReminderEnabled").checked,time=$("amalReminderTime").value;
  if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){toast("সঠিক সময় নির্বাচন করুন");return}
  if(enabled&&"Notification" in window&&Notification.permission==="default"){try{await Notification.requestPermission()}catch(e){console.warn("Notification permission unavailable",e)}}
@@ -779,7 +789,7 @@ async function saveAmalReminder(){
  renderAmalReminderSettings();$("amalReminderStatus").textContent=enabled?(("Notification" in window&&Notification.permission==="granted")?"নির্ধারিত সময়ে নোটিফিকেশন দেওয়ার অনুমতি আছে। অ্যাপ বন্ধ থাকলে নিশ্চয়তা নেই।":"অ্যাপ খোলা থাকলে নির্ধারিত সময়ে মনে করিয়ে দেবে।"):"রিমাইন্ডার বন্ধ আছে।";toast(enabled?"আমল রিমাইন্ডার চালু হয়েছে":"আমল রিমাইন্ডার বন্ধ হয়েছে");
 }
 async function checkDailyAmalReminder(){
- if(!dailyAmalRecord)await loadDailyAmal();if(!dailyAmalRecord?.reminder?.enabled)return;
+ if(!dailyAmalRecord&&!(await loadDailyAmal()))return;if(!dailyAmalRecord?.reminder?.enabled)return;
  const r=dailyAmalRecord.reminder,now=new Date(),today=localDateKey(),time=String(r.time||"07:00");
  if(r.lastNotifiedDate===today||now.getHours()*60+now.getMinutes()<Number(time.slice(0,2))*60+Number(time.slice(3,5)))return;
  const next=JSON.parse(JSON.stringify(dailyAmalRecord));next.reminder={...r,lastNotifiedDate:today};if(!await persistDailyAmal(next))return;
@@ -798,7 +808,7 @@ async function persistDailyAmal(nextRecord){
  finally{dailyAmalSaving=false}
 }
 async function addDailyAmal(){
- const name=$("dailyAmalNew").value.trim();if(!name){toast("একটি আমলের নাম লিখুন");return}if(!dailyAmalRecord)await loadDailyAmal();
+ const name=$("dailyAmalNew").value.trim();if(!name){toast("একটি আমলের নাম লিখুন");return}if(!dailyAmalRecord&&!(await loadDailyAmal()))return;
  const next=JSON.parse(JSON.stringify(dailyAmalRecord));next.items=next.items||[];const normalizedName=name.normalize("NFC").toLocaleLowerCase(currentLocale());
  if(next.items.some(x=>String(x.name||"").trim().normalize("NFC").toLocaleLowerCase(currentLocale())===normalizedName)){toast("এই আমলটি তালিকায় আছে");return}
  const target=Number($("dailyAmalTarget").value);if(!Number.isInteger(target)||target<1||target>100000){toast(tr("লক্ষ্য ১ থেকে ১০০০০০-এর মধ্যে পূর্ণসংখ্যা দিন"));return}
@@ -831,7 +841,7 @@ async function removeDailyAmal(id){
  for(const day of Object.keys(next.days||{}))if(next.days[day])delete next.days[day][id];if(!await persistDailyAmal(next))return;renderDailyAmal();toast("আমল তালিকা থেকে বাদ দেওয়া হয়েছে");
 }
 async function openDailyAmal(){
- await loadDailyAmal();$("homeMenu").classList.remove("show");$("dailyAmalPanel").classList.add("show");
+ if(!await loadDailyAmal())return;$("homeMenu").classList.remove("show");$("dailyAmalPanel").classList.add("show");
  try{history.pushState({amolDailyAmal:true},"",location.href);dailyBackEntry=true}catch(e){}
  saveNavState();
 }
@@ -841,22 +851,24 @@ function closeDailyAmal(){
 }
 
 async function loadTasbih(){
- let local=(await allItems()).find(x=>x.id==="system-tasbih-counter"&&!x.deletedAt)||null;
+ let local=(await allItems()).find(x=>x.id==="system-tasbih-counter"&&!x.deletedAt)||null,cloudReadFailed=false;
  if(currentUser&&cloud&&navigator.onLine){
   try{
    const ref=cloud.collection("users").doc(currentUser.uid).collection("items").doc("system-tasbih-counter");
    const snap=await ref.get(),remote=snap.exists?snap.data():null;
    if(remote&&(!local||Number(remote.updatedAt||0)>Number(local.updatedAt||0))){
-    try{await putItem(remote);local=remote}
-    catch(e){console.warn("Tasbih remote copy could not be saved locally",e);toast("ক্লাউডের গণনা এই ডিভাইসে সংরক্ষণ হয়নি—আগের স্থানীয় গণনা অক্ষত আছে।")}
-   }else if(local&&!remote){try{await ref.set(local)}catch(e){console.warn("Tasbih cloud seed failed",e)}}
-  }catch(e){console.warn("Tasbih cloud load failed",e)}
+    await putItem(remote);local=remote;
+   }else if(local&&!remote){
+    try{await ref.set(local)}catch(e){console.warn("Tasbih cloud seed failed",e);scheduleCloudSyncRetry()}
+   }
+  }catch(e){cloudReadFailed=true;console.warn("Tasbih cloud load failed",e);scheduleCloudSyncRetry()}
  }
  if(!local){
+  if(cloudReadFailed){toast("ক্লাউডের গণনা যাচাই করা যায়নি—নিরাপত্তার জন্য নতুন শূন্য গণনা তৈরি করা হয়নি।");return false}
   const fresh={id:"system-tasbih-counter",type:"counter",tab:"__system__",title:"তাসবিহ কাউন্টার",zikr:"سُبْحَانَ اللَّهِ",count:0,target:33,updatedAt:Date.now()};
   try{await putItem(fresh);local=fresh}
   catch(e){console.error("Tasbih initial local save failed",e);toast("তাসবিহ কাউন্টার সংরক্ষণ করা যায়নি—আবার চেষ্টা করুন।");return false}
-  if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(local.id).set(local)}catch(e){console.warn("Tasbih cloud save failed",e)}}
+  if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(local.id).set(local)}catch(e){console.warn("Tasbih cloud save failed",e);scheduleCloudSyncRetry()}}
  }
  tasbihRecord=local;updateTasbihUI();return true;
 }
@@ -924,7 +936,7 @@ async function resetTasbih(){
 }
 async function openTasbih(){
  $("tasbihVibration").checked=localStorage.getItem("amol-tasbih-vibration")==="on";$("tasbihSound").checked=localStorage.getItem("amol-tasbih-sound")==="1";
- await loadTasbih();
+ if(!await loadTasbih())return;
  $("homeMenu").classList.remove("show");$("tasbihPanel").classList.add("show");
  try{history.pushState({amolTasbih:true},"",location.href);tasbihBackEntry=true}catch(e){}
  saveNavState();
