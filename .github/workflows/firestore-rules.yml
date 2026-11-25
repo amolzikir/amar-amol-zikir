@@ -13,6 +13,7 @@ on:
       - "tests/dom-security.test.js"
       - "tests/daily-amal-recovery.test.js"
       - "tests/daily-amal-save-safety.test.js"
+      - "tests/tasbih-save-safety.test.js"
       - "tests/backup-restore.test.js"
       - "tests/folder-operations.test.js"
       - "tests/note-save-safety.test.js"
@@ -53,6 +54,8 @@ jobs:
         run: npm run test:daily-amal-save
       - name: Run Daily Amal history preservation tests
         run: npm run test:daily-amal-history
+      - name: Run Tasbih save safety tests
+        run: npm run test:tasbih
       - name: Run backup and restore tests
         run: npm run test:backup
       - name: Run folder operation safety tests
