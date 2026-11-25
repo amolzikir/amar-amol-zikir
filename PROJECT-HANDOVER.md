@@ -521,3 +521,12 @@
 - Cache marker: `amol-zikir-v169`। Added `tests/pwa-update-notice.test.js`, `npm run test:pwa-updates`, এবং GitHub Actions test step।
 - Exact pre-change backups fetched back and verified byte-for-byte: `backup/index-html-2026-11-25-before-v169-update-notice.bak`, `backup/sw-js-2026-11-25-before-v169-update-notice.bak`, `backup/package-json-2026-11-25-before-v169-update-notice.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v169-update-notice.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v169-update-notice.bak`.
 - Initial CI run `45663299238` failed only because the existing PWA installability test still expected cache `v168`; that assertion was updated to `v169` after an exact backup (`backup/tests-pwa-installability-test-js-2026-11-25-before-v169-cache-assertion.bak`). Final CI run `45663722433` and Pages run `45663722250` both succeeded on commit `f5ef833021dd4bd14a6be3e3dbf577bd717ba423`. Android update-notice behavior remains unverified.
+
+
+## v170 — দোয়ার মূল সূত্রের পৃষ্ঠা-লিংক সংশোধন (২৫ নভেম্বর ২০২৬)
+- Shamela মূল পাঠে আটটি অ্যাপ-দোয়ার রেফারেন্স/আরবি মিলিয়ে দেখা হয়েছে; আগেই যাচাইকৃত ছয়টির পুনরাবৃত্তি পরিবর্তন করা হয়নি। দুটি পৃষ্ঠা-লিংক ভুল ছিল, হাদিস নম্বর ঠিক ছিল:
+  - বাড়ি থেকে বের হওয়ার দোয়া: সুনান আবি দাউদ ৫০৯৫ — সঠিক পৃষ্ঠা `https://shamela.ws/book/1726/6957` (আগের লিংক 6958 ছিল পরের অধ্যায়ের পৃষ্ঠা)।
+  - সকাল-সন্ধ্যার আফিয়াহ দোয়া: সুনান আবি দাউদ ৫০৭৪ — সঠিক পৃষ্ঠা `https://shamela.ws/book/1726/6934` (আগের লিংক 6935 ছিল হাদিস ৫০৭৫)।
+- সংশোধিত লিংক দুটির জন্য `tests/dua-source-links.test.js` ও `npm run test:dua-sources` যোগ করা হয়েছে; workflow push/PR path ও test step যুক্ত। বিদ্যমান `tests/backup-restore.test.js`-এ পুরোনো ভুল URL assertion-ও সঠিক পৃষ্ঠায় আপডেট করা হয়েছে।
+- Exact pre-change backups verified byte-for-byte: `backup/index-html-2026-11-25-before-v170-dua-source-links.bak`, `backup/package-json-2026-11-25-before-v170-dua-source-links.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v170-dua-source-links.bak`, `backup/PROJECT-HANDOVER-md-2026-11-25-before-v170-dua-source-links.bak`, `backup/tests-backup-restore-test-js-2026-11-25-before-v170-dua-source-assertion.bak`.
+- Pages deploy run `45665115733` succeeded on commit `685cc0a826d1535edf05aa26d4b08000b0de5fd2`. Focused link assertions evaluated successfully against current repository content. Final CI run `45665115279` was still in progress at handover update; do not mark v170 complete until it succeeds. No user data or Firebase data changed.
