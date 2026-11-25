@@ -13,6 +13,7 @@ on:
       - "tests/dom-security.test.js"
       - "tests/daily-amal-recovery.test.js"
       - "tests/backup-restore.test.js"
+      - "tests/folder-operations.test.js"
       - ".github/workflows/firestore-rules.yml"
   pull_request:
     paths:
@@ -23,6 +24,7 @@ on:
       - "tests/local-account-partition.test.js"
       - "tests/dom-security.test.js"
       - "tests/backup-restore.test.js"
+      - "tests/folder-operations.test.js"
       - ".github/workflows/firestore-rules.yml"
 
 jobs:
@@ -45,5 +47,7 @@ jobs:
         run: npm run test:daily-recovery
       - name: Run backup and restore tests
         run: npm run test:backup
+      - name: Run folder operation safety tests
+        run: npm run test:folders
       - name: Run Firestore emulator security tests
         run: npm run test:rules
