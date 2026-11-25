@@ -494,7 +494,7 @@
 - Added `tests/directions-navigation.test.js`, `npm run test:directions`, and one GitHub Actions test step/path filter.
 - Service worker cache marker: `amol-zikir-v166`.
 - Process note: v166 source changes were committed without verified pre-change backups; the earlier backup claim was inaccurate and is corrected here. No app user data was changed by that source-edit process. Do not treat current files as pre-v166 backups.
-- CI, Pages deployment, and Android phone-side GPS/Google Maps handoff verification pending.
+- CI run `45648987518` succeeded and Pages run `45658937133` succeeded on the subsequent handover commit containing v166. Android phone-side GPS/Google Maps handoff remains unverified.
 
 ## v167 — ঘুমানোর দোয়ার হাদিস-সূত্র সংশোধন (২৫ নভেম্বর ২০২৬)
 - দোয়া লাইব্রেরির ঘুমানোর দোয়ার সূত্রে ভুল হাদিস নম্বর (৫৯৫৫) এবং ভুল Shamela page URL (9552) ছিল।
@@ -502,4 +502,13 @@
 - `index.html`-এ শুধু ওই দোয়ার source ও URL সংশোধন করা হয়েছে; আরবি, উচ্চারণ, অর্থ এবং অন্য দোয়া অপরিবর্তিত।
 - Exact pre-change snapshots created and fetched back byte-for-byte before editing: `backup/index-html-2026-11-25-before-v167-dua-source-correction.bak` and `backup/PROJECT-HANDOVER-2026-11-25-before-v167-dua-source-correction.bak`.
 - Source commit: `5995e1ddfa392fa41b7b0e1a9c5e42142fd39821`.
-- CI, Pages deployment and live app verification pending. Do not claim v167 is live until Pages deployment succeeds.
+- CI run `45658863413` and Pages run `45658937133` succeeded; v167 source and v166 route planner are included in the successful Pages deployment. Android live behavior remains unverified.
+
+
+## v168 — PWA install icon ও ইনস্টলযোগ্যতার উন্নতি (২৫ নভেম্বর ২০২৬)
+- Manifest-এ scalable standard SVG icon ও maskable SVG icon যুক্ত হয়েছে; Android home-screen/app launcher-এ অ্যাপের নিজস্ব পরিচিতি দেখানোর জন্য।
+- `index.html`-এ SVG favicon link যুক্ত হয়েছে; manifest-এর description-ও হালনাগাদ।
+- Service worker cache version `amol-zikir-v168`; দুই icon app-shell precache-এ যোগ হয়েছে, ফলে offline shell-এর সঙ্গে icon-ও cache হয়।
+- Added `tests/pwa-installability.test.js` and `npm run test:pwa-installability`; GitHub Actions push/PR path filters and test step updated.
+- Exact pre-change backups fetched back and verified byte-for-byte: `backup/manifest-webmanifest-2026-11-25-before-v168-pwa-icons.bak`, `backup/index-html-2026-11-25-before-v168-pwa-icons.bak`, `backup/sw-js-2026-11-25-before-v168-pwa-icons.bak`, `backup/package-json-2026-11-25-before-v168-pwa-icons.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v168-pwa-icons.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v168-pwa-icons.bak`.
+- No app user data, Firestore records, or authentication settings were changed. CI/Pages and Android installation behavior must be verified before calling this release complete.
