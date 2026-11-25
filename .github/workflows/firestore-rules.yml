@@ -11,6 +11,7 @@ on:
       - "tests/pwa-installability.test.js"
       - "tests/pwa-update-notice.test.js"
       - "tests/dua-source-links.test.js"
+      - "tests/daily-hadith.test.js"
       - "tests/indexeddb-transaction.test.js"
       - "sw.js"
       - "tests/service-worker-offline.test.js"
@@ -82,6 +83,8 @@ jobs:
         run: npm run test:pwa-updates
       - name: Run dua source link tests
         run: npm run test:dua-sources
+      - name: Run daily hadith source and rotation tests
+        run: npm run test:daily-hadith
       - name: Run offline service worker fallback tests
         run: npm run test:offline-shell
       - name: Run IndexedDB transaction commit tests
