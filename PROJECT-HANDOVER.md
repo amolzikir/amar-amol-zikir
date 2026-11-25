@@ -371,3 +371,13 @@
 - Service worker cache: `amol-zikir-v154`.
 - Exact pre-change backups: `backup/index.html-2026-11-25-before-v154-indexeddb-commit-safety.bak`, `backup/sw.js-2026-11-25-before-v154-indexeddb-commit-safety.bak`, `backup/PROJECT-HANDOVER.md-2026-11-25-before-v154-indexeddb-commit-safety.bak`, `backup/package.json-2026-11-25-before-v154-indexeddb-commit-safety.bak`, and `backup/.github-workflows-firestore-rules.yml-2026-11-25-before-v154-indexeddb-commit-safety.bak`.
 - This improves local transaction success reporting; it does not by itself prove offline-to-cloud sync or phone-side behavior. CI and Pages must pass before calling the release complete.
+
+
+## v155 — Daily Amal ও তাসবিহ Cloud retry safety (২৫ নভেম্বর ২০২৬)
+- Direct Firestore write ব্যর্থ হলে Daily Amal ও তাসবিহের local IndexedDB record অক্ষত থাকে; এখন shared exponential-backoff scheduler দিয়ে full conflict-safe `syncCloud()` retry queue করা হয়।
+- একই সময়ে একাধিক failure হলে duplicate timer তৈরি হয় না; offline/sign-out অবস্থায় timer নয়—বিদ্যমান online event reconnect হলে Sync চালায়।
+- Existing `syncCloud()` error retry-ও একই scheduler ব্যবহার করে; backoff সর্বোচ্চ পাঁচ মিনিট, successful sync-এ আগের মতো reset।
+- Added `tests/cloud-sync-retry.test.js` for retry scheduling, timer de-duplication, offline/sign-out behavior and backoff cap. Existing Daily Amal/Tasbih tests now stub the scheduler.
+- Service worker cache: `amol-zikir-v155`.
+- Exact pre-change backups: `backup/index-html-2026-11-25-before-v155-cloud-retry.bak`, `backup/sw-js-2026-11-25-before-v155-cloud-retry.bak`, `backup/package-json-2026-11-25-before-v155-cloud-retry.bak`, `backup/workflow-2026-11-25-before-v155-cloud-retry.bak`, `backup/PROJECT-HANDOVER-2026-11-25-before-v155-cloud-retry.bak`, `backup/tests-daily-amal-save-2026-11-25-before-v155-cloud-retry.bak`, and `backup/tests-tasbih-save-2026-11-25-before-v155-cloud-retry.bak`.
+- CI and Pages verification required before release completion. This change does not perform any user-data restore, deletion, or migration.
