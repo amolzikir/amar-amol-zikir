@@ -39,3 +39,27 @@ test("folder delete and reorder use one IndexedDB batch write, not per-record wr
  assert.match(source,/await putItemsBatch\(writes\)/);
  assert.match(source,/putItemsBatch\(buildFolderReorderWrites\(siblings,Date\.now\(\)\)\)/);
 });
+
+test("folder metadata save guards duplicate writes and preserves prior state on failure",()=>{
+ const fn=source.slice(source.indexOf("async function saveFolderPatch("),source.indexOf("\\nfunction buildFolderDeleteWrites"));
+ assert.match(fn,/if\\(!menuFolderId\\|\\|saveFolderPatch\\.saving\\)return false/);
+ assert.match(fn,/saveFolderPatch\\.saving=true/);
+ assert.match(fn,/await putItem\\(candidate\\)/);
+ assert.ok(fn.indexOf("catch(e)")<fn.indexOf("await render()"));
+ assert.match(fn,/আগের তথ্য অক্ষত আছে, আবার চেষ্টা করুন/);
+});
+test("folder reorder is guarded and reports batch failure without rendering success",()=>{
+ const fn=source.slice(source.indexOf("async function reorderFolder("),source.indexOf("\\nasync function folderMenuAction"));
+ assert.match(fn,/if\\(reorderFolder\\.saving\\)return false/);
+ assert.match(fn,/await putItemsBatch\\(buildFolderReorderWrites/);
+ assert.ok(fn.indexOf("catch(e)")<fn.indexOf("await render()"));
+ assert.match(fn,/আগের ক্রম অক্ষত আছে, আবার চেষ্টা করুন/);
+});
+test("folder move revalidates destination and rejects descendant cycles",()=>{
+ const fn=source.slice(source.indexOf("async function moveFolderToSelected("),source.indexOf('\\n$("moveFolderNow").onclick'));
+ assert.match(fn,/if\\(!target\\|\\|descendants\\.has\\(newParent\\)\\)/);
+ assert.match(fn,/moveFolderToSelected\\.saving/);
+ assert.ok(fn.indexOf("await putItem(candidate)")<fn.indexOf("closeFolderMenu()"));
+ assert.ok(fn.indexOf("catch(e)")<fn.indexOf("closeFolderMenu()"));
+ assert.match(fn,/আগের অবস্থান অক্ষত আছে, আবার চেষ্টা করুন/);
+});
