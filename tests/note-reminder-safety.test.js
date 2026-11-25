@@ -9,21 +9,21 @@ function extract(name,next){
  if(start<0||end<0)throw new Error(name+" function was not found");
  return source.slice(start,end);
 }
-const save=extract("async function saveReminder(){","\\nasync function clearReminder");
-const clear=extract("async function clearReminder(){","\\nasync function checkReminders");
+const save=extract("async function saveReminder(){","\nasync function clearReminder");
+const clear=extract("async function clearReminder(){","\nasync function checkReminders");
 for(const [name,fn] of [["save",save],["clear",clear]]){
  test(name+" reminder write ignores duplicate taps and releases its guard",()=>{
-  assert.match(fn,new RegExp("if\\(!viewing\\|\\|"+name+"Reminder\\.saving\\)return"));
-  assert.match(fn,new RegExp(name+"Reminder\\.saving=true"));
-  assert.match(fn,new RegExp(name+"Reminder\\.saving=false"));
+  assert.ok(fn.includes("if(!viewing||"+name+"Reminder.saving)return"));
+  assert.ok(fn.includes(name+"Reminder.saving=true"));
+  assert.ok(fn.includes(name+"Reminder.saving=false"));
  });
  test(name+" reminder commits the candidate only after IndexedDB succeeds",()=>{
-  assert.match(fn,/const candidate=\\{\\.\\.\\.viewing,reminderAt:/);
+  assert.ok(fn.includes("const candidate={...viewing,reminderAt:"));
   assert.ok(fn.indexOf("await putItem(candidate)")<fn.indexOf("viewing=candidate"));
   assert.ok(fn.indexOf("catch(e)")<fn.indexOf("viewing=candidate"));
  });
  test(name+" reminder failure preserves the current viewer and leaves the panel open",()=>{
-  assert.match(fn,/আগের তথ্য অক্ষত আছে, আবার চেষ্টা করুন/);
+  assert.ok(fn.includes("আগের তথ্য অক্ষত আছে, আবার চেষ্টা করুন"));
   assert.ok(fn.indexOf("catch(e)")<fn.indexOf('$("reminderPanel").classList.remove("show")'));
   assert.ok(fn.indexOf("catch(e)")<fn.indexOf("syncCloud()"));
  });
