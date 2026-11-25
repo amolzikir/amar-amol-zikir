@@ -857,14 +857,28 @@ function updateTasbihUI(){
  $("tasbihTarget").value=Number(tasbihRecord.target||33);$("tasbihTargetPreset").value=["33","100","1000"].includes(String(tasbihRecord.target||33))?String(tasbihRecord.target||33):"__custom";
  const count=Number(tasbihRecord.count||0),target=Math.max(1,Number(tasbihRecord.target||33)),rounds=Math.floor(count/target),within=count%target,cyclePct=Math.round(within/target*100),pct=Math.min(100,cyclePct);$("tasbihRounds").innerHTML=tr("সম্পন্ন চক্র: ")+"<strong>"+rounds.toLocaleString(currentLocale())+"</strong> · "+tr("চলতি চক্র: ")+within.toLocaleString(currentLocale())+" / "+target.toLocaleString(currentLocale())+" · "+tr("বাকি: ")+(target-within).toLocaleString(currentLocale());$("tasbihProgress").style.width=pct+"%";$("tasbihTap").style.setProperty("--tasbih-progress",String(pct));$("tasbihProgress").parentElement.setAttribute("role","progressbar");$("tasbihProgress").parentElement.setAttribute("aria-valuemin","0");$("tasbihProgress").parentElement.setAttribute("aria-valuemax",String(target));$("tasbihProgress").parentElement.setAttribute("aria-valuenow",String(Math.min(count,target)));$("tasbihProgress").parentElement.setAttribute("aria-label",tr("তাসবিহের অগ্রগতি"));$("tasbihTap").setAttribute("aria-label",tr("গণনা বাড়ান")+". "+count.toLocaleString(currentLocale())+" / "+target.toLocaleString(currentLocale()));
 }
+let tasbihSaving=false;
 async function saveTasbih(){
- if(!tasbihRecord)return;
- tasbihRecord={...tasbihRecord,zikr:$("tasbihPhrase").value.trim()||"سُبْحَانَ اللَّهِ",target:Math.max(1,Math.min(100000,Number($("tasbihTarget").value)||33)),updatedAt:Date.now()};
- await persistTasbih();
+ if(!tasbihRecord||tasbihSaving)return;
+ const next={...tasbihRecord,zikr:$("tasbihPhrase").value.trim()||"سُبْحَانَ اللَّهِ",target:Math.max(1,Math.min(100000,Number($("tasbihTarget").value)||33)),updatedAt:Date.now()};
+ await persistTasbih(next);
 }
-async function persistTasbih(){
- await putItem(tasbihRecord);updateTasbihUI();
- if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(tasbihRecord.id).set(tasbihRecord)}catch(e){console.warn("Tasbih cloud sync pending",e)}}
+async function persistTasbih(nextRecord){
+ if(!tasbihRecord||tasbihSaving)return false;
+ tasbihSaving=true;
+ const candidate={...(nextRecord||tasbihRecord),updatedAt:Date.now()};
+ try{
+  await putItem(candidate);
+  tasbihRecord=candidate;
+  updateTasbihUI();
+  if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(candidate.id).set(candidate)}catch(e){console.warn("Tasbih cloud sync pending",e)}}
+  return true;
+ }catch(e){
+  console.error("Tasbih local save failed",e);
+  toast("তাসবিহ সংরক্ষণ হয়নি—আগের গণনা অক্ষত আছে, আবার চেষ্টা করুন।");
+  updateTasbihUI();
+  return false;
+ }finally{tasbihSaving=false}
 }
 function tasbihFeedback(kind="tap"){
  const vibrate=$("tasbihVibration")?.checked,sound=$("tasbihSound")?.checked;
@@ -884,17 +898,17 @@ function tasbihFeedback(kind="tap"){
 }
 async function changeTasbih(delta){
  if(!tasbihRecord){await loadTasbih();return changeTasbih(delta)}
+ if(tasbihSaving){toast("আগের গণনাটি সংরক্ষণ হচ্ছে—একটু পর আবার চাপুন।");return}
  const before=Number(tasbihRecord.count||0),target=Math.max(1,Number(tasbihRecord.target||33));
  const completes=delta>0&&Math.floor((before+delta)/target)>Math.floor(before/target);
- if(delta>0)tasbihFeedback(completes?"complete":"tap");
- tasbihRecord={...tasbihRecord,count:Math.max(0,before+delta),updatedAt:Date.now()};
- await persistTasbih();
- if(completes)toast("একটি চক্র সম্পন্ন হয়েছে");
+ const next={...tasbihRecord,count:Math.max(0,before+delta),updatedAt:Date.now()};
+ if(await persistTasbih(next)){if(delta>0)tasbihFeedback(completes?"complete":"tap");if(completes)toast("একটি চক্র সম্পন্ন হয়েছে")}
 }
 async function resetTasbih(){
  if(!tasbihRecord)return;
  if(!confirm(tr("তাসবিহের গণনা শূন্য করবেন?")))return;
- tasbihRecord={...tasbihRecord,count:0,updatedAt:Date.now()};await persistTasbih();toast("গণনা শূন্য করা হয়েছে");
+ if(tasbihSaving){toast("আগের গণনাটি সংরক্ষণ হচ্ছে—একটু পর আবার চেষ্টা করুন।");return}
+ if(await persistTasbih({...tasbihRecord,count:0,updatedAt:Date.now()}))toast("গণনা শূন্য করা হয়েছে");
 }
 async function openTasbih(){
  $("tasbihVibration").checked=localStorage.getItem("amol-tasbih-vibration")==="on";$("tasbihSound").checked=localStorage.getItem("amol-tasbih-sound")==="1";
