@@ -1,11 +1,12 @@
-const CACHE="amol-zikir-v168";
+const CACHE="amol-zikir-v169";
 const FILES=["./","./index.html","./manifest.webmanifest","./assets/app-icon.svg","./assets/app-icon-maskable.svg"];
 const FIREBASE=[
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js",
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"
 ];
-self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>caches.open(CACHE)).then(c=>Promise.all(FIREBASE.map(u=>c.add(u).catch(()=>{})))).then(()=>self.skipWaiting()))});
+self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>caches.open(CACHE)).then(c=>Promise.all(FIREBASE.map(u=>c.add(u).catch(()=>{})))))});
+self.addEventListener("message",e=>{if(e.data&&e.data.type==="SKIP_WAITING")self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("amol-zikir-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 function cachedAppShell(request){return caches.match(request).then(cached=>cached||caches.match("./index.html")).then(cached=>cached||new Response("অফলাইন: অ্যাপের সংরক্ষিত কপি পাওয়া যায়নি। ইন্টারনেট চালু করে আবার চেষ্টা করুন।",{status:503,statusText:"Offline"}))}
 self.addEventListener("fetch",e=>{
