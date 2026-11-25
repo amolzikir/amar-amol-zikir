@@ -402,3 +402,14 @@
 - Service worker cache: `amol-zikir-v157`.
 - Exact pre-change backups: `backup/index-html-2026-11-25-before-v157-keyboard-focus.bak`, `backup/sw-js-2026-11-25-before-v157-keyboard-focus.bak`, `backup/package-json-2026-11-25-before-v157-keyboard-focus.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v157-keyboard-focus.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v157-keyboard-focus.bak`.
 - CI, Pages, JavaScript syntax and live Android behavior must be verified before calling this release complete.
+
+
+
+## v158 — মোবাইল টাচ-বাটনের ব্যবহারযোগ্যতা (২৫ নভেম্বর ২০২৬)
+- দৈনিক আমলের তারিখ নেভিগেশন, সংখ্যা বাড়ানো, সাজানো, সম্পাদনা ও বাদ দেওয়ার বোতামগুলোর touch target কমপক্ষে 44×44px করা হয়েছে; ছোট স্ক্রিনের আগের সংকীর্ণ override-ও অতিক্রম করে।
+- তাসবিহের phrase tools এবং কুরআন ট্র্যাকারের entry action বোতামের touch height কমপক্ষে 44px করা হয়েছে।
+- পরিবর্তনটি কেবল CSS presentation; কোনো record, sync, backup বা restore logic পরিবর্তন করা হয়নি।
+- Added `tests/mobile-touch-targets.test.js` and `npm run test:touch-targets`; GitHub Actions runs the regression test.
+- Service worker cache: `amol-zikir-v158`.
+- Exact pre-change backups: `backup/index-html-2026-11-25-before-v158-mobile-touch-targets.bak`, `backup/sw-js-2026-11-25-before-v158-mobile-touch-targets.bak`, `backup/package-json-2026-11-25-before-v158-mobile-touch-targets.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v158-mobile-touch-targets.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v158-mobile-touch-targets.bak`.
+- CI, Pages, and phone-side visual behavior must be verified before calling this release complete.
