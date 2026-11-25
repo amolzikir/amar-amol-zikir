@@ -576,3 +576,11 @@
   - `backup/tests-pwa-update-notice-test-js-2026-11-25-before-v172-daily-hadith-library.bak` — `1acff8ab800099f7ea187a205def6c891875a187`
   - `backup/PROJECT-HANDOVER-2026-11-25-before-v172-daily-hadith-library.bak` — `9598549a38d4bf69b81cc34ad785e0fa9170a02b`
 - No user notes, IndexedDB records, Firestore records, or existing hadith-related user data were changed. Pages deployment run `45669143340` succeeded on handover commit `8c3337136b95376128150f71cc39d1da2817b61c`; the v172 code is now published. CI run `45669078162` is still in progress at dependency installation, so automated tests are not yet confirmed. Android runtime remains unverified.
+
+## v173 — দৈনিক হাদিস সংগ্রহ ১২টি ও পুনরাবৃত্তিহীন চক্র (২৬ নভেম্বর ২০২৬) — প্রকাশিত ও CI যাচাইকৃত
+- দৈনিক হাদিস সংগ্রহ ৯ থেকে ১২টি করা হয়েছে; প্রতিটি entry-তে আরবি, সহজ বাংলা অর্থ, শিক্ষা এবং মূল উৎসের লিংক রয়েছে।
+- একই দিনে একই হাদিস স্থির থাকে; browser localStorage-এ দেখা-হওয়া entry-র ইতিহাস রেখে সংগ্রহ শেষ না হওয়া পর্যন্ত পুনরাবৃত্তি এড়ায়, তারপর নতুন চক্র শুরু করে। এই ইতিহাস এই browser/device-এ সীমাবদ্ধ; site data মুছলে history-ও মুছে যেতে পারে।
+- Service Worker cache marker `amol-zikir-v173`; daily hadith test ১২টি entry ও rotation/no-repeat আচরণ পরীক্ষা করে।
+- v173-এর code ও test পরিবর্তনের আগে প্রাসঙ্গিক ফাইলগুলোর exact backups তৈরি এবং পুনরায় fetch করে byte-for-byte যাচাই করা হয়েছে। অতিরিক্তভাবে stale cache assertion ঠিক করার আগে `backup/tests-pwa-installability-2026-11-26-before-v173-cache-assertion.bak` এবং `backup/tests-pwa-update-notice-2026-11-26-before-v173-cache-assertion-fix.bak` exact যাচাই করা হয়েছে। এই চূড়ান্ত handover update-এর আগের কপিও `backup/PROJECT-HANDOVER-2026-11-26-before-v173-final-status.bak` হিসেবে exact যাচাই করা হয়েছে।
+- Final commit `06cd9bb514f4041e6aa9b2defc1a31935dc421a9`-এ CI run `45684604867` সফল এবং GitHub Pages deployment `45684604722` সফল।
+- কোনো নোট, IndexedDB record, Firestore record বা ব্যবহারকারীর সংরক্ষিত তথ্য পরিবর্তন করা হয়নি। Android ফোনে বাস্তব display/দৈনিক rollover পরীক্ষা এখনো ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়; browser site data মুছে ফেলবেন না, এতে no-repeat history হারাতে পারে।
