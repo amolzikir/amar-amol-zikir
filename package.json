@@ -8,7 +8,8 @@
     "test:local": "node --test tests/local-account-partition.test.js",
     "test:security": "node --test tests/dom-security.test.js",
     "test:daily-recovery": "node --test tests/daily-amal-recovery.test.js",
-    "test:backup": "node --test tests/backup-restore.test.js"
+    "test:backup": "node --test tests/backup-restore.test.js",
+    "test:folders": "node --test tests/folder-operations.test.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.3",
