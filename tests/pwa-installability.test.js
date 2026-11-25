@@ -7,8 +7,9 @@ const read = (name) => fs.readFileSync(path.join(__dirname, '..', name), 'utf8')
 
 test('manifest declares scalable standard and maskable app icons', () => {
   const manifest = JSON.parse(read('manifest.webmanifest'));
-  assert.ok(manifest.icons.some(icon => icon.src === './assets/app-icon.svg' && icon.sizes === 'any' && icon.type === 'image/svg+xml' && icon.purpose === 'any'));
-  assert.ok(manifest.icons.some(icon => icon.src === './assets/app-icon-maskable.svg' && icon.sizes === 'any' && icon.type === 'image/svg+xml' && icon.purpose === 'maskable'));
+  assert.ok(manifest.icons.some(icon => icon.src === './assets/app-icon.svg' && icon.sizes === '192x192' && icon.type === 'image/svg+xml' && icon.purpose === 'any'));
+  assert.ok(manifest.icons.some(icon => icon.src === './assets/app-icon.svg' && icon.sizes === '512x512' && icon.type === 'image/svg+xml' && icon.purpose === 'any'));
+  assert.ok(manifest.icons.some(icon => icon.src === './assets/app-icon-maskable.svg' && icon.sizes === '512x512' && icon.type === 'image/svg+xml' && icon.purpose === 'maskable'));
   assert.equal(manifest.display, 'standalone');
 });
 
