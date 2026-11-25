@@ -432,3 +432,15 @@
 - Service worker cache: `amol-zikir-v160`.
 - Exact pre-change backups (verified): `backup/index-html-2026-11-25-before-v160-note-reminder-safety.bak`, `backup/sw-js-2026-11-25-before-v160-note-reminder-safety.bak`, `backup/package-json-2026-11-25-before-v160-note-reminder-safety.bak`, `backup/workflow-2026-11-25-before-v160-note-reminder-safety.bak`, and `backup/PROJECT-HANDOVER-2026-11-25-before-v160-note-reminder-safety.bak`.
 - CI, Pages, JavaScript syntax and Android phone-side behavior must be verified before release completion. No user records were modified by this code change.
+
+
+## v161 — ফোল্ডার পরিবর্তনের write-failure সুরক্ষা (২৫ নভেম্বর ২০২৬)
+- ফোল্ডারের রং/আকার/পিন metadata save-এ duplicate-write guard, candidate-first IndexedDB commit এবং failure message যোগ করা হয়েছে; failure হলে আগের metadata ও selector value থাকে।
+- ফোল্ডার reorder batch write ব্যর্থ হলে আগের ক্রম অপরিবর্তিত থাকে; duplicate reorder guard ও retryable message যোগ করা হয়েছে।
+- ফোল্ডার move-এ write guard ও failure handling যোগ হয়েছে; commit সফল না হলে menu বন্ধ হয় না, render বা cloud sync হয় না।
+- Move করার সময় destination আবার যাচাই হয়: গন্তব্যটি একই tab-এর জীবিত folder হতে হবে এবং নিজের descendant হতে পারবে না; এতে stale menu/invalid target থেকেও cycle প্রতিরোধ হয়।
+- Existing folder delete/reorder batch behavior and its tests retained; no duplicate folder deletion implementation was added.
+- Extended existing `tests/folder-operations.test.js`; existing `npm run test:folders` and GitHub Actions step cover these regressions. No extra workflow step or duplicate test command was added.
+- Service worker cache: `amol-zikir-v161`.
+- Exact pre-change backups (verified): `backup/index-html-2026-11-25-before-v161-folder-write-safety.bak`, `backup/sw-js-2026-11-25-before-v161-folder-write-safety.bak`, `backup/tests-folder-operations-2026-11-25-before-v161-folder-write-safety.bak`, `backup/package-json-2026-11-25-before-v161-folder-write-safety.bak`, `backup/workflow-2026-11-25-before-v161-folder-write-safety.bak`, and `backup/PROJECT-HANDOVER-2026-11-25-before-v161-folder-write-safety.bak`.
+- CI and Pages must pass before release completion; Android phone-side behavior remains unverified until tested.
