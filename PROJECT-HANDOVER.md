@@ -51,7 +51,7 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ যাচাইকৃত app release: **v169**; CI run `45663722433` এবং GitHub Pages run `45663722250`—দুটিই success; উভয়টি commit `f5ef833021dd4bd14a6be3e3dbf577bd717ba423`-এ। Service worker cache marker `amol-zikir-v169`; Android ফোনে নতুন সংস্করণ নোটিশ/আপডেট আচরণ বাস্তবে যাচাই বাকি। v163 Firestore emulator test CI-তে pass করেছে, তবে Firebase Console-এর live Rules publish status এখনও অযাচাইকৃত। v165 Sylhet-local Hijri sunset rollover এবং v166 route planner-এর CI/Pages deploy সফল; Android-এ GPS handoff ও Hijri display বাস্তব পরীক্ষা বাকি।
+- সর্বশেষ সফল app release: **v170**; CI run `45665115279` এবং GitHub Pages run `45665115733` সফল। নতুন v171 candidate-এ প্রতিদিনের হাদিস ৩ দিনের ঘূর্ণায়মান তালিকায় বাড়ানো হয়েছে; সর্বশেষ CI run `45667421683` ও Pages run `45667421858` এখনও in progress, তাই v171-কে প্রকাশিত/সম্পূর্ণ বলা যাবে না। Candidate service-worker cache marker `amol-zikir-v171`। Android ফোনে নতুন সংস্করণ নোটিশ/আপডেট, হিজরি display ও GPS handoff বাস্তব যাচাই বাকি। v163 Firestore emulator test CI-তে pass করেছে, তবে Firebase Console-এর live Rules publish status এখনও অযাচাইকৃত।
 - v136-এ Backup v2 export-এ account-scoped Dua favorites যুক্ত; restore v1/v2 গ্রহণ করে, records ও favorites merge করে এবং local write read-back যাচাই করে।
 - v136-এ চারটি সূত্র-উল্লেখসহ দোয়া যোগ হয়েছে: ঘর থেকে বের হওয়া, সকাল-সন্ধ্যার আফিয়াত, মসজিদে প্রবেশ ও মসজিদ থেকে বের হওয়া।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৪-১১-২০২৬): `index.html` blob SHA `65a44f0240a2110d3fec1b5f019dfc614f1a84ba`; `sw.js` blob SHA `316a388da4e09b71303df9ff978c9128657110d4`।
@@ -530,3 +530,22 @@
 - সংশোধিত লিংক দুটির জন্য `tests/dua-source-links.test.js` ও `npm run test:dua-sources` যোগ করা হয়েছে; workflow push/PR path ও test step যুক্ত। বিদ্যমান `tests/backup-restore.test.js`-এ পুরোনো ভুল URL assertion-ও সঠিক পৃষ্ঠায় আপডেট করা হয়েছে।
 - Exact pre-change backups verified byte-for-byte: `backup/index-html-2026-11-25-before-v170-dua-source-links.bak`, `backup/package-json-2026-11-25-before-v170-dua-source-links.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v170-dua-source-links.bak`, `backup/PROJECT-HANDOVER-md-2026-11-25-before-v170-dua-source-links.bak`, `backup/tests-backup-restore-test-js-2026-11-25-before-v170-dua-source-assertion.bak`.
 - Pages deploy run `45665115733` succeeded and final CI run `45665115279` completed successfully on commit `685cc0a826d1535edf05aa26d4b08000b0de5`. Focused link assertions passed. v170 code, CI and Pages publication are complete. Android phone-side display/links remain unverified. No user data or Firebase data changed.
+
+ 
+## v171 — প্রতিদিনের হাদিসের ৩ দিনের ঘূর্ণায়মান সংগ্রহ (২৫ নভেম্বর ২০২৬)
+- আগের একটিমাত্র স্থির হাদিস বাদ না দিয়ে সেটিসহ মোট তিনটি হাদিস স্থানীয় তারিখ অনুযায়ী দৈনিক ঘুরে দেখানোর ব্যবস্থা যোগ করা হয়েছে; একই দিনে একই হাদিস স্থির থাকে, পরের দিনে পরবর্তীটি আসে।
+- মূল পাঠ ও নম্বর মূল পৃষ্ঠায় যাচাই করা হয়েছে:
+  - সহিহ বুখারি ৪৭৩৯ — https://shamela.ws/book/735/7589
+  - সহিহ বুখারি ১৩ — https://shamela.ws/book/735/33
+  - সহিহ বুখারি ১০ — https://shamela.ws/book/735/27
+- প্রতিটির বাংলা অর্থ, সংক্ষিপ্ত শিক্ষা ও মূল Shamela পৃষ্ঠা-লিংক যোগ হয়েছে; ব্যবহারকারী ডেটা/Firestore পরিবর্তিত হয়নি।
+- Added `tests/daily-hadith.test.js`, `npm run test:daily-hadith`, and CI push/PR coverage. Existing PWA install/update assertions updated to cache marker `amol-zikir-v171`.
+- Exact pre-change backups verified by matching Git blob SHA with the original source:
+  - `backup/index-html-2026-11-25-before-v171-daily-hadith-rotation.bak` — `42e09e11a2ba3e39d2e0e436e8254e865907a951`
+  - `backup/sw-js-2026-11-25-before-v171-daily-hadith-rotation.bak` — `59aff24547973169bfaa34cf25b58e5ec38593f6`
+  - `backup/package-json-2026-11-25-before-v171-daily-hadith-rotation.bak` — `2899cf1d9d81237edcefe76a9300c6cb6edca91d`
+  - `backup/workflow-2026-11-25-before-v171-daily-hadith-rotation.bak` — `c55ec0499eaff715c57054d03edb4e20796bdcbb`
+  - `backup/tests-pwa-update-notice-2026-11-25-before-v171-daily-hadith-rotation.bak` — `f24ebb899dd0fb289f2bb9ed02846c7bca0faca4`
+  - `backup/tests-pwa-installability-2026-11-25-before-v171-daily-hadith-rotation.bak` — `37d2436228ccac7c95a505bca89d9d9584d4c2fe`
+  - `backup/PROJECT-HANDOVER-2026-11-25-before-v171-daily-hadith-rotation.bak` — `05f44954f7598e11c3aae9f444bfbf220ca9f2b3`
+- Final candidate commit: `cfee5d505ed716fbabf63219066aa52a49ce2640`. CI run `45667421683` and Pages run `45667421858` were still running at this handover update; do not call v171 complete until both succeed. Earlier in-flight runs from sequential commits were cancelled/superseded. Android display remains unverified.
