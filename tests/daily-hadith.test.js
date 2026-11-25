@@ -9,8 +9,8 @@ const match = html.match(/const DAILY_HADITHS=(\[[\s\S]*?\]);/);
 assert.ok(match, "daily hadith collection should exist");
 const hadiths = JSON.parse(match[1]);
 
-test("daily hadith library contains fifteen distinct source-backed entries", () => {
-  assert.equal(hadiths.length, 15);
+test("daily hadith library contains eighteen distinct source-backed entries", () => {
+  assert.equal(hadiths.length, 18);
   assert.deepEqual(hadiths.map(x => x.url), [
     "https://shamela.ws/book/735/7589",
     "https://shamela.ws/book/735/33",
@@ -26,7 +26,10 @@ test("daily hadith library contains fifteen distinct source-backed entries", () 
     "https://shamela.ws/book/711/7188",
     "https://shamela.ws/book/711/180",
     "https://shamela.ws/book/1435/3384",
-    "https://shamela.ws/book/1435/3381"
+    "https://shamela.ws/book/1435/3381",
+    "https://shamela.ws/book/711/8000",
+    "https://shamela.ws/book/711/7876",
+    "https://shamela.ws/book/711/5841"
   ]);
   assert.equal(new Set(hadiths.map(x => x.arabic)).size, hadiths.length);
   for (const item of hadiths) {
