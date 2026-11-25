@@ -1308,6 +1308,20 @@ function openZikrRoutine(){$("homeMenu").classList.remove("show");$("zikrRoutine
 function closeZikrRoutine(){$("zikrRoutinePanel").classList.remove("show")}
 function addZikrRoutine(){const phrase=$("routinePhrase").value.trim(),target=Number($("routineTarget").value);if(!phrase||!Number.isInteger(target)||target<1||target>100000){toast("জিকির ও সঠিক লক্ষ্য লিখুন");return}const a=readZikrRoutines();a.push({id:uid(),phrase,target,count:0,date:localDateKey()});saveZikrRoutines(a);$("routinePhrase").value="";renderZikrRoutines();toast("জিকির রুটিন যোগ হয়েছে")}
 function handleZikrRoutineAction(e){const b=e.target.closest("[data-routine-plus],[data-routine-reset],[data-routine-delete]");if(!b)return;let a=readZikrRoutines(),id=b.dataset.routinePlus||b.dataset.routineReset||b.dataset.routineDelete;a=a.map(x=>{if(x.id!==id)return x;const today=localDateKey(),count=x.date===today?(Number(x.count)||0):0;if(b.dataset.routinePlus!==undefined)return {...x,count:count+1,date:today};if(b.dataset.routineReset!==undefined)return {...x,count:0,date:today};return x});if(b.dataset.routineDelete!==undefined)a=a.filter(x=>x.id!==id);saveZikrRoutines(a);renderZikrRoutines()}
+function getBangladeshHijriEffectiveDate(date,hour,minute){
+ const year=date.getUTCFullYear(),month=date.getUTCMonth(),day=date.getUTCDate();
+ const dayOfYear=Math.floor((Date.UTC(year,month,day)-Date.UTC(year,0,1))/86400000)+1;
+ const daysInYear=(Date.UTC(year+1,0,1)-Date.UTC(year,0,1))/86400000;
+ const gamma=2*Math.PI/daysInYear*(dayOfYear-1);
+ const eqTime=229.18*(0.000075+0.001868*Math.cos(gamma)-0.032077*Math.sin(gamma)-0.014615*Math.cos(2*gamma)-0.040849*Math.sin(2*gamma));
+ const decl=0.006918-0.399912*Math.cos(gamma)+0.070257*Math.sin(gamma)-0.006758*Math.cos(2*gamma)+0.000907*Math.sin(2*gamma)-0.002697*Math.cos(3*gamma)+0.00148*Math.sin(3*gamma);
+ const lat=23.8103*Math.PI/180,longitude=90.4125,zenith=90.833*Math.PI/180;
+ const cosHourAngle=Math.cos(zenith)/(Math.cos(lat)*Math.cos(decl))-Math.tan(lat)*Math.tan(decl);
+ const hourAngle=Math.acos(Math.max(-1,Math.min(1,cosHourAngle)))*180/Math.PI;
+ const sunsetMinutes=720-4*longitude-eqTime+360+4*hourAngle;
+ const currentMinutes=hour*60+minute;
+ return new Date(Date.UTC(year,month,day+(currentMinutes>=sunsetMinutes?1:0)));
+}
 function openHijriCalendar(){
  $("homeMenu").classList.remove("show");
  try{
@@ -1315,12 +1329,15 @@ function openHijriCalendar(){
   const get=t=>parts.find(p=>p.type===t)?.value||"";
   const todayKey=get("year")+"-"+get("month")+"-"+get("day");
   const today=new Date(Date.UTC(Number(get("year")),Number(get("month"))-1,Number(get("day"))));
+  const timeParts=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Dhaka",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date());
+  const getTime=t=>timeParts.find(p=>p.type===t)?.value||"0";
+  const hijriDate=getBangladeshHijriEffectiveDate(today,Number(getTime("hour")),Number(getTime("minute")));
   const announcedStart=Date.UTC(2026,10,12);
-  const dayNumber=Math.floor((today.getTime()-announcedStart)/86400000)+1;
+  const dayNumber=Math.floor((hijriDate.getTime()-announcedStart)/86400000)+1;
   if(dayNumber>=1&&dayNumber<=30){
    $("hijriToday").textContent=dayNumber.toLocaleString("bn-BD")+" জমাদিউস সানি ১৪৪৮ হিজরি";
    $("hijriGregorian").textContent="গ্রেগরিয়ান: "+new Intl.DateTimeFormat("bn-BD",{timeZone:"Asia/Dhaka",dateStyle:"full"}).format(new Date(today.getTime()));
-   $("hijriCalendarNote").textContent="বাংলাদেশের জাতীয় চাঁদ দেখা কমিটির ঘোষণায় ১২ নভেম্বর ২০২৬ থেকে জমাদিউস সানি শুরু। পরবর্তী মাসের শুরু নতুন চাঁদ দেখার ঘোষণায় নির্ধারিত হবে। হিজরি নতুন দিন মাগরিব থেকে শুরু হয়।";
+   $("hijriCalendarNote").textContent="বাংলাদেশের জাতীয় চাঁদ দেখা কমিটির ঘোষিত মাসের শুরু অনুসরণ করা হয়েছে। দিন পরিবর্তনে ঢাকার আনুমানিক সূর্যাস্ত ধরা হয়; আপনার এলাকার মাগরিবের সময়ে কয়েক মিনিট পার্থক্য হতে পারে।";
   }else{
    const fallback=new Intl.DateTimeFormat("bn-BD-u-ca-islamic-umalqura",{timeZone:"Asia/Dhaka",day:"numeric",month:"long",year:"numeric"}).format(new Date(today.getTime()));
    $("hijriToday").textContent="আনুমানিক: "+fallback;
