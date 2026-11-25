@@ -24,7 +24,8 @@
     "test:tracker-load": "node --test tests/system-tracker-load-safety.test.js",
     "test:keyboard-focus": "node --test tests/keyboard-focus-accessibility.test.js",
     "test:touch-targets": "node --test tests/mobile-touch-targets.test.js",
-    "test:safe-area": "node --test tests/mobile-touch-targets.test.js"
+    "test:safe-area": "node --test tests/mobile-touch-targets.test.js",
+    "test:hijri-calendar": "node --test tests/hijri-calendar-sunset.test.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.3",
