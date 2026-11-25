@@ -26,7 +26,8 @@
     "test:touch-targets": "node --test tests/mobile-touch-targets.test.js",
     "test:safe-area": "node --test tests/mobile-touch-targets.test.js",
     "test:hijri-calendar": "node --test tests/hijri-calendar-sunset.test.js",
-    "test:directions": "node --test tests/directions-navigation.test.js"
+    "test:directions": "node --test tests/directions-navigation.test.js",
+    "test:pwa-installability": "node --test tests/pwa-installability.test.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.3",
