@@ -46,7 +46,7 @@ function contextFor(loaderSource, { local = null, remote = null, readError = nul
     console: { error: () => {}, warn: () => {} },
     Date
   };
-  vm.runInNewContext(loaderSource + "\nglobalThis.load=" + (loaderSource === dailySource ? "loadDailyAmal" : "loadTasbih") + "; globalThis.record=()=> " + (loaderSource === dailySource ? "dailyAmalRecord" : "tasbihRecord") + "; globalThis.retries=()=>context.retries;", context);
+  vm.runInNewContext(loaderSource + "\nglobalThis.load=" + (loaderSource === dailySource ? "loadDailyAmal" : "loadTasbih") + "; globalThis.record=()=> " + (loaderSource === dailySource ? "dailyAmalRecord" : "tasbihRecord") + "; globalThis.retries=()=>retries;", context);
   return context;
 }
 
