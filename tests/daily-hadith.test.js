@@ -33,7 +33,7 @@ test("daily hadith library contains fifteen distinct source-backed entries", () 
     assert.ok(item.arabic.length > 10);
     assert.ok(item.meaning.length > 10);
     assert.ok(item.lesson.length > 10);
-    assert.match(item.url, /^https:\/\/shamela\.ws\/book\/(735|711)\//);
+    assert.match(item.url, /^https:\/\/shamela\.ws\/book\/(735|711|1435)\//);
     assert.match(item.source, /(সহিহ (বুখারি|মুসলিম)|সুনান তিরমিযি)/);
   }
   assert.match(html, /বাংলা অর্থ \(সহজ ভাবার্থ\)/);
