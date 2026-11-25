@@ -7,7 +7,7 @@ const FIREBASE=[
 ];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>caches.open(CACHE)).then(c=>Promise.all(FIREBASE.map(u=>c.add(u).catch(()=>{})))).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("amol-zikir-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-function cachedAppShell(request){return caches.match(request).then(cached=>cached||caches.match("./index.html"))}
+function cachedAppShell(request){return caches.match(request).then(cached=>cached||caches.match("./index.html")).then(cached=>cached||new Response("অফলাইন: অ্যাপের সংরক্ষিত কপি পাওয়া যায়নি। ইন্টারনেট চালু করে আবার চেষ্টা করুন।",{status:503,statusText:"Offline"}))}
 self.addEventListener("fetch",e=>{
  const u=new URL(e.request.url);
  if(e.request.method!=="GET")return;
