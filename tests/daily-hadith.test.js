@@ -31,7 +31,7 @@ test("daily hadith rotation is stable and advances once per local calendar day",
   const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\)\)\{[\s\S]*?\n\}/);
   assert.ok(fnMatch, "daily index function should exist");
   const context = { DAILY_HADITHS: hadiths, Date, Math };
-  const indexFor = vm.runInNewContext("(" + fnMatch[0] + "; dailyHadithIndex)", context);
+  const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", context);
   assert.equal(indexFor(new Date(2026, 0, 1)), 0);
   assert.equal(indexFor(new Date(2026, 0, 2)), 1);
   assert.equal(indexFor(new Date(2026, 0, 3)), 2);
