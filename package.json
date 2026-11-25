@@ -14,7 +14,8 @@
     "test:note-copy": "node --test tests/note-copy-safety.test.js",
     "test:note-actions": "node --test tests/note-action-safety.test.js",
     "test:daily-amal-save": "node --test tests/daily-amal-save-safety.test.js",
-    "test:daily-amal-history": "node --test tests/daily-amal-save-safety.test.js"
+    "test:daily-amal-history": "node --test tests/daily-amal-save-safety.test.js",
+    "test:tasbih": "node --test tests/tasbih-save-safety.test.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.3",
