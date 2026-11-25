@@ -9,8 +9,8 @@ const match = html.match(/const DAILY_HADITHS=(\[[\s\S]*?\]);/);
 assert.ok(match, "daily hadith collection should exist");
 const hadiths = JSON.parse(match[1]);
 
-test("daily hadith library contains twelve distinct source-backed entries", () => {
-  assert.equal(hadiths.length, 12);
+test("daily hadith library contains fifteen distinct source-backed entries", () => {
+  assert.equal(hadiths.length, 15);
   assert.deepEqual(hadiths.map(x => x.url), [
     "https://shamela.ws/book/735/7589",
     "https://shamela.ws/book/735/33",
@@ -23,7 +23,10 @@ test("daily hadith library contains twelve distinct source-backed entries", () =
     "https://shamela.ws/book/735/136",
     "https://shamela.ws/book/735/13",
     "https://shamela.ws/book/711/1696",
-    "https://shamela.ws/book/711/7188"
+    "https://shamela.ws/book/711/7188",
+    "https://shamela.ws/book/711/180",
+    "https://shamela.ws/book/1435/3384",
+    "https://shamela.ws/book/1435/3381"
   ]);
   assert.equal(new Set(hadiths.map(x => x.arabic)).size, hadiths.length);
   for (const item of hadiths) {
@@ -31,7 +34,7 @@ test("daily hadith library contains twelve distinct source-backed entries", () =
     assert.ok(item.meaning.length > 10);
     assert.ok(item.lesson.length > 10);
     assert.match(item.url, /^https:\/\/shamela\.ws\/book\/(735|711)\//);
-    assert.match(item.source, /সহিহ (বুখারি|মুসলিম)/);
+    assert.match(item.source, /(সহিহ (বুখারি|মুসলিম)|সুনান তিরমিযি)/);
   }
   assert.match(html, /বাংলা অর্থ \(সহজ ভাবার্থ\)/);
   assert.match(html, /সব হাদিস শেষ না হওয়া পর্যন্ত একই হাদিস আবার আসবে না/);
