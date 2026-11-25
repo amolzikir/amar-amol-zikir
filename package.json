@@ -21,7 +21,8 @@
     "test:indexeddb-commit": "node --test tests/indexeddb-transaction.test.js",
     "test:cloud-retry": "node --test tests/cloud-sync-retry.test.js",
     "test:tracker-load": "node --test tests/system-tracker-load-safety.test.js",
-    "test:keyboard-focus": "node --test tests/keyboard-focus-accessibility.test.js"
+    "test:keyboard-focus": "node --test tests/keyboard-focus-accessibility.test.js",
+    "test:touch-targets": "node --test tests/mobile-touch-targets.test.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.3",
