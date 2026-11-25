@@ -1108,6 +1108,15 @@ function validateBackupItem(x){
  if(x.deletedAt!==undefined&&x.deletedAt!==null&&(!Number.isFinite(Number(x.deletedAt))||Number(x.deletedAt)<0))return false;
  return validateBackupTree(x);
 }
+// Compare edit and deletion timestamps; tombstones win equal-time ties.
+function backupRecordTimestamp(item){
+ return Math.max(Number(item?.updatedAt)||0,Number(item?.deletedAt)||0);
+}
+function preferBackupRecord(candidate,current){
+ const a=backupRecordTimestamp(candidate),b=backupRecordTimestamp(current);
+ if(a!==b)return a>b;
+ return !!candidate?.deletedAt&&!current?.deletedAt;
+}
 function validateBackupRoutine(r){
  return !!r&&typeof r==="object"&&!Array.isArray(r)&&typeof r.id==="string"&&r.id.trim().length>0&&r.id.length<=200&&typeof r.phrase==="string"&&r.phrase.trim().length>0&&r.phrase.length<=500&&Number.isInteger(Number(r.target))&&Number(r.target)>=1&&Number(r.target)<=100000&&(r.count===undefined||(Number.isInteger(Number(r.count))&&Number(r.count)>=0&&Number(r.count)<=10000000))&&(r.date===undefined||(typeof r.date==="string"&&r.date.length<=30))&&validateBackupTree(r);
 }
@@ -1126,13 +1135,13 @@ async function importAppBackup(file){
   const local=await allItems(),byId=new Map(local.map(x=>[x.id,x])),incomingById=new Map();
   for(const incoming of data.items){
    const prior=incomingById.get(incoming.id);
-   if(!prior||Number(incoming.updatedAt||0)>Number(prior.updatedAt||0))incomingById.set(incoming.id,incoming);
+   if(!prior||preferBackupRecord(incoming,prior))incomingById.set(incoming.id,incoming);
   }
   const writes=[];let added=0,updated=0,kept=0;
   for(const incoming of incomingById.values()){
    const current=byId.get(incoming.id);
    if(!current){writes.push(incoming);added++;continue}
-   if(Number(incoming.updatedAt||0)>Number(current.updatedAt||0)){writes.push(incoming);updated++}
+   if(preferBackupRecord(incoming,current)){writes.push(incoming);updated++}
    else kept++;
   }
   let mergedRoutines=null,routineAdded=0,mergedFavorites=null,favoriteAdded=0;
