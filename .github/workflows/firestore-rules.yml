@@ -22,6 +22,7 @@ on:
       - "tests/firestore.rules.test.js"
       - "tests/local-account-partition.test.js"
       - "tests/dom-security.test.js"
+      - "tests/backup-restore.test.js"
       - ".github/workflows/firestore-rules.yml"
 
 jobs:
