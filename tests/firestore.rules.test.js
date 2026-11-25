@@ -33,6 +33,13 @@ test("signed-out users cannot read a user's items", async () => {
   await assertFails(getDoc(doc(db, "users/user-a/items/note-1")));
 });
 
+test("signed-out users cannot write a user's items", async () => {
+  const db = testEnv.unauthenticatedContext().firestore();
+  await assertFails(setDoc(doc(db, "users/user-a/items/note-1"), {
+    title: "অননুমোদিত", updatedAt: 1
+  }));
+});
+
 test("a signed-in user can create and read their own item", async () => {
   const db = testEnv.authenticatedContext("user-a").firestore();
   const ref = doc(db, "users/user-a/items/note-1");
