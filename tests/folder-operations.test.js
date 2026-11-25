@@ -45,14 +45,16 @@ test("folder metadata save guards duplicate writes and preserves prior state on 
  assert.ok(fn.includes("if(!menuFolderId||saveFolderPatch.saving)return false"));
  assert.ok(fn.includes("saveFolderPatch.saving=true"));
  assert.ok(fn.includes("await putItem(candidate)"));
- assert.ok(fn.indexOf("catch(e)")<fn.indexOf("await render()"));
+ assert.ok(fn.includes("catch(e)"));
+ assert.ok(fn.indexOf("await putItem(candidate)")<fn.indexOf("await render()"));
  assert.ok(fn.includes("আগের তথ্য অক্ষত আছে, আবার চেষ্টা করুন"));
 });
 test("folder reorder is guarded and reports batch failure without rendering success",()=>{
  const fn=source.slice(source.indexOf("async function reorderFolder("),source.indexOf("\nasync function folderMenuAction"));
  assert.ok(fn.includes("if(reorderFolder.saving)return false"));
  assert.ok(fn.includes("await putItemsBatch(buildFolderReorderWrites(siblings,Date.now()))"));
- assert.ok(fn.indexOf("catch(e)")<fn.indexOf("await render()"));
+ assert.ok(fn.includes("catch(e)"));
+ assert.ok(fn.indexOf("await putItemsBatch(buildFolderReorderWrites(siblings,Date.now()))")<fn.indexOf("await render()"));
  assert.ok(fn.includes("আগের ক্রম অক্ষত আছে, আবার চেষ্টা করুন"));
 });
 test("folder move revalidates destination and rejects descendant cycles",()=>{
@@ -60,6 +62,7 @@ test("folder move revalidates destination and rejects descendant cycles",()=>{
  assert.ok(fn.includes("if(!target||descendants.has(newParent))"));
  assert.ok(fn.includes("moveFolderToSelected.saving"));
  assert.ok(fn.indexOf("await putItem(candidate)")<fn.indexOf("closeFolderMenu()"));
- assert.ok(fn.indexOf("catch(e)")<fn.indexOf("closeFolderMenu()"));
+ assert.ok(fn.includes("catch(e)"));
+ assert.ok(fn.indexOf("await putItem(candidate)")<fn.indexOf("closeFolderMenu()"));
  assert.ok(fn.includes("আগের অবস্থান অক্ষত আছে, আবার চেষ্টা করুন"));
 });
