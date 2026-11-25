@@ -5,14 +5,14 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const source = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 const start = source.indexOf("function validateBackupTree(");
-const end = source.indexOf("\nasync function importAppBackup", start);
+const end = source.indexOf("\nfunction backupRecordTimestamp", start);
 if (start < 0 || end < 0) throw new Error("Backup validators were not found");
 const mergeStart = source.indexOf("function mergeBackupIds(");
 const mergeEnd = source.indexOf("\nfunction renderZikrRoutines", mergeStart);
 if (mergeStart < 0 || mergeEnd < 0) throw new Error("Backup merge helper was not found");
 const helpers = source.slice(start, end) + "\n" + source.slice(mergeStart, mergeEnd);
 const context = {};
-vm.runInNewContext(helpers + "\nglobalThis.check={validateBackupTree,validateBackupItem,validateBackupRoutine,mergeBackupIds};", context);
+vm.runInNewContext(helpers + "\nglobalThis.check={validateBackupTree,validateBackupItem,validateBackupRoutine,mergeBackupIds,backupRecordTimestamp,preferBackupRecord};", context);
 const h = context.check;
 
 test("valid backup records and routines pass strict shape validation", () => {
@@ -42,4 +42,14 @@ test("Dua entries use verified source references and retain the existing offline
   assert.ok(source.includes("https://shamela.ws/book/711/1940"));
   assert.ok(source.includes("function renderDuaLibrary()"));
   assert.ok(source.includes('<option value="নামাজ ও মসজিদ">নামাজ ও মসজিদ</option>'));
+});
+
+test("backup merge compares deletedAt as well as updatedAt", () => {
+  assert.equal(h.backupRecordTimestamp({updatedAt:10,deletedAt:30}),30);
+  assert.equal(h.preferBackupRecord({id:"n",type:"note",updatedAt:10,deletedAt:30},{id:"n",type:"note",updatedAt:20,deletedAt:null}),true);
+  assert.equal(h.preferBackupRecord({id:"n",type:"note",updatedAt:30,deletedAt:null},{id:"n",type:"note",updatedAt:10,deletedAt:20}),true);
+});
+test("a deletion tombstone wins an equal timestamp tie", () => {
+  assert.equal(h.preferBackupRecord({id:"n",type:"note",updatedAt:30,deletedAt:30},{id:"n",type:"note",updatedAt:30,deletedAt:null}),true);
+  assert.equal(h.preferBackupRecord({id:"n",type:"note",updatedAt:30,deletedAt:null},{id:"n",type:"note",updatedAt:30,deletedAt:30}),false);
 });
