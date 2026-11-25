@@ -1,6 +1,6 @@
 # আমার আমল ও জিকির — প্রকল্প হস্তান্তর নথি
 
-**সর্বশেষ হালনাগাদ:** ২৫ নভেম্বর ২০২৬  
+**সর্বশেষ হালনাগাদ:** ২৬ নভেম্বর ২০২৬  
 **উদ্দেশ্য:** ChatGPT-এর পুরোনো চ্যাট হারালেও অন্য ফোন বা অন্য ChatGPT অ্যাকাউন্ট থেকে প্রকল্পের কাজ নিরাপদে চালিয়ে যাওয়া।
 
 ## ১. প্রকল্প পরিচিতি
@@ -584,3 +584,12 @@
 - v173-এর code ও test পরিবর্তনের আগে প্রাসঙ্গিক ফাইলগুলোর exact backups তৈরি এবং পুনরায় fetch করে byte-for-byte যাচাই করা হয়েছে। অতিরিক্তভাবে stale cache assertion ঠিক করার আগে `backup/tests-pwa-installability-2026-11-26-before-v173-cache-assertion.bak` এবং `backup/tests-pwa-update-notice-2026-11-26-before-v173-cache-assertion-fix.bak` exact যাচাই করা হয়েছে। এই চূড়ান্ত handover update-এর আগের কপিও `backup/PROJECT-HANDOVER-2026-11-26-before-v173-final-status.bak` হিসেবে exact যাচাই করা হয়েছে।
 - Final commit `06cd9bb514f4041e6aa9b2defc1a31935dc421a9`-এ CI run `45684604867` সফল এবং GitHub Pages deployment `45684604722` সফল।
 - কোনো নোট, IndexedDB record, Firestore record বা ব্যবহারকারীর সংরক্ষিত তথ্য পরিবর্তন করা হয়নি। Android ফোনে বাস্তব display/দৈনিক rollover পরীক্ষা এখনো ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়; browser site data মুছে ফেলবেন না, এতে no-repeat history হারাতে পারে।
+
+
+## v174 — দৈনিক হাদিস সংগ্রহ ১৫টি ও পুনরাবৃত্তিহীন চক্র (২৬ নভেম্বর ২০২৬) — প্রকাশিত ও CI যাচাইকৃত
+- v173-এর ১২টি হাদিস অক্ষত রেখে আরও ৩টি মূল-উৎস যাচাইকৃত হাদিস যোগ হয়েছে; এখন সংগ্রহে মোট ১৫টি। নতুন বিষয়: ভালো কথা বলা/প্রতিবেশী ও অতিথির সম্মান (সহিহ মুসলিম ৪৭ — https://shamela.ws/book/711/180), হাসিমুখ ও মানুষের উপকারকে সদকা হিসেবে গণ্য করা (সুনান তিরমিযি ১৯৫৬ — https://shamela.ws/book/1435/3384), মানুষের প্রতি কৃতজ্ঞতা (সুনান তিরমিযি ১৯৫৪ — https://shamela.ws/book/1435/3381)। বাংলা লেখা সহজ ভাবার্থ, প্রকাশকের অনুবাদ নয়।
+- আগের no-repeat history key অপরিবর্তিত রাখা হয়েছে; পূর্বে দেখা ১২টির ইতিহাস reset হয়নি। একই দিনে একই হাদিস স্থির থাকে; ১৫টি শেষ না হওয়া পর্যন্ত পুনরাবৃত্তি এড়িয়ে চলে।
+- Service Worker cache marker amol-zikir-v174; daily-hadith test-এ ১৫টি entry ও source URL যাচাই যুক্ত। PWA install/update tests-এ cache marker v174 করা হয়েছে।
+- v174 পরিবর্তনের আগে index.html, sw.js, tests/daily-hadith.test.js, PWA assertion test এবং এই handover-এর exact backups তৈরি ও যাচাই করা হয়েছে; backup files repository-তে সংরক্ষিত।
+- Final commit ba5e605ff4727707c4bfe772d5ee3526214e05b3-এ CI run 45685572167 সফল এবং GitHub Pages deployment 45685572121 সফল।
+- কোনো ব্যবহারকারীর note, IndexedDB record, Firestore record বা Firebase setting পরিবর্তন করা হয়নি। Android ফোনে বাস্তব display/দৈনিক rollover পরীক্ষা এখনো ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়; browser site data মুছবেন না, এতে no-repeat history হারাতে পারে।
