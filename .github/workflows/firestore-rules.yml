@@ -6,8 +6,11 @@ on:
       - "firestore.rules"
       - "index.html"
       - "sw.js"
+      - "tests/service-worker-offline.test.js"
       - "firebase.json"
+      - "sw.js"
       - "package.json"
+      - "tests/service-worker-offline.test.js"
       - "tests/firestore.rules.test.js"
       - "tests/local-account-partition.test.js"
       - "tests/dom-security.test.js"
@@ -45,6 +48,8 @@ jobs:
           node-version: 20
       - name: Install test dependencies
         run: npm install
+      - name: Run offline service worker fallback tests
+        run: npm run test:offline-shell
       - name: Run local account partition tests
         run: npm run test:local
       - name: Run DOM security tests
