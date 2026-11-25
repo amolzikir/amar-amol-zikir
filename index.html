@@ -622,7 +622,7 @@ async function loadDailyAmal(){
   }catch(e){cloudReadFailed=true;console.warn("Daily amal cloud load pending",e);scheduleCloudSyncRetry()}
  }
  if(!local){
-  if(cloudReadFailed){toast("ক্লাউডের আমল যাচাই করা যায়নি—নিরাপত্তার জন্য নতুন খালি তালিকা তৈরি করা হয়নি।");return false}
+  if(cloudReadFailed||(currentUser&&cloud&&!navigator.onLine)){toast("ক্লাউডের আমল যাচাই করা যায়নি—নিরাপত্তার জন্য নতুন খালি তালিকা তৈরি করা হয়নি।");return false}
   local={id,type:"daily-amal",tab:"__system__",title:"দৈনিক আমল",items:[],days:{},updatedAt:Date.now()};
   try{await putItem(local)}catch(e){console.error("Daily Amal initial local save failed",e);toast("দৈনিক আমল চালু করা যায়নি—স্থানীয় সংরক্ষণ ব্যর্থ হয়েছে।");return false}
   if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(id).set(local)}catch(e){console.warn("Daily amal initial cloud save pending",e);scheduleCloudSyncRetry()}}
@@ -864,7 +864,7 @@ async function loadTasbih(){
   }catch(e){cloudReadFailed=true;console.warn("Tasbih cloud load failed",e);scheduleCloudSyncRetry()}
  }
  if(!local){
-  if(cloudReadFailed){toast("ক্লাউডের গণনা যাচাই করা যায়নি—নিরাপত্তার জন্য নতুন শূন্য গণনা তৈরি করা হয়নি।");return false}
+  if(cloudReadFailed||(currentUser&&cloud&&!navigator.onLine)){toast("ক্লাউডের গণনা যাচাই করা যায়নি—নিরাপত্তার জন্য নতুন শূন্য গণনা তৈরি করা হয়নি।");return false}
   const fresh={id:"system-tasbih-counter",type:"counter",tab:"__system__",title:"তাসবিহ কাউন্টার",zikr:"سُبْحَانَ اللَّهِ",count:0,target:33,updatedAt:Date.now()};
   try{await putItem(fresh);local=fresh}
   catch(e){console.error("Tasbih initial local save failed",e);toast("তাসবিহ কাউন্টার সংরক্ষণ করা যায়নি—আবার চেষ্টা করুন।");return false}
