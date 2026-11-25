@@ -29,7 +29,7 @@ for(const [name,fn] of [["save",save],["clear",clear]]){
  });
 }
 
-const check=extract("async function checkReminders(){","\\nasync function runFind");
+const check=extract("async function checkReminders(){","\nasync function runFind");
 test("reminder completion checks cannot overlap",()=>{
  assert.ok(check.includes("if(!dbLocal||checkReminders.running)return"));
  assert.ok(check.includes("checkReminders.running=true"));
