@@ -817,8 +817,9 @@ async function editDailyAmal(id){
  const item=dailyAmalRecord?.items?.find(x=>x.id===id);if(!item)return;const name=prompt(tr("আমলের নতুন নাম লিখুন"),item.name);if(name===null)return;const clean=name.trim();if(!clean){toast("একটি নাম লিখুন");return}
  const normalizedName=clean.normalize("NFC").toLocaleLowerCase(currentLocale());if(dailyAmalRecord.items.some(x=>x.id!==id&&String(x.name||"").trim().normalize("NFC").toLocaleLowerCase(currentLocale())===normalizedName)){toast("এই আমলটি তালিকায় আছে");return}
  const targetText=prompt(tr("আমলের লক্ষ্যসংখ্যা লিখুন"),String(Math.max(1,Number(item.target)||1)));if(targetText===null)return;const target=Number(targetText.trim());if(!Number.isInteger(target)||target<1||target>100000){toast(tr("লক্ষ্য ১ থেকে ১০০০০০-এর মধ্যে পূর্ণসংখ্যা দিন"));return}
- const next=JSON.parse(JSON.stringify(dailyAmalRecord)),nextItem=next.items.find(x=>x.id===id);if(!nextItem)return;nextItem.name=clean;const oldTarget=Math.max(1,Number(nextItem.target)||1);
- for(const day of Object.values(next.days||{})){if(!day||day[id]===undefined)continue;const raw=day[id]===true?oldTarget:Number(day[id])||0;day[id]=Math.max(0,Math.min(target,raw))}nextItem.target=target;
+ const next=JSON.parse(JSON.stringify(dailyAmalRecord)),nextItem=next.items.find(x=>x.id===id);if(!nextItem)return;nextItem.name=clean;
+ // Keep historical counts unchanged when the target changes; display calculations cap progress without rewriting history.
+ nextItem.target=target;
  if(!await persistDailyAmal(next))return;renderDailyAmal();toast(tr("আমলের তথ্য আপডেট হয়েছে"));
 }
 async function moveDailyAmal(id,delta){
