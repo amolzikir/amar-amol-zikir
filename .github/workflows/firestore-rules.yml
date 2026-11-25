@@ -8,9 +8,7 @@ on:
       - "sw.js"
       - "tests/service-worker-offline.test.js"
       - "firebase.json"
-      - "sw.js"
       - "package.json"
-      - "tests/service-worker-offline.test.js"
       - "tests/firestore.rules.test.js"
       - "tests/local-account-partition.test.js"
       - "tests/dom-security.test.js"
@@ -27,8 +25,10 @@ on:
   pull_request:
     paths:
       - "firestore.rules"
+      - "sw.js"
       - "firebase.json"
       - "package.json"
+      - "tests/service-worker-offline.test.js"
       - "tests/firestore.rules.test.js"
       - "tests/local-account-partition.test.js"
       - "tests/dom-security.test.js"
