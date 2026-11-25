@@ -1,0 +1,78 @@
+name: Firestore security rules
+
+on:
+  push:
+    paths:
+      - "firestore.rules"
+      - "index.html"
+      - "sw.js"
+      - "tests/service-worker-offline.test.js"
+      - "firebase.json"
+      - "package.json"
+      - "tests/firestore.rules.test.js"
+      - "tests/local-account-partition.test.js"
+      - "tests/dom-security.test.js"
+      - "tests/daily-amal-recovery.test.js"
+      - "tests/daily-amal-save-safety.test.js"
+      - "tests/tasbih-save-safety.test.js"
+      - "tests/quran-tracker-safety.test.js"
+      - "tests/backup-restore.test.js"
+      - "tests/folder-operations.test.js"
+      - "tests/note-save-safety.test.js"
+      - "tests/note-copy-safety.test.js"
+      - "tests/note-action-safety.test.js"
+      - ".github/workflows/firestore-rules.yml"
+  pull_request:
+    paths:
+      - "firestore.rules"
+      - "sw.js"
+      - "firebase.json"
+      - "package.json"
+      - "tests/service-worker-offline.test.js"
+      - "tests/firestore.rules.test.js"
+      - "tests/local-account-partition.test.js"
+      - "tests/dom-security.test.js"
+      - "tests/backup-restore.test.js"
+      - "tests/folder-operations.test.js"
+      - ".github/workflows/firestore-rules.yml"
+
+jobs:
+  firestore-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install test dependencies
+        run: npm install
+      - name: Run offline service worker fallback tests
+        run: npm run test:offline-shell
+      - name: Run local account partition tests
+        run: npm run test:local
+      - name: Run DOM security tests
+        run: npm run test:security
+      - name: Run Daily Amal recovery tests
+        run: npm run test:daily-recovery
+      - name: Run Daily Amal save safety tests
+        run: npm run test:daily-amal-save
+      - name: Run Daily Amal history preservation tests
+        run: npm run test:daily-amal-history
+      - name: Run Tasbih save safety tests
+        run: npm run test:tasbih
+      - name: Run Quran tracker safety tests
+        run: npm run test:quran-tracker
+      - name: Run backup and restore tests
+        run: npm run test:backup
+      - name: Run folder operation safety tests
+        run: npm run test:folders
+      - name: Run note save safety tests
+        run: npm run test:notes
+      - name: Run note copy safety tests
+        run: npm run test:note-copy
+      - name: Run note action safety tests
+        run: npm run test:note-actions
+      - name: Run Firestore emulator security tests
+        run: npm run test:rules
