@@ -524,8 +524,8 @@ const languageObserver=new MutationObserver(rs=>{for(const r of rs){if(r.type===
 function toast(s){$("toast").textContent=tr(s);$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",2600)}
 function allItems(db=dbLocal){return databaseItems(db)}
 function getItem(id,db=dbLocal){return new Promise((res,rej)=>{let r=db.transaction(STORE).objectStore(STORE).get(id);r.onsuccess=()=>res(r.result||null);r.onerror=()=>rej(r.error)})}
-function putItem(x,db=dbLocal){return new Promise((res,rej)=>{let r=db.transaction(STORE,"readwrite").objectStore(STORE).put(x);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
-function delLocal(id){return new Promise((res,rej)=>{let r=dbLocal.transaction(STORE,"readwrite").objectStore(STORE).delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function putItem(x,db=dbLocal){return new Promise((res,rej)=>{let tx;try{tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).put(x)}catch(e){rej(e);return}let settled=false;tx.oncomplete=()=>{if(!settled){settled=true;res()}};tx.onerror=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা সংরক্ষণ ব্যর্থ"))}};tx.onabort=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা সংরক্ষণ বাতিল"))}}})}
+function delLocal(id){return new Promise((res,rej)=>{let tx;try{tx=dbLocal.transaction(STORE,"readwrite");tx.objectStore(STORE).delete(id)}catch(e){rej(e);return}let settled=false;tx.oncomplete=()=>{if(!settled){settled=true;res()}};tx.onerror=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা মুছতে ব্যর্থ"))}};tx.onabort=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা মুছা বাতিল"))}}})}
 function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function safeHttpsUrl(value){try{const url=new URL(String(value));return url.protocol==="https:"?url.href:"#"}catch(e){return "#"}}
