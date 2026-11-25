@@ -11,7 +11,8 @@
     "test:backup": "node --test tests/backup-restore.test.js",
     "test:folders": "node --test tests/folder-operations.test.js",
     "test:notes": "node --test tests/note-save-safety.test.js",
-    "test:note-copy": "node --test tests/note-copy-safety.test.js"
+    "test:note-copy": "node --test tests/note-copy-safety.test.js",
+    "test:note-actions": "node --test tests/note-action-safety.test.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.3",
