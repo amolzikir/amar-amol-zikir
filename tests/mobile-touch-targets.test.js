@@ -16,3 +16,9 @@ test("tasbih phrase tools and quran entry buttons have at least 44px touch heigh
   assert.match(html, /#tasbihPanel \.tasbih-phrase-tools button\{[^}]*width:44px;height:44px;min-width:44px;min-height:44px/);
   assert.match(html, /\.quran-entry button\{[^}]*min-height:44px;padding:8px 12px/);
 });
+
+test("fixed add button and toast respect device safe-area insets", () => {
+  assert.match(html, /\.fab\{right:calc\(20px \+ env\(safe-area-inset-right\)\);bottom:calc\(22px \+ env\(safe-area-inset-bottom\)\)\}/);
+  assert.match(html, /#toast\{bottom:calc\(90px \+ env\(safe-area-inset-bottom\)\)\}/);
+  assert.match(html, /main\{padding-bottom:calc\(90px \+ env\(safe-area-inset-bottom\)\)\}/);
+});
