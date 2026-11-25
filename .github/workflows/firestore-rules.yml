@@ -14,6 +14,7 @@ on:
       - "tests/daily-amal-recovery.test.js"
       - "tests/daily-amal-save-safety.test.js"
       - "tests/tasbih-save-safety.test.js"
+      - "tests/quran-tracker-safety.test.js"
       - "tests/backup-restore.test.js"
       - "tests/folder-operations.test.js"
       - "tests/note-save-safety.test.js"
@@ -56,6 +57,8 @@ jobs:
         run: npm run test:daily-amal-history
       - name: Run Tasbih save safety tests
         run: npm run test:tasbih
+      - name: Run Quran tracker safety tests
+        run: npm run test:quran-tracker
       - name: Run backup and restore tests
         run: npm run test:backup
       - name: Run folder operation safety tests
