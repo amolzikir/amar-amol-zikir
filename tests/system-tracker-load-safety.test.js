@@ -28,8 +28,8 @@ function cloudStub({ remote = null, readError = null, writeError = null } = {}) 
 }
 
 function contextFor(loaderSource, { local = null, remote = null, readError = null, writeError = null, putItem = async () => {} } = {}) {
-  let retries = 0;
   const context = {
+    retries: 0,
     dailyAmalRecord: null,
     tasbihRecord: null,
     allItems: async () => local ? [local] : [],
@@ -37,7 +37,7 @@ function contextFor(loaderSource, { local = null, remote = null, readError = nul
     currentUser: { uid: "test-user" },
     cloud: cloudStub({ remote, readError, writeError }),
     navigator: { onLine: true },
-    scheduleCloudSyncRetry: () => { retries++; },
+    scheduleCloudSyncRetry: () => { context.retries++; },
     toast: () => {},
     renderDailyAmal: () => {},
     updateTasbihUI: () => {},
@@ -46,7 +46,7 @@ function contextFor(loaderSource, { local = null, remote = null, readError = nul
     console: { error: () => {}, warn: () => {} },
     Date
   };
-  vm.runInNewContext(loaderSource + "\nglobalThis.load=" + (loaderSource === dailySource ? "loadDailyAmal" : "loadTasbih") + "; globalThis.record=()=> " + (loaderSource === dailySource ? "dailyAmalRecord" : "tasbihRecord") + "; globalThis.retries=()=>retries;", context);
+  vm.runInNewContext(loaderSource + "\nglobalThis.load=" + (loaderSource === dailySource ? "loadDailyAmal" : "loadTasbih") + "; globalThis.record=()=> " + (loaderSource === dailySource ? "dailyAmalRecord" : "tasbihRecord") + "; globalThis.retries=()=>context.retries;", context);
   return context;
 }
 
