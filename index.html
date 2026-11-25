@@ -843,10 +843,22 @@ function closeDailyAmal(){
 async function loadTasbih(){
  let local=(await allItems()).find(x=>x.id==="system-tasbih-counter"&&!x.deletedAt)||null;
  if(currentUser&&cloud&&navigator.onLine){
-  try{const ref=cloud.collection("users").doc(currentUser.uid).collection("items").doc("system-tasbih-counter");const snap=await ref.get();const remote=snap.exists?snap.data():null;if(remote&&(!local||Number(remote.updatedAt||0)>Number(local.updatedAt||0))){local=remote;await putItem(local)}else if(local&&!remote){await ref.set(local)}}catch(e){console.warn("Tasbih cloud load failed",e)}
+  try{
+   const ref=cloud.collection("users").doc(currentUser.uid).collection("items").doc("system-tasbih-counter");
+   const snap=await ref.get(),remote=snap.exists?snap.data():null;
+   if(remote&&(!local||Number(remote.updatedAt||0)>Number(local.updatedAt||0))){
+    try{await putItem(remote);local=remote}
+    catch(e){console.warn("Tasbih remote copy could not be saved locally",e);toast("ক্লাউডের গণনা এই ডিভাইসে সংরক্ষণ হয়নি—আগের স্থানীয় গণনা অক্ষত আছে।")}
+   }else if(local&&!remote){try{await ref.set(local)}catch(e){console.warn("Tasbih cloud seed failed",e)}}
+  }catch(e){console.warn("Tasbih cloud load failed",e)}
  }
- if(!local){local={id:"system-tasbih-counter",type:"counter",tab:"__system__",title:"তাসবিহ কাউন্টার",zikr:"سُبْحَانَ اللَّهِ",count:0,target:33,updatedAt:Date.now()};await putItem(local);if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(local.id).set(local)}catch(e){console.warn("Tasbih cloud save failed",e)}}}
- tasbihRecord=local;updateTasbihUI();
+ if(!local){
+  const fresh={id:"system-tasbih-counter",type:"counter",tab:"__system__",title:"তাসবিহ কাউন্টার",zikr:"سُبْحَانَ اللَّهِ",count:0,target:33,updatedAt:Date.now()};
+  try{await putItem(fresh);local=fresh}
+  catch(e){console.error("Tasbih initial local save failed",e);toast("তাসবিহ কাউন্টার সংরক্ষণ করা যায়নি—আবার চেষ্টা করুন।");return false}
+  if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(local.id).set(local)}catch(e){console.warn("Tasbih cloud save failed",e)}}
+ }
+ tasbihRecord=local;updateTasbihUI();return true;
 }
 I18N["নিজস্ব জিকির"]=["Custom dhikr","ذكر مخصص","اپنا ذکر"];
 function updateTasbihUI(){
