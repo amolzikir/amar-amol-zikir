@@ -6,7 +6,7 @@ const assert = require("node:assert/strict");
 
 const source = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 const start = source.indexOf("function scheduleCloudSyncRetry(){");
-const end = source.indexOf("\\nasync function syncCloud", start);
+const end = source.indexOf("\nasync function syncCloud", start);
 if (start < 0 || end < 0) throw new Error("Cloud retry scheduler was not found");
 const helper = source.slice(start, end);
 
@@ -22,7 +22,7 @@ function makeContext({ online = true, signedIn = true } = {}) {
     syncCloud: () => { context.syncCalls++; },
     syncCalls: 0
   };
-  vm.runInNewContext(helper + "\\nglobalThis.schedule=scheduleCloudSyncRetry;", context);
+  vm.runInNewContext(helper + "\nglobalThis.schedule=scheduleCloudSyncRetry;", context);
   context.scheduled = scheduled;
   return context;
 }
