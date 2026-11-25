@@ -9,6 +9,7 @@ on:
       - "assets/app-icon.svg"
       - "assets/app-icon-maskable.svg"
       - "tests/pwa-installability.test.js"
+      - "tests/pwa-update-notice.test.js"
       - "tests/indexeddb-transaction.test.js"
       - "sw.js"
       - "tests/service-worker-offline.test.js"
@@ -75,6 +76,8 @@ jobs:
         run: npm install
       - name: Run PWA installability tests
         run: npm run test:pwa-installability
+      - name: Run PWA update notice tests
+        run: npm run test:pwa-updates
       - name: Run offline service worker fallback tests
         run: npm run test:offline-shell
       - name: Run IndexedDB transaction commit tests
