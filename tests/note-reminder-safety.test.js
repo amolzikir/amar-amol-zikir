@@ -28,3 +28,20 @@ for(const [name,fn] of [["save",save],["clear",clear]]){
   assert.ok(fn.indexOf("catch(e)")<fn.indexOf("syncCloud()"));
  });
 }
+
+const check=extract("async function checkReminders(){","\\nasync function runFind");
+test("reminder completion checks cannot overlap",()=>{
+ assert.ok(check.includes("if(!dbLocal||checkReminders.running)return"));
+ assert.ok(check.includes("checkReminders.running=true"));
+ assert.ok(check.includes("finally{checkReminders.running=false}"));
+});
+test("a failed reminder completion write is isolated and later reminders continue",()=>{
+ assert.ok(check.includes("await putItem(candidate)"));
+ assert.ok(check.includes("catch(e){console.error(\"Reminder completion save failed\",e);continue}"));
+ assert.ok(check.indexOf("await putItem(candidate)")<check.indexOf("const msg="));
+});
+test("successfully completed reminders trigger one Cloud sync after local commits",()=>{
+ assert.ok(check.includes("changed=true"));
+ assert.ok(check.includes("if(changed)await syncCloud()"));
+ assert.ok(check.indexOf("finally{checkReminders.running=false}")<check.indexOf("if(changed)await syncCloud()"));
+});
