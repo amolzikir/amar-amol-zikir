@@ -16,7 +16,7 @@ test('manifest declares scalable standard and maskable app icons', () => {
 test('index links the app icon and manifest', () => {
   const html = read('index.html');
   assert.match(html, /rel=["']manifest["'] href=["']manifest\.webmanifest["']/);
-  assert.match(html, /rel=["']icon["'] href=["']assets\/app-icon\.svg["']/);
+  assert.match(html, /rel=["']icon["'][^>]*href=["']assets\/app-icon\.svg["']/);
 });
 
 test('service worker precaches both app icons for offline installation shell', () => {
