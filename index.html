@@ -593,7 +593,25 @@ async function makeNoteCopy(){if(!viewing||makeNoteCopy.saving)return;makeNoteCo
 function openReminder(){if(!viewing)return;const d=viewing.reminderAt?new Date(viewing.reminderAt):new Date(Date.now()+3600000);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());$("reminderDate").value=d.toISOString().slice(0,16);$("reminderPanel").classList.add("show")}
 async function saveReminder(){if(!viewing||saveReminder.saving)return;const value=$("reminderDate").value;if(!value){toast("তারিখ ও সময় নির্বাচন করুন");return}const at=new Date(value).getTime();if(!Number.isFinite(at)||at<=Date.now()){toast("ভবিষ্যতের তারিখ ও সময় দিন");return}const candidate={...viewing,reminderAt:at,reminderDone:false,updatedAt:Date.now()};saveReminder.saving=true;try{await putItem(candidate)}catch(e){console.error("Reminder save failed",e);toast("রিমাইন্ডার সংরক্ষণ করা যায়নি—আগের তথ্য অক্ষত আছে, আবার চেষ্টা করুন।");return}finally{saveReminder.saving=false}viewing=candidate;$("reminderPanel").classList.remove("show");openViewer(candidate);await render();syncCloud();toast("রিমাইন্ডার সংরক্ষিত হয়েছে")}
 async function clearReminder(){if(!viewing||clearReminder.saving)return;const candidate={...viewing,reminderAt:null,reminderDone:false,updatedAt:Date.now()};clearReminder.saving=true;try{await putItem(candidate)}catch(e){console.error("Reminder clear failed",e);toast("রিমাইন্ডার সরানো যায়নি—আগের তথ্য অক্ষত আছে, আবার চেষ্টা করুন।");return}finally{clearReminder.saving=false}viewing=candidate;$("reminderPanel").classList.remove("show");openViewer(candidate);await render();syncCloud();toast("রিমাইন্ডার সরানো হয়েছে")}
-async function checkReminders(){if(!dbLocal)return;const all=await allItems(),now=Date.now();for(const x of all){if(x.type==="note"&&!x.deletedAt&&x.reminderAt&&x.reminderAt<=now&&!x.reminderDone){await putItem({...x,reminderDone:true,updatedAt:now});const msg=(x.title||"নোট")+" — "+tr("আপনার রিমাইন্ডার");if("Notification" in window&&Notification.permission==="granted"){try{new Notification("আমার আমল ও জিকির",{body:msg})}catch(e){alert(msg)}}else{alert(msg)}}}}
+async function checkReminders(){
+ if(!dbLocal||checkReminders.running)return;
+ checkReminders.running=true;let changed=false;
+ try{
+  const all=await allItems(),now=Date.now();
+  for(const x of all){
+   if(x.type!=="note"||x.deletedAt||!x.reminderAt||x.reminderAt>now||x.reminderDone)continue;
+   const candidate={...x,reminderDone:true,updatedAt:now};
+   try{await putItem(candidate);changed=true}
+   catch(e){console.error("Reminder completion save failed",e);continue}
+   const msg=(x.title||"নোট")+" — "+tr("আপনার রিমাইন্ডার");
+   if("Notification" in window&&Notification.permission==="granted"){
+    try{new Notification("আমার আমল ও জিকির",{body:msg})}catch(e){alert(msg)}
+   }else{alert(msg)}
+  }
+ }catch(e){console.error("Reminder check failed",e)}
+ finally{checkReminders.running=false}
+ if(changed)await syncCloud();
+}
 async function runFind(){const term=$("findTerm").value.trim();if(!term||!viewing)return;const body=viewing.body||"";const index=body.toLocaleLowerCase().indexOf(term.toLocaleLowerCase());$("findResult").textContent=index<0?"এই নোটে শব্দটি পাওয়া যায়নি।":"পাওয়া গেছে। অবস্থান: "+(index+1)+" নম্বর অক্ষর।\n"+body.slice(Math.max(0,index-45),Math.min(body.length,index+term.length+65))}
 async function openFolderMenu(id){const all=await allItems();const f=all.find(x=>x.id===id&&x.type==="folder"&&!x.deletedAt);if(!f)return;menuFolderId=id;$("folderMenuTitle").textContent="📁 "+f.title;$("folderColor").value=f.color||"";$("folderSize").value=f.size||"normal";$("folderMenu").classList.add("show");const descendants=new Set([id]);let again=true;while(again){again=false;for(const x of all)if(x.parentId&&descendants.has(x.parentId)&&!descendants.has(x.id)){descendants.add(x.id);again=true}}const targets=all.filter(x=>x.type==="folder"&&!x.deletedAt&&x.tab===f.tab&&!descendants.has(x.id));$("folderMoveTo").innerHTML="<option value=\"__same__\">এখানেই রাখুন</option><option value=\"__root__\">মূল তালিকায়</option>"+targets.map(x=>"<option value=\""+esc(x.id)+"\">"+esc(x.title)+"</option>").join("");$("folderMenu").querySelector("[data-folder-action=pin]").textContent=f.pinned?"📌 পিন তুলে দিন":"📌 পিন করুন"}
 function closeFolderMenu(){$("folderMenu").classList.remove("show");menuFolderId=null}
