@@ -5,5 +5,19 @@
   "display": "standalone",
   "background_color": "#f7faf7",
   "theme_color": "#176b50",
-  "description": "ব্যক্তিগত আমল, জিকির, ফোল্ডার ও নোট"
+  "description": "ব্যক্তিগত আমল, জিকির, দোয়া, ফোল্ডার ও নোট",
+  "icons": [
+    {
+      "src": "./assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/app-icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
 }
