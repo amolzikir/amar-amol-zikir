@@ -59,7 +59,7 @@ test("overlapping Tasbih writes are rejected without overwriting the first", asy
 });
 
 const loadStart = source.indexOf("async function loadTasbih(){");
-const loadEnd = source.indexOf("\\nI18N[", loadStart);
+const loadEnd = source.indexOf("\nI18N[", loadStart);
 if (loadStart < 0 || loadEnd < 0) throw new Error("Tasbih loader was not found");
 const loadSource = source.slice(loadStart, loadEnd);
 
@@ -84,7 +84,7 @@ function makeLoadContext({ local, remote, putItem }) {
       set: async () => {}
     }) }) }) }) };
   }
-  vm.runInNewContext(loadSource + "\\nglobalThis.load=loadTasbih;", context);
+  vm.runInNewContext(loadSource + "\nglobalThis.load=loadTasbih;", context);
   return context;
 }
 
