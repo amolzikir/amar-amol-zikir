@@ -422,3 +422,13 @@
 - Service worker cache: `amol-zikir-v159`.
 - Exact pre-change backups: `backup/index-html-2026-11-25-before-v159-safe-area.bak`, `backup/sw-js-2026-11-25-before-v159-safe-area.bak`, `backup/tests-mobile-touch-targets-test-js-2026-11-25-before-v159-safe-area.bak`, `backup/package-json-2026-11-25-before-v159-safe-area.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v159-safe-area.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v159-safe-area.bak`.
 - CI, Pages, and physical Android behavior must be verified before calling this release complete.
+
+
+## v160 — নোট রিমাইন্ডার সংরক্ষণ নিরাপত্তা (২৫ নভেম্বর ২০২৬)
+- নোটের রিমাইন্ডার সংরক্ষণ ও সরানোর সময় এখন আগে candidate record IndexedDB-তে commit হয়; সফল হলে তবেই viewer state বদলায় এবং panel বন্ধ হয়।
+- IndexedDB write ব্যর্থ হলে আগের reminder ও viewer state অক্ষত থাকে, panel খোলা থাকে এবং পুনরায় চেষ্টা করার বাংলা বার্তা দেখায়।
+- দ্রুত একাধিক tap থেকে duplicate write ঠেকাতে save/clear guard যোগ করা হয়েছে।
+- Added `tests/note-reminder-safety.test.js`, `npm run test:note-reminders`, and GitHub Actions coverage.
+- Service worker cache: `amol-zikir-v160`.
+- Exact pre-change backups (verified): `backup/index-html-2026-11-25-before-v160-note-reminder-safety.bak`, `backup/sw-js-2026-11-25-before-v160-note-reminder-safety.bak`, `backup/package-json-2026-11-25-before-v160-note-reminder-safety.bak`, `backup/workflow-2026-11-25-before-v160-note-reminder-safety.bak`, and `backup/PROJECT-HANDOVER-2026-11-25-before-v160-note-reminder-safety.bak`.
+- CI, Pages, JavaScript syntax and Android phone-side behavior must be verified before release completion. No user records were modified by this code change.
