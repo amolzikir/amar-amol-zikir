@@ -1394,6 +1394,37 @@ function queueAccountDatabaseSwitch(user){
  });
  return accountSwitchQueue;
 }
+let appServiceWorkerRegistrationPromise=null,appUpdateReloading=false;
+function registerAppServiceWorker(){
+ if(!("serviceWorker" in navigator)||appServiceWorkerRegistrationPromise)return appServiceWorkerRegistrationPromise;
+ appServiceWorkerRegistrationPromise=(async()=>{
+  try{
+   const registration=await navigator.serviceWorker.register("./sw.js");
+   if(navigator.serviceWorker.controller){
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{
+     if(appUpdateReloading)return;appUpdateReloading=true;location.reload();
+    });
+   }
+   const showUpdateNotice=()=>{
+    if(!registration.waiting||!navigator.serviceWorker.controller||$("appUpdateNotice"))return;
+    const notice=document.createElement("div");notice.id="appUpdateNotice";notice.setAttribute("role","status");notice.setAttribute("aria-live","polite");
+    Object.assign(notice.style,{position:"fixed",left:"12px",right:"12px",bottom:"calc(12px + env(safe-area-inset-bottom, 0px))",zIndex:"10000",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",padding:"14px",borderRadius:"14px",background:"#173f35",color:"#fff",boxShadow:"0 4px 18px rgba(0,0,0,.25)",fontSize:"14px"});
+    const message=document.createElement("span");message.textContent="অ্যাপের নতুন সংস্করণ প্রস্তুত। আপডেট নিতে চাইলে চাপ দিন।";
+    const button=document.createElement("button");button.type="button";button.textContent="এখনই আপডেট";button.setAttribute("aria-label","অ্যাপ এখনই আপডেট করুন");
+    Object.assign(button.style,{border:"0",borderRadius:"9px",padding:"10px 12px",fontWeight:"700",whiteSpace:"nowrap",background:"#f3d58a",color:"#173f35"});
+    button.addEventListener("click",()=>{button.disabled=true;button.textContent="আপডেট হচ্ছে…";registration.waiting?.postMessage({type:"SKIP_WAITING"})});
+    notice.append(message,button);document.body.appendChild(notice);
+   };
+   if(registration.waiting)showUpdateNotice();
+   registration.addEventListener("updatefound",()=>{
+    const worker=registration.installing;if(!worker)return;
+    worker.addEventListener("statechange",()=>{if(worker.state==="installed")showUpdateNotice()});
+   });
+   window.addEventListener("focus",()=>registration.update().catch(()=>{}));
+  }catch(error){console.warn("Service worker registration/update check failed",error)}
+ })();
+ return appServiceWorkerRegistrationPromise;
+}
 async function init(){
  $("newFolder").onclick=()=>openEditor("folder");$("newNote").onclick=()=>openEditor("note");$("fab").onclick=()=>openEditor("note");
  $("editorNoteMore").onclick=()=>{if(editing?.item)openNoteMenu(editing.item)};$("cancelEdit").onclick=cancelEditor;$("saveEdit").onclick=saveEditor;$("closeView").onclick=closeViewer;$("openNoteMenu").onclick=()=>openNoteMenu();$("closeNoteMenu").onclick=closeNoteMenu;$("favoriteView").onclick=()=>{closeNoteMenu();toggleViewedFlag("favorite")};$("bookmarkView").onclick=()=>{closeNoteMenu();toggleViewedFlag("bookmarked")};$("pinView").onclick=()=>{closeNoteMenu();toggleViewedFlag("pinned")};$("reminderView").onclick=()=>{closeNoteMenu();openReminder()};$("findView").onclick=()=>{closeNoteMenu();$("findTerm").value="";$("findResult").textContent="";$("findPanel").classList.add("show")};$("copyView").onclick=()=>{closeNoteMenu();makeNoteCopy()};$("shareView").onclick=()=>{closeNoteMenu();$("sharePanel").classList.add("show")};$("cancelReminder").onclick=()=>$("reminderPanel").classList.remove("show");$("saveReminder").onclick=saveReminder;$("clearReminder").onclick=clearReminder;$("closeFind").onclick=()=>$("findPanel").classList.remove("show");$("doFind").onclick=runFind;$("closeShare").onclick=()=>$("sharePanel").classList.remove("show");$("nativeShare").onclick=async()=>{if(!viewing)return;try{if(navigator.share)await navigator.share({title:viewing.title,text:noteShareText()});else{await navigator.clipboard.writeText(noteShareText());toast("লেখা কপি হয়েছে")}}catch(e){if(e.name!=="AbortError")toast("শেয়ার করা যায়নি; অন্য অপশন ব্যবহার করুন")}};$("whatsappShare").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(noteShareText()),"_blank");$("emailShare").onclick=()=>{location.href="mailto:?subject="+encodeURIComponent(viewing?.title||"নোট")+"&body="+encodeURIComponent(noteShareText())};$("copyTextShare").onclick=async()=>{try{await navigator.clipboard.writeText(noteShareText());toast("নোটের লেখা কপি হয়েছে")}catch(e){toast("কপি করা যায়নি; শেয়ার মেনু ব্যবহার করুন")}};
@@ -1432,7 +1463,7 @@ $("moveFolderNow").onclick=moveFolderToSelected;
  window.addEventListener("online",()=>{toast("ইন্টারনেট এসেছে—সিঙ্ক হচ্ছে");syncCloud()});
  window.addEventListener("offline",()=>{setSyncStatus("offline");toast("ইন্টারনেট নেই—তথ্য ডিভাইসে সংরক্ষণ হচ্ছে")});
  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&navigator.onLine&&currentUser&&!$("editor")?.classList.contains("show"))syncCloud()});
- if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(console.warn)}
+ registerAppServiceWorker()
  document.body.style.pointerEvents="none";
  let initialUser=null,authReadyResolve,authReadyPromise,authConfigured=false,authInitialResolved=false;
  authReadyPromise=new Promise(resolve=>{authReadyResolve=resolve});
@@ -1461,7 +1492,7 @@ $("moveFolderNow").onclick=moveFolderToSelected;
   if(initialUser)await syncCloud();else if(authConfigured){$("accountBtn").textContent="লগইন করুন";setSyncStatus("signedout")}
   checkReminders();checkDailyAmalReminder();setInterval(()=>{checkReminders();checkDailyAmalReminder()},30000)
  }catch(e){document.body.style.pointerEvents="";console.error("App startup/storage error",e);toast("অ্যাপের ডেটা চালু করতে সমস্যা হয়েছে। পেজটি আবার লোড করুন।")}
- if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(console.warn)}
+ registerAppServiceWorker()
 }
 Object.assign(I18N,{"মোট সম্পন্ন আমল":["Completed amal items","الأعمال المكتملة","مکمل اعمال"],"সম্পূর্ণ দিন":["Fully completed days","الأيام المكتملة بالكامل","مکمل دن"],"মোট সম্পন্ন আমল":["Completed amal items","الأعمال المكتملة","مکمل اعمال"]});
 Object.assign(I18N,{"জিকির বেছে নিন":["Choose a dhikr","اختر الذكر","ذکر منتخب کریں"],"জিকিরের বাক্য সম্পাদনা করুন":["Edit dhikr phrase","تعديل نص الذكر","ذکر کے الفاظ میں ترمیم کریں"],"নিজের জিকির লিখুন":["Enter your own dhikr","أدخل ذكرك الخاص","اپنا ذکر لکھیں"]});
