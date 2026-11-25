@@ -1,0 +1,23 @@
+{
+  "name": "amar-amol-zikir-security-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Local Firestore security rules tests for Amar Amol o Zikir",
+  "scripts": {
+    "test:rules": "firebase emulators:exec --only firestore --project amar-amol-zikir-rules-test \"node --test tests/firestore.rules.test.js\"",
+    "test:local": "node --test tests/local-account-partition.test.js",
+    "test:security": "node --test tests/dom-security.test.js",
+    "test:daily-recovery": "node --test tests/daily-amal-recovery.test.js",
+    "test:backup": "node --test tests/backup-restore.test.js",
+    "test:folders": "node --test tests/folder-operations.test.js",
+    "test:notes": "node --test tests/note-save-safety.test.js",
+    "test:note-copy": "node --test tests/note-copy-safety.test.js",
+    "test:note-actions": "node --test tests/note-action-safety.test.js",
+    "test:daily-amal-save": "node --test tests/daily-amal-save-safety.test.js"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.3",
+    "firebase": "10.12.2",
+    "firebase-tools": "^13.35.1"
+  }
+}
