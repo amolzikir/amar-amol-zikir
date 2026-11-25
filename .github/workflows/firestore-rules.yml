@@ -12,6 +12,7 @@ on:
       - "tests/local-account-partition.test.js"
       - "tests/dom-security.test.js"
       - "tests/daily-amal-recovery.test.js"
+      - "tests/daily-amal-save-safety.test.js"
       - "tests/backup-restore.test.js"
       - "tests/folder-operations.test.js"
       - "tests/note-save-safety.test.js"
@@ -48,6 +49,8 @@ jobs:
         run: npm run test:security
       - name: Run Daily Amal recovery tests
         run: npm run test:daily-recovery
+      - name: Run Daily Amal save safety tests
+        run: npm run test:daily-amal-save
       - name: Run backup and restore tests
         run: npm run test:backup
       - name: Run folder operation safety tests
