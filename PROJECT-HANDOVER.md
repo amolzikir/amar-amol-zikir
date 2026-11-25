@@ -51,7 +51,7 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ প্রকাশিত release: **v142**; service worker cache string: `amol-zikir-v142`।
+- সর্বশেষ যাচাইকৃত release: **v161**; v162 রিমাইন্ডার completion safety এখন CI/Pages যাচাইাধীন; service worker cache marker `amol-zikir-v162`।
 - v136-এ Backup v2 export-এ account-scoped Dua favorites যুক্ত; restore v1/v2 গ্রহণ করে, records ও favorites merge করে এবং local write read-back যাচাই করে।
 - v136-এ চারটি সূত্র-উল্লেখসহ দোয়া যোগ হয়েছে: ঘর থেকে বের হওয়া, সকাল-সন্ধ্যার আফিয়াত, মসজিদে প্রবেশ ও মসজিদ থেকে বের হওয়া।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৪-১১-২০২৬): `index.html` blob SHA `65a44f0240a2110d3fec1b5f019dfc614f1a84ba`; `sw.js` blob SHA `316a388da4e09b71303df9ff978c9128657110d4`।
@@ -59,14 +59,11 @@
 - SHA-গুলো কেবল এই নথি হালনাগাদের সময়ের রেফারেন্স; প্রতিটি update-এর আগে নতুন করে fetch করতে হবে।
 - Automated tests pass করলেও Android ফোনে backup download/restore, account switch, offline sync, app lock/biometric-এর বাস্তব পরীক্ষা এখনও ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়।
 
-## ৫. পরবর্তী কাজের অগ্রাধিকার (v136-এর পর)
-1. **Android বাস্তব ডেটা-সুরক্ষা পরীক্ষা:** ফোনে Settings থেকে JSON backup ডাউনলোড করে ফাইলটি আছে কি না নিশ্চিত করা; restore কেবল একটি আলাদা নিরাপদ test record/backup দিয়ে পরীক্ষা করা। নিজের আসল backup অক্ষত রাখতে হবে।
-2. **অ্যাকাউন্ট বিচ্ছিন্নতা পরীক্ষা:** একই ফোন/ব্রাউজারে প্রথম Google account থেকে sign-out করে দ্বিতীয় account-এ প্রবেশ, আলাদা local notes/favorites/routines যাচাই, তারপর প্রথম account-এ ফিরে তার ডেটা অক্ষত আছে কি না দেখা। কোনো account বদলের আগে backup নিতে হবে; অন্যের/দ্বিতীয় account না থাকলে পরীক্ষা স্থগিত।
-3. **Offline/online ও conflict বাস্তব পরীক্ষা:** নেট বন্ধ রেখে test note তৈরি/সম্পাদনা/মুছে ফেলা, পরে নেট চালু করে sync status ও অন্য session-এ ফল যাচাই; আসল নোটে destructive পরীক্ষা নয়।
-4. **App Lock বাস্তব পরীক্ষা:** PIN lock/unlock, ১০ মিনিট idle, biometric fallback এবং lock disable/re-enable পরীক্ষা। এটি UI lock—ডেটা encryption নয়।
-5. **Firebase Rules প্রকাশ যাচাই:** GitHub-এর emulator test pass করেছে; Firebase Console-এ একই rules live deploy হয়েছে কি না এই repository থেকে নিশ্চিত করা যায় না। Console-এ বর্তমান rules মিলিয়ে দেখা প্রয়োজন।
-6. **Hijri date ও ধর্মীয় কনটেন্ট যাচাই:** বাংলাদেশে প্রচলিত নির্ভরযোগ্য ক্যালেন্ডার/চাঁদ দেখার তথ্যের সঙ্গে Hijri date তুলনা; নতুন দোয়ার আরবি, উচ্চারণ ও অর্থ আলাদা নির্ভরযোগ্য উৎসে যাচাই।
-7. **বিস্তৃত regression audit:** Calendar, Daily Amal, Tasbih, Quran tracker, reminders, search ও navigation—ধাপে ধাপে পরীক্ষা; কোনো সমস্যা প্রমাণিত না হলে শুধু নতুন release তৈরির জন্য কোড পরিবর্তন নয়।
+## ৫. পরবর্তী কাজের অগ্রাধিকার (v162-এর পর)
+1. **Android বাস্তব পরীক্ষা:** নিরাপদ test note দিয়ে backup download/restore, offline-to-online sync, account isolation এবং App Lock/biometric আচরণ যাচাই; আসল ডেটায় destructive test নয়।
+2. **Firebase Rules live verification:** GitHub emulator test pass করলেই Firebase Console-এ live rules deploy নিশ্চিত হয় না; আলাদা যাচাই প্রয়োজন।
+3. **ধর্মীয় কনটেন্ট ও Hijri date যাচাই:** নির্ভরযোগ্য উৎসে আরবি, উচ্চারণ, অর্থ, হাদিসের সূত্র এবং স্থানীয় তারিখ যাচাই।
+4. **অবশিষ্ট regression audit:** Calendar, Daily Amal, Tasbih, Quran tracker, search ও navigation—শুধু নতুন প্রমাণিত ঘাটতি থাকলে পরিবর্তন; পুনরাবৃত্ত পরীক্ষা/কোড নয়.
 
 **নিরাপদ পরীক্ষার নিয়ম:** ব্যবহারকারীর ফোনে বাস্তব পরীক্ষা না হলে সেটিকে pending বলতে হবে; আসল ডেটা মুছে/ওভাররাইট করার মতো পরীক্ষা করা যাবে না।
 
@@ -444,3 +441,13 @@
 - Service worker cache: `amol-zikir-v161`.
 - Exact pre-change backups (verified): `backup/index-html-2026-11-25-before-v161-folder-write-safety.bak`, `backup/sw-js-2026-11-25-before-v161-folder-write-safety.bak`, `backup/tests-folder-operations-2026-11-25-before-v161-folder-write-safety.bak`, `backup/package-json-2026-11-25-before-v161-folder-write-safety.bak`, `backup/workflow-2026-11-25-before-v161-folder-write-safety.bak`, and `backup/PROJECT-HANDOVER-2026-11-25-before-v161-folder-write-safety.bak`.
 - CI and Pages must pass before release completion; Android phone-side behavior remains unverified until tested.
+
+
+## v162 — নোট রিমাইন্ডার সম্পন্ন হওয়ার নিরাপত্তা (২৫ নভেম্বর ২০২৬)
+- Due reminder-এর completion flag এখন আগে IndexedDB-তে commit হয়; write ব্যর্থ হলে notification দেখানো হয় না এবং পরবর্তী reminder processing বন্ধ না করে পরের record-এ যায়।
+- একাধিক interval/startup call overlap করে একই reminder notification একাধিকবার দেখানো ঠেকাতে `checkReminders`-এ single-run guard যোগ হয়েছে।
+- এক বা একাধিক reminder সফলভাবে local commit হলে batch শেষে `syncCloud()` একবার চলে; ফলে `reminderDone` অবস্থা account cloud data-তেও পৌঁছায়।
+- Existing `tests/note-reminder-safety.test.js`-এ overlap guard, failed-write isolation এবং post-commit Cloud sync assertions যোগ হয়েছে; বিদ্যমান npm script ও CI step-ই ব্যবহার করা হয়েছে, duplicate workflow step যোগ হয়নি।
+- Service worker cache: `amol-zikir-v162`.
+- Exact pre-change backups (verified): `backup/index-html-2026-11-25-before-v162-reminder-completion-safety.bak`, `backup/sw-js-2026-11-25-before-v162-reminder-completion-safety.bak`, `backup/tests-note-reminder-safety-2026-11-25-before-v162-reminder-completion-safety.bak`, `backup/PROJECT-HANDOVER-2026-11-25-before-v162-reminder-completion-safety.bak`.
+- CI, Pages, JavaScript syntax and Android reminder notification behavior must pass/be checked before declaring full completion.
