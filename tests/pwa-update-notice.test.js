@@ -6,7 +6,7 @@ const read = name => fs.readFileSync(path.join(__dirname, '..', name), 'utf8');
 
 test('service worker waits for an explicit user update action', () => {
   const sw = read('sw.js');
-  assert.match(sw, /const CACHE=["']amol-zikir-v169["']/);
+  assert.match(sw, /const CACHE=["']amol-zikir-v171["']/);
   assert.match(sw, /addEventListener\(["']message["'],e=>\{if\(e\.data&&e\.data\.type===["']SKIP_WAITING["']\)self\.skipWaiting\(\)\}\)/);
   assert.doesNotMatch(sw, /then\(\(\)=>self\.skipWaiting\(\)\)/);
 });
