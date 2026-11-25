@@ -72,6 +72,7 @@ function makeLoadContext({ local, remote, putItem }) {
     currentUser: null,
     cloud: null,
     navigator: { onLine: false },
+    scheduleCloudSyncRetry: () => {},
     toast: () => {},
     updateTasbihUI: () => {},
     console: { error: () => {}, warn: () => {} },
