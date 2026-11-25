@@ -1226,7 +1226,7 @@ function dailyHadithIndex(date=new Date(),storage=window.localStorage){
 }
 function renderDailyHadith(date=new Date()){
  const h=DAILY_HADITHS[dailyHadithIndex(date)];
- $("dailyHadithCard").innerHTML='<div class="dua-label">আজকের হাদিস</div><div class="dua-arabic" lang="ar" dir="rtl">'+esc(h.arabic)+'</div><div class="dua-label">বাংলা অর্থ</div><div class="dua-copytext">'+esc(h.meaning)+'</div><div class="dua-label">আজকের শিক্ষা</div><div class="dua-copytext">'+esc(h.lesson)+'</div><div class="dua-source">সূত্র: '+esc(h.source)+'। <a href="'+esc(safeHttpsUrl(h.url))+'" target="_blank" rel="noopener">মূল সূত্র দেখুন</a></div>';
+ $("dailyHadithCard").innerHTML='<div class="dua-label">আজকের হাদিস</div><div class="dua-arabic" lang="ar" dir="rtl">'+esc(h.arabic)+'</div><div class="dua-label">বাংলা অর্থ (সহজ ভাবার্থ)</div><div class="dua-copytext">'+esc(h.meaning)+'</div><div class="dua-label">আজকের শিক্ষা</div><div class="dua-copytext">'+esc(h.lesson)+'</div><div class="dua-source">সূত্র: '+esc(h.source)+'। <a href="'+esc(safeHttpsUrl(h.url))+'" target="_blank" rel="noopener">মূল সূত্র দেখুন</a></div>';
 }
 function openDailyHadith(){$("homeMenu").classList.remove("show");$("dailyHadith").classList.add("show");renderDailyHadith()}
 function closeDailyHadith(){$("dailyHadith").classList.remove("show")}
