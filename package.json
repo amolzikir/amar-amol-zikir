@@ -29,7 +29,8 @@
     "test:directions": "node --test tests/directions-navigation.test.js",
     "test:pwa-installability": "node --test tests/pwa-installability.test.js",
     "test:pwa-updates": "node --test tests/pwa-update-notice.test.js",
-    "test:dua-sources": "node --test tests/dua-source-links.test.js"
+    "test:dua-sources": "node --test tests/dua-source-links.test.js",
+    "test:daily-hadith": "node --test tests/daily-hadith.test.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.3",
