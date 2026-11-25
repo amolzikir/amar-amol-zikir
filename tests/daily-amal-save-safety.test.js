@@ -17,6 +17,7 @@ function makeContext(putItem) {
     currentUser: null,
     cloud: null,
     navigator: { onLine: false },
+    scheduleCloudSyncRetry: () => {},
     toast: () => {},
     console: { error: () => {}, warn: () => {} },
     Date
