@@ -1,5 +1,5 @@
-const CACHE="amol-zikir-v166";
-const FILES=["./","./index.html","./manifest.webmanifest"];
+const CACHE="amol-zikir-v168";
+const FILES=["./","./index.html","./manifest.webmanifest","./assets/app-icon.svg","./assets/app-icon-maskable.svg"];
 const FIREBASE=[
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js",
