@@ -15,6 +15,7 @@ on:
       - "tests/system-tracker-load-safety.test.js"
       - "tests/keyboard-focus-accessibility.test.js"
       - "tests/mobile-touch-targets.test.js"
+      - "tests/mobile-safe-area.test.js"
       - "tests/system-tracker-load-safety.test.js"
       - "tests/firestore.rules.test.js"
       - "tests/local-account-partition.test.js"
