@@ -25,10 +25,12 @@ on:
       - "tests/tasbih-save-safety.test.js"
       - "tests/quran-tracker-safety.test.js"
       - "tests/backup-restore.test.js"
+      - "tests/note-reminder-safety.test.js"
       - "tests/folder-operations.test.js"
       - "tests/note-save-safety.test.js"
       - "tests/note-copy-safety.test.js"
       - "tests/note-action-safety.test.js"
+      - "tests/note-reminder-safety.test.js"
       - ".github/workflows/firestore-rules.yml"
   pull_request:
     paths:
@@ -95,5 +97,7 @@ jobs:
         run: npm run test:note-copy
       - name: Run note action safety tests
         run: npm run test:note-actions
+      - name: Run note reminder safety tests
+        run: npm run test:note-reminders
       - name: Run Firestore emulator security tests
         run: npm run test:rules
