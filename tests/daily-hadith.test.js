@@ -9,32 +9,55 @@ const match = html.match(/const DAILY_HADITHS=(\[[\s\S]*?\]);/);
 assert.ok(match, "daily hadith collection should exist");
 const hadiths = JSON.parse(match[1]);
 
-test("daily hadith collection contains three source-backed entries", () => {
-  assert.equal(hadiths.length, 3);
+test("daily hadith library contains nine distinct source-backed entries", () => {
+  assert.equal(hadiths.length, 9);
   assert.deepEqual(hadiths.map(x => x.url), [
     "https://shamela.ws/book/735/7589",
     "https://shamela.ws/book/735/33",
-    "https://shamela.ws/book/735/27"
+    "https://shamela.ws/book/735/27",
+    "https://shamela.ws/book/711/206",
+    "https://shamela.ws/book/735/9073",
+    "https://shamela.ws/book/711/178",
+    "https://shamela.ws/book/711/7858",
+    "https://shamela.ws/book/711/2142",
+    "https://shamela.ws/book/735/136"
   ]);
-  assert.match(hadiths[0].source, /৪৭৩৯/);
-  assert.match(hadiths[1].source, /১৩/);
-  assert.match(hadiths[2].source, /১০/);
+  assert.equal(new Set(hadiths.map(x => x.arabic)).size, hadiths.length);
   for (const item of hadiths) {
     assert.ok(item.arabic.length > 10);
     assert.ok(item.meaning.length > 10);
     assert.ok(item.lesson.length > 10);
-    assert.match(item.url, /^https:\/\/shamela\.ws\/book\/735\//);
+    assert.match(item.url, /^https:\/\/shamela\.ws\/book\/(735|711)\//);
+    assert.match(item.source, /সহিহ (বুখারি|মুসলিম)/);
   }
+  assert.match(html, /বাংলা অর্থ \(সহজ ভাবার্থ\)/);
+  assert.match(html, /সব হাদিস শেষ না হওয়া পর্যন্ত একই হাদিস আবার আসবে না/);
 });
 
-test("daily hadith rotation is stable and advances once per local calendar day", () => {
-  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\)\)\{[\s\S]*?\n\}/);
-  assert.ok(fnMatch, "daily index function should exist");
-  const context = { DAILY_HADITHS: hadiths, Date, Math };
+test("daily hadith stays fixed per date and does not repeat until the collection is exhausted", () => {
+  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\),storage=window\.localStorage\)\{[\s\S]*?\n\}/);
+  assert.ok(fnMatch, "persistent no-repeat index function should exist");
+  const values = new Map();
+  const storage = {
+    getItem(key) { return values.has(key) ? values.get(key) : null; },
+    setItem(key, value) { values.set(key, String(value)); }
+  };
+  const context = {
+    DAILY_HADITHS: hadiths,
+    DAILY_HADITH_STATE_KEY: "amol-zikir-daily-hadith-v172",
+    Date,
+    Math,
+    window: { localStorage: storage }
+  };
   const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", context);
-  assert.equal(indexFor(new Date(2026, 0, 1)), 0);
-  assert.equal(indexFor(new Date(2026, 0, 2)), 1);
-  assert.equal(indexFor(new Date(2026, 0, 3)), 2);
-  assert.equal(indexFor(new Date(2026, 0, 4)), 0);
+  const first = indexFor(new Date(2026, 0, 1));
+  assert.equal(first, 0);
+  assert.equal(indexFor(new Date(2026, 0, 1)), first, "same day should keep the same hadith");
+  const sequence = [first];
+  for (let day = 2; day <= hadiths.length; day++) {
+    sequence.push(indexFor(new Date(2026, 0, day)));
+  }
+  assert.equal(new Set(sequence).size, hadiths.length, "each entry should appear once before reset");
+  assert.equal(indexFor(new Date(2026, 0, hadiths.length + 1)), 0, "start a fresh cycle only after all entries were shown");
   assert.match(html, /renderDailyHadith\(\)/);
 });
