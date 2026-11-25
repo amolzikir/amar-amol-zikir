@@ -381,3 +381,14 @@
 - Service worker cache: `amol-zikir-v155`.
 - Exact pre-change backups: `backup/index-html-2026-11-25-before-v155-cloud-retry.bak`, `backup/sw-js-2026-11-25-before-v155-cloud-retry.bak`, `backup/package-json-2026-11-25-before-v155-cloud-retry.bak`, `backup/workflow-2026-11-25-before-v155-cloud-retry.bak`, `backup/PROJECT-HANDOVER-2026-11-25-before-v155-cloud-retry.bak`, `backup/tests-daily-amal-save-2026-11-25-before-v155-cloud-retry.bak`, and `backup/tests-tasbih-save-2026-11-25-before-v155-cloud-retry.bak`.
 - CI and Pages verification required before release completion. This change does not perform any user-data restore, deletion, or migration.
+
+
+## v156 — Daily Amal ও তাসবিহ লোড/Cloud seed নিরাপত্তা (২৫ নভেম্বর ২০২৬)
+- Daily Amal loader এখন নতুন Cloud record-কে active করার আগে IndexedDB-তে সফলভাবে লিখে; write ব্যর্থ হলে পুরোনো local record-ই active থাকে এবং shared Cloud retry schedule হয়।
+- Daily Amal বা তাসবিহের Cloud read ব্যর্থ এবং local record অনুপস্থিত থাকলে আর নতুন খালি/শূন্য record তৈরি হয় না; এতে অজানা remote data overwrite হওয়ার ঝুঁকি কমে।
+- Daily Amal ও তাসবিহের initial Cloud seed এবং local-only record-এর Cloud seed ব্যর্থ হলে shared exponential-backoff retry schedule হয়।
+- Loader failure হলে সংশ্লিষ্ট panel খোলা হয় না; Daily Amal add/reminder flow-তেও record অনুপস্থিত থাকলে নিরাপদে থামে।
+- Added `tests/system-tracker-load-safety.test.js` for remote-to-local write failure, Cloud read failure, and Cloud seed retry behavior.
+- Service worker cache: `amol-zikir-v156`.
+- Exact pre-change backups: `backup/index-html-2026-11-25-before-v156-tracker-load-safety.bak`, `backup/sw-js-2026-11-25-before-v156-tracker-load-safety.bak`, `backup/package-json-2026-11-25-before-v156-tracker-load-safety.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v156-tracker-load-safety.bak`, `backup/tests-daily-amal-save-safety-test-js-2026-11-25-before-v156-tracker-load-safety.bak`, `backup/tests-tasbih-save-safety-test-js-2026-11-25-before-v156-tracker-load-safety.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v156-tracker-load-safety.bak`.
+- CI and Pages verification required before release completion; Android phone-side behavior remains unverified until the user tests it.
