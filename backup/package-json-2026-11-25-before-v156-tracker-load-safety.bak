@@ -1,0 +1,29 @@
+{
+  "name": "amar-amol-zikir-security-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Local Firestore security rules tests for Amar Amol o Zikir",
+  "scripts": {
+    "test:rules": "firebase emulators:exec --only firestore --project amar-amol-zikir-rules-test \"node --test tests/firestore.rules.test.js\"",
+    "test:local": "node --test tests/local-account-partition.test.js",
+    "test:security": "node --test tests/dom-security.test.js",
+    "test:daily-recovery": "node --test tests/daily-amal-recovery.test.js",
+    "test:backup": "node --test tests/backup-restore.test.js",
+    "test:folders": "node --test tests/folder-operations.test.js",
+    "test:notes": "node --test tests/note-save-safety.test.js",
+    "test:note-copy": "node --test tests/note-copy-safety.test.js",
+    "test:note-actions": "node --test tests/note-action-safety.test.js",
+    "test:daily-amal-save": "node --test tests/daily-amal-save-safety.test.js",
+    "test:daily-amal-history": "node --test tests/daily-amal-save-safety.test.js",
+    "test:tasbih": "node --test tests/tasbih-save-safety.test.js",
+    "test:quran-tracker": "node --test tests/quran-tracker-safety.test.js",
+    "test:offline-shell": "node --test tests/service-worker-offline.test.js",
+    "test:indexeddb-commit": "node --test tests/indexeddb-transaction.test.js",
+    "test:cloud-retry": "node --test tests/cloud-sync-retry.test.js"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.3",
+    "firebase": "10.12.2",
+    "firebase-tools": "^13.35.1"
+  }
+}
