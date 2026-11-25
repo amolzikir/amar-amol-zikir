@@ -1464,3 +1464,7 @@ window.addEventListener("error",e=>console.error("App runtime error",e.error||e.
 init().catch(e=>{console.error("App initialization failed",e);toast("কিছু ফিচার চালু হয়নি। মেনু দিয়ে চেষ্টা করুন।")});
 </script>
 </body></html>
+/* v159: keep fixed controls clear of device safe areas */
+.fab{right:calc(20px + env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom))}
+#toast{bottom:calc(90px + env(safe-area-inset-bottom))}
+main{padding-bottom:calc(90px + env(safe-area-inset-bottom))}
