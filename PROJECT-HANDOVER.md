@@ -413,3 +413,12 @@
 - Service worker cache: `amol-zikir-v158`.
 - Exact pre-change backups: `backup/index-html-2026-11-25-before-v158-mobile-touch-targets.bak`, `backup/sw-js-2026-11-25-before-v158-mobile-touch-targets.bak`, `backup/package-json-2026-11-25-before-v158-mobile-touch-targets.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v158-mobile-touch-targets.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v158-mobile-touch-targets.bak`.
 - CI, Pages, and phone-side visual behavior must be verified before calling this release complete.
+
+
+## v159 — মোবাইল safe-area সুরক্ষা (২৫ নভেম্বর ২০২৬)
+- ভাসমান নতুন নোট বাটন ডিভাইসের নিচের ও ডান পাশের safe-area inset মেনে চলে; নেভিগেশন/জেসচার এলাকার ওপর পড়ার ঝুঁকি কমায়।
+- Toast বার্তা এবং মূল কনটেন্টের নিচের ফাঁকা জায়গাও bottom safe-area অনুযায়ী সমন্বিত।
+- Added safe-area regression assertions to `tests/mobile-touch-targets.test.js` and `npm run test:safe-area`; GitHub Actions runs this check.
+- Service worker cache: `amol-zikir-v159`.
+- Exact pre-change backups: `backup/index-html-2026-11-25-before-v159-safe-area.bak`, `backup/sw-js-2026-11-25-before-v159-safe-area.bak`, `backup/tests-mobile-touch-targets-test-js-2026-11-25-before-v159-safe-area.bak`, `backup/package-json-2026-11-25-before-v159-safe-area.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v159-safe-area.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v159-safe-area.bak`.
+- CI, Pages, and physical Android behavior must be verified before calling this release complete.
