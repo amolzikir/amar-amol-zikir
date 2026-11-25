@@ -1065,12 +1065,19 @@ function closeDuaLibrary(){$("duaLibrary").classList.remove("show")}
 
 
 
-let quranTrackerRecord=null;
+let quranTrackerRecord=null,quranTrackerSaving=false;
+async function persistQuranTracker(nextRecord){
+ if(quranTrackerSaving)return false;
+ quranTrackerSaving=true;
+ try{await putItem(nextRecord);quranTrackerRecord=nextRecord;renderQuranTracker();if(currentUser&&navigator.onLine)syncCloud();return true}
+ catch(e){console.error("Quran tracker local save failed",e);toast("সংরক্ষণ করা যায়নি—আগের রেকর্ড অক্ষত আছে, আবার চেষ্টা করুন।");return false}
+ finally{quranTrackerSaving=false}
+}
 async function loadQuranTracker(){
- const id="system-quran-tracker";let local=(await allItems()).find(x=>x.id===id&&!x.deletedAt)||null;
- if(currentUser&&cloud&&navigator.onLine){try{const ref=cloud.collection("users").doc(currentUser.uid).collection("items").doc(id),snap=await ref.get(),remote=snap.exists?snap.data():null;if(remote&&(!local||Number(remote.updatedAt||0)>Number(local.updatedAt||0))){local=remote;await putItem(local)}else if(local&&!remote)await ref.set(local)}catch(e){console.warn("Quran tracker cloud load pending",e)}}
- if(!local){local={id,type:"quran-tracker",tab:"__system__",title:"কুরআন তিলাওয়াত",entries:[],updatedAt:Date.now()};await putItem(local)}
- quranTrackerRecord=local;$("quranDate").value=localDateKey();renderQuranTracker();
+ const id="system-quran-tracker";let local=(await allItems()).find(x=>x.id===id&&!x.deletedAt)||null,cloudReadFailed=false;
+ if(currentUser&&cloud&&navigator.onLine){try{const ref=cloud.collection("users").doc(currentUser.uid).collection("items").doc(id),snap=await ref.get(),remote=snap.exists?snap.data():null;if(remote&&(!local||Number(remote.updatedAt||0)>Number(local.updatedAt||0))){await putItem(remote);local=remote}else if(local&&!remote)await ref.set(local)}catch(e){cloudReadFailed=true;console.warn("Quran tracker cloud load pending",e);if(!local)toast("ক্লাউডের তথ্য যাচাই করা যায়নি—নিরাপত্তার জন্য খালি রেকর্ড তৈরি করা হয়নি।")}}
+ if(!local){if(cloudReadFailed)return false;const fresh={id,type:"quran-tracker",tab:"__system__",title:"কুরআন তিলাওয়াত",entries:[],updatedAt:Date.now()};try{await putItem(fresh);local=fresh}catch(e){console.error("Quran tracker initial save failed",e);toast("ট্র্যাকার চালু করা যায়নি—স্থানীয় সংরক্ষণ ব্যর্থ হয়েছে।");return false}}
+ quranTrackerRecord=local;$("quranDate").value=localDateKey();renderQuranTracker();return true;
 }
 function renderQuranTracker(){
  const r=quranTrackerRecord||{entries:[]},entries=(r.entries||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.createdAt)-Number(a.createdAt));
@@ -1084,13 +1091,18 @@ async function saveQuranEntry(){
  const date=$("quranDate").value||localDateKey(),surah=$("quranSurah").value.trim(),from=$("quranAyahFrom").value,to=$("quranAyahTo").value,pages=$("quranPageCount").value,minutes=$("quranMinutesInput").value;
  const validNum=(v,max,min=0)=>v===""||(Number.isInteger(Number(v))&&Number(v)>=min&&Number(v)<=max);
  if(!date||!validNum(pages,604)||!validNum(minutes,1440)||!validNum(from,6236,1)||!validNum(to,6236,1)||((from==="")!==(to===""))||(from!==""&&Number(to)<Number(from))||(!surah&&!from&&!(Number(pages)>0)&&!(Number(minutes)>0))){toast("তথ্যগুলো সঠিকভাবে পূরণ করুন");return}
- if(!quranTrackerRecord)await loadQuranTracker();
+ if(quranTrackerSaving)return;
+ if(!quranTrackerRecord&&!(await loadQuranTracker()))return;
  const entry={entryId:uid(),date,surah,ayahFrom:from?Number(from):null,ayahTo:to?Number(to):null,pages:pages?Number(pages):0,minutes:minutes?Number(minutes):0,createdAt:Date.now()};
- quranTrackerRecord={...quranTrackerRecord,entries:[...(quranTrackerRecord.entries||[]),entry],updatedAt:Date.now()};await putItem(quranTrackerRecord);$("quranSurah").value="";$("quranAyahFrom").value="";$("quranAyahTo").value="";$("quranPageCount").value="";$("quranMinutesInput").value="";renderQuranTracker();if(currentUser&&navigator.onLine)syncCloud();toast("তিলাওয়াত সংরক্ষণ হয়েছে");
+ const next={...quranTrackerRecord,entries:[...(quranTrackerRecord.entries||[]),entry],updatedAt:Date.now()};
+ if(!(await persistQuranTracker(next)))return;
+ $("quranSurah").value="";$("quranAyahFrom").value="";$("quranAyahTo").value="";$("quranPageCount").value="";$("quranMinutesInput").value="";toast("তিলাওয়াত সংরক্ষণ হয়েছে");
 }
 async function deleteQuranEntry(id){
  if(!quranTrackerRecord||!confirm(tr("এই তিলাওয়াতের রেকর্ড মুছবেন?")))return;
- quranTrackerRecord={...quranTrackerRecord,entries:(quranTrackerRecord.entries||[]).filter(x=>x.entryId!==id),updatedAt:Date.now()};await putItem(quranTrackerRecord);renderQuranTracker();if(currentUser&&navigator.onLine)syncCloud();toast("রেকর্ড মুছে ফেলা হয়েছে");
+ if(quranTrackerSaving)return;
+ const next={...quranTrackerRecord,entries:(quranTrackerRecord.entries||[]).filter(x=>x.entryId!==id),updatedAt:Date.now()};
+ if(await persistQuranTracker(next))toast("রেকর্ড মুছে ফেলা হয়েছে");
 }
 
 async function exportAppBackup(){
