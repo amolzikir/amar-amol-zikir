@@ -51,7 +51,7 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ যাচাইকৃত app release: **v162**; CI run `45639105197` এবং GitHub Pages run `45639102420`—দুটিই success; service worker cache marker `amol-zikir-v162`। v163 Firestore Rules test-coverage hardening: anonymous read/write denial-সহ Emulator test; CI run `45644601904` success। v163-এ app code বদলায়নি, তাই আলাদা Pages deploy প্রয়োজন হয়নি। v164 Hijri sunset rollover-এর প্রথম বাস্তবায়ন (Dhaka estimate) v165-এ Sylhet-এর স্থানীয় সূর্যাস্ত অনুযায়ী সমন্বয় করা হয়েছে; v165 CI/Pages pending; cache marker `amol-zikir-v165`।
+- সর্বশেষ যাচাইকৃত app release: **v168**; CI run `45661701165` এবং GitHub Pages run `45661699052`—দুটিই success; উভয়টি commit `2a92ba3eb2f4e15a2a60101453f190060a00122e`-এ। Service worker cache marker `amol-zikir-v168`; Android ফোনে বাস্তব install পরীক্ষা এখনও বাকি। v163 Firestore emulator test CI-তে pass করেছে, তবে Firebase Console-এর live Rules publish status এখনও অযাচাইকৃত। v165 Sylhet-local Hijri sunset rollover এবং v166 route planner-এর CI/Pages deploy সফল; Android-এ GPS handoff ও Hijri display বাস্তব পরীক্ষা বাকি।
 - v136-এ Backup v2 export-এ account-scoped Dua favorites যুক্ত; restore v1/v2 গ্রহণ করে, records ও favorites merge করে এবং local write read-back যাচাই করে।
 - v136-এ চারটি সূত্র-উল্লেখসহ দোয়া যোগ হয়েছে: ঘর থেকে বের হওয়া, সকাল-সন্ধ্যার আফিয়াত, মসজিদে প্রবেশ ও মসজিদ থেকে বের হওয়া।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৪-১১-২০২৬): `index.html` blob SHA `65a44f0240a2110d3fec1b5f019dfc614f1a84ba`; `sw.js` blob SHA `316a388da4e09b71303df9ff978c9128657110d4`।
@@ -512,3 +512,12 @@
 - Added `tests/pwa-installability.test.js` and `npm run test:pwa-installability`; GitHub Actions push/PR path filters and test step updated.
 - Exact pre-change backups fetched back and verified byte-for-byte: `backup/manifest-webmanifest-2026-11-25-before-v168-pwa-icons.bak`, `backup/index-html-2026-11-25-before-v168-pwa-icons.bak`, `backup/sw-js-2026-11-25-before-v168-pwa-icons.bak`, `backup/package-json-2026-11-25-before-v168-pwa-icons.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v168-pwa-icons.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v168-pwa-icons.bak`.
 - No app user data, Firestore records, or authentication settings were changed. CI/Pages and Android installation behavior must be verified before calling this release complete.
+
+
+## v169 — ব্যবহারকারী-নিয়ন্ত্রিত PWA আপডেট নোটিশ (২৫ নভেম্বর ২০২৬)
+- নতুন Service Worker সংস্করণ পাওয়া গেলে অ্যাপের নিচে অ্যাক্সেসিবল আপডেট নোটিশ ও “এখনই আপডেট” বোতাম দেখায়; ব্যবহারকারীর click ছাড়া নতুন worker activate বা পৃষ্ঠা reload হয় না।
+- Service worker-এর install-এ স্বয়ংক্রিয় `skipWaiting()` সরানো হয়েছে; `SKIP_WAITING` message পেলে তবেই waiting worker activate হয়। Activation-এর পর `controllerchange` একবার পৃষ্ঠা reload করে, যাতে নতুন app shell লোড হয়।
+- একাধিক registration call-কে একটি shared promise দিয়ে deduplicate করা হয়েছে; browser focus হলে update check হয়।
+- Cache marker: `amol-zikir-v169`। Added `tests/pwa-update-notice.test.js`, `npm run test:pwa-updates`, এবং GitHub Actions test step।
+- Exact pre-change backups fetched back and verified byte-for-byte: `backup/index-html-2026-11-25-before-v169-update-notice.bak`, `backup/sw-js-2026-11-25-before-v169-update-notice.bak`, `backup/package-json-2026-11-25-before-v169-update-notice.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v169-update-notice.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v169-update-notice.bak`.
+- CI run `45663299238` and Pages run `45663297364` are associated with commit `b17527532dc4c66ccb2c8702fe6e6ba155c87d22`; Pages deploy succeeded. CI status was pending at handover update time. Android update-notice behavior remains unverified.
