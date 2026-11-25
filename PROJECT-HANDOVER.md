@@ -51,7 +51,7 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ যাচাইকৃত release: **v161**; v162 রিমাইন্ডার completion safety এখন CI/Pages যাচাইাধীন; service worker cache marker `amol-zikir-v162`।
+- সর্বশেষ যাচাইকৃত app release: **v162**; CI run `45639105197` এবং GitHub Pages run `45639102420`—দুটিই success; service worker cache marker `amol-zikir-v162`। v163 হলো শুধু Firestore Rules test-coverage hardening (কোনো app code/cache পরিবর্তন নয়); CI/Pages যাচাই pending।
 - v136-এ Backup v2 export-এ account-scoped Dua favorites যুক্ত; restore v1/v2 গ্রহণ করে, records ও favorites merge করে এবং local write read-back যাচাই করে।
 - v136-এ চারটি সূত্র-উল্লেখসহ দোয়া যোগ হয়েছে: ঘর থেকে বের হওয়া, সকাল-সন্ধ্যার আফিয়াত, মসজিদে প্রবেশ ও মসজিদ থেকে বের হওয়া।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৪-১১-২০২৬): `index.html` blob SHA `65a44f0240a2110d3fec1b5f019dfc614f1a84ba`; `sw.js` blob SHA `316a388da4e09b71303df9ff978c9128657110d4`।
@@ -451,3 +451,11 @@
 - Service worker cache: `amol-zikir-v162`.
 - Exact pre-change backups (verified): `backup/index-html-2026-11-25-before-v162-reminder-completion-safety.bak`, `backup/sw-js-2026-11-25-before-v162-reminder-completion-safety.bak`, `backup/tests-note-reminder-safety-2026-11-25-before-v162-reminder-completion-safety.bak`, `backup/PROJECT-HANDOVER-2026-11-25-before-v162-reminder-completion-safety.bak`.
 - CI, Pages, JavaScript syntax and Android reminder notification behavior must pass/be checked before declaring full completion.
+
+
+## v163 — Firestore Rules anonymous-write regression coverage (২৫ নভেম্বর ২০২৬)
+- Security review-এ checklist-এর signed-out write DENY শর্তটি বিদ্যমান emulator test-এ সরাসরি পরীক্ষা হচ্ছিল না; একই `firestore.rules` ও existing test harness রেখে একটি focused `assertFails(setDoc(...))` test যোগ করা হয়েছে।
+- Existing tests already cover signed-out read denial, own-account create/read, cross-account read/write denial, and unrelated collection denial; এগুলো পুনরায় লেখা হয়নি।
+- `firestore.rules`, Firebase config, app code এবং service-worker cache অপরিবর্তিত; এটি test-only change।
+- Exact pre-change backups (fetched and SHA-verified): `backup/tests-firestore-rules-2026-11-25-before-v163-firestore-anonymous-write-test.bak` and `backup/PROJECT-HANDOVER-2026-11-25-before-v163-firestore-anonymous-write-test.bak`.
+- GitHub CI and Pages verification pending. This emulator test does not prove the rules currently deployed in Firebase Console; live deployment status remains unverified.
