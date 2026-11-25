@@ -57,7 +57,7 @@ test("Daily Amal keeps the old local record active when a newer cloud copy canno
   assert.equal(await ctx.load(), true);
   assert.equal(ctx.record(), local);
   assert.equal(ctx.record().items[0].id, "local");
-  assert.equal(ctx.retries(), 1);
+  assert.equal(ctx.retries, 1);
 });
 
 test("Daily Amal does not create an empty record when cloud read fails and no local record exists", async () => {
@@ -66,7 +66,7 @@ test("Daily Amal does not create an empty record when cloud read fails and no lo
   assert.equal(await ctx.load(), false);
   assert.equal(ctx.record(), null);
   assert.equal(writes, 0);
-  assert.equal(ctx.retries(), 1);
+  assert.equal(ctx.retries, 1);
 });
 
 test("Daily Amal cloud seed failure schedules the shared retry", async () => {
@@ -74,7 +74,7 @@ test("Daily Amal cloud seed failure schedules the shared retry", async () => {
   const ctx = contextFor(dailySource, { local, writeError: new Error("unavailable") });
   assert.equal(await ctx.load(), true);
   assert.equal(ctx.record(), local);
-  assert.equal(ctx.retries(), 1);
+  assert.equal(ctx.retries, 1);
 });
 
 test("Tasbih does not create a zero counter when cloud read fails and no local record exists", async () => {
@@ -83,14 +83,14 @@ test("Tasbih does not create a zero counter when cloud read fails and no local r
   assert.equal(await ctx.load(), false);
   assert.equal(ctx.record(), null);
   assert.equal(writes, 0);
-  assert.equal(ctx.retries(), 1);
+  assert.equal(ctx.retries, 1);
 });
 
 test("Tasbih initial cloud seed failure schedules the shared retry", async () => {
   const ctx = contextFor(tasbihSource, { writeError: new Error("unavailable") });
   assert.equal(await ctx.load(), true);
   assert.equal(ctx.record().count, 0);
-  assert.equal(ctx.retries(), 1);
+  assert.equal(ctx.retries, 1);
 });
 
 test("Tasbih keeps the previous local counter when a newer cloud copy cannot be saved", async () => {
@@ -100,7 +100,7 @@ test("Tasbih keeps the previous local counter when a newer cloud copy cannot be 
   assert.equal(await ctx.load(), true);
   assert.equal(ctx.record(), local);
   assert.equal(ctx.record().count, 8);
-  assert.equal(ctx.retries(), 1);
+  assert.equal(ctx.retries, 1);
 });
 
 test("Daily Amal does not create a new empty record offline before cloud data can be checked", async () => {
