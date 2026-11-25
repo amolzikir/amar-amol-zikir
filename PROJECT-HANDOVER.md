@@ -483,4 +483,15 @@
 - Updated `tests/hijri-calendar-sunset.test.js` thresholds for Sylhet (Nov 11 approx 17:07, Nov 25 approx 17:04 local).
 - Service worker cache marker: `amol-zikir-v165`.
 - Exact pre-v165 backups: `backup/index-html-2026-11-25-before-sylhet-sunset-adjustment.bak`, `backup/sw-js-2026-11-25-before-sylhet-sunset-adjustment.bak`, `backup/tests-hijri-calendar-sunset-test-js-2026-11-25-before-sylhet-sunset-adjustment.bak`, `backup/package-json-2026-11-25-before-sylhet-sunset-adjustment.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-sylhet-sunset-adjustment.bak`, `backup/PROJECT-HANDOVER-md-2026-11-25-before-sylhet-sunset-adjustment.bak`.
-- CI/Pages and Android live display verification pending.
+- CI run `45647574125` and Pages run `45647617317` succeeded on v165; Android live display verification remains pending.
+
+
+## v166 — লোকেশন-ভিত্তিক যাতায়াতের রুট (২৫ নভেম্বর ২০২৬)
+- প্রধান মেনুতে “যাতায়াতের রুট” যোগ হয়েছে; ব্যবহারকারী শুরুর স্থান ও গন্তব্য লিখে রুট চাইতে পারবেন।
+- Browser Geolocation API দিয়ে বোতাম চাপলে বর্তমান GPS coordinates নেওয়া হয়; অনুমতি না দিলে/লোকেশন না পেলে ম্যানুয়াল শুরুর স্থান ব্যবহার করা যায়। GPS অনুমতি স্বয়ংক্রিয়ভাবে চাওয়া হয় না।
+- গাড়ি (driving), হাঁটা (walking), গণপরিবহন (transit) নির্বাচন করে Google Maps Directions URL খোলে; কোনো Google Maps API key বা paid API দরকার হয় না।
+- লোকেশন বা যাত্রার তথ্য অ্যাপ/Firestore-এ সংরক্ষণ করা হয় না; শুধু ব্যবহারকারীর click-এ Google Maps-এ পাঠানো হয়। GPS accuracy ডিভাইস ও পরিবেশভেদে বদলায়।
+- Added `tests/directions-navigation.test.js`, `npm run test:directions`, and one GitHub Actions test step/path filter.
+- Service worker cache marker: `amol-zikir-v166`.
+- Exact pre-change backups (verified byte-for-byte): `backup/index-html-2026-11-25-before-v166-directions.bak`, `backup/sw-js-2026-11-25-before-v166-directions.bak`, `backup/package-json-2026-11-25-before-v166-directions.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v166-directions.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v166-directions.bak`.
+- CI, Pages deployment, and Android phone-side GPS/Google Maps handoff verification pending.
