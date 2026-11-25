@@ -27,11 +27,13 @@ on:
       - "tests/backup-restore.test.js"
       - "tests/note-reminder-safety.test.js"
       - "tests/folder-operations.test.js"
+      - "tests/directions-navigation.test.js"
       - "tests/note-save-safety.test.js"
       - "tests/note-copy-safety.test.js"
       - "tests/note-action-safety.test.js"
       - "tests/note-reminder-safety.test.js"
       - "tests/hijri-calendar-sunset.test.js"
+      - "tests/directions-navigation.test.js"
       - ".github/workflows/firestore-rules.yml"
   pull_request:
     paths:
@@ -103,5 +105,7 @@ jobs:
         run: npm run test:note-reminders
       - name: Run Hijri sunset rollover tests
         run: npm run test:hijri-calendar
+      - name: Run route planner navigation tests
+        run: npm run test:directions
       - name: Run Firestore emulator security tests
         run: npm run test:rules
