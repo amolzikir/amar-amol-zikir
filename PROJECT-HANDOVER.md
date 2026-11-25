@@ -51,7 +51,7 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ যাচাইকৃত app release: **v162**; CI run `45639105197` এবং GitHub Pages run `45639102420`—দুটিই success; service worker cache marker `amol-zikir-v162`। v163 Firestore Rules test-coverage hardening: anonymous read/write denial-সহ Emulator test; CI run `45644601904` success। v163-এ app code বদলায়নি, তাই আলাদা Pages deploy প্রয়োজন হয়নি। v164 Hijri sunset rollover fix; CI/Pages pending; cache marker `amol-zikir-v164`।
+- সর্বশেষ যাচাইকৃত app release: **v162**; CI run `45639105197` এবং GitHub Pages run `45639102420`—দুটিই success; service worker cache marker `amol-zikir-v162`। v163 Firestore Rules test-coverage hardening: anonymous read/write denial-সহ Emulator test; CI run `45644601904` success। v163-এ app code বদলায়নি, তাই আলাদা Pages deploy প্রয়োজন হয়নি। v164 Hijri sunset rollover-এর প্রথম বাস্তবায়ন (Dhaka estimate) v165-এ Sylhet-এর স্থানীয় সূর্যাস্ত অনুযায়ী সমন্বয় করা হয়েছে; v165 CI/Pages pending; cache marker `amol-zikir-v165`।
 - v136-এ Backup v2 export-এ account-scoped Dua favorites যুক্ত; restore v1/v2 গ্রহণ করে, records ও favorites merge করে এবং local write read-back যাচাই করে।
 - v136-এ চারটি সূত্র-উল্লেখসহ দোয়া যোগ হয়েছে: ঘর থেকে বের হওয়া, সকাল-সন্ধ্যার আফিয়াত, মসজিদে প্রবেশ ও মসজিদ থেকে বের হওয়া।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৪-১১-২০২৬): `index.html` blob SHA `65a44f0240a2110d3fec1b5f019dfc614f1a84ba`; `sw.js` blob SHA `316a388da4e09b71303df9ff978c9128657110d4`।
@@ -474,3 +474,13 @@
 - Service worker cache: `amol-zikir-v164`.
 - Pre-change exact backups: `backup/index-html-2026-11-25-before-hijri-sunset-fix.bak`, `backup/sw-js-2026-11-25-before-hijri-sunset-fix.bak`, `backup/package-json-2026-11-25-before-hijri-sunset-fix.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-hijri-sunset-fix.bak`, `backup/PROJECT-HANDOVER-md-2026-11-25-before-hijri-sunset-fix.bak`.
 - CI, Pages এবং Android বাস্তব আচরণ যাচাই pending।
+
+
+## v165 — Sylhet-local Maghrib/Hijri rollover adjustment (২৫ নভেম্বর ২০২৬)
+- ব্যবহারকারীর স্পষ্ট চাহিদা: সূর্যাস্ত/মাগরিবের পর Hijri date এক দিন এগোবে (যেমন দিনের ১৪ তারিখ মাগরিবের পর ১৫)।
+- v164-এর sunset-based rollover রাখা হয়েছে; বর্তমান estimated location Sylhet হওয়ায় coordinates Sylhet (24.8949°N, 91.8687°E) করা হয়েছে। sunset-এর আগে civil date, sunset থেকে পরের Hijri date।
+- UI note-এ ঢাকার বদলে সিলেটের আনুমানিক সূর্যাস্ত উল্লেখ করা হয়েছে। coordinates approximate; ব্যবহারকারীর নির্দিষ্ট এলাকার Maghrib-এর সঙ্গে কয়েক মিনিট পার্থক্য হতে পারে।
+- Updated `tests/hijri-calendar-sunset.test.js` thresholds for Sylhet (Nov 11 approx 17:07, Nov 25 approx 17:04 local).
+- Service worker cache marker: `amol-zikir-v165`.
+- Exact pre-v165 backups: `backup/index-html-2026-11-25-before-sylhet-sunset-adjustment.bak`, `backup/sw-js-2026-11-25-before-sylhet-sunset-adjustment.bak`, `backup/tests-hijri-calendar-sunset-test-js-2026-11-25-before-sylhet-sunset-adjustment.bak`, `backup/package-json-2026-11-25-before-sylhet-sunset-adjustment.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-sylhet-sunset-adjustment.bak`, `backup/PROJECT-HANDOVER-md-2026-11-25-before-sylhet-sunset-adjustment.bak`.
+- CI/Pages and Android live display verification pending.
