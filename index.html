@@ -792,7 +792,7 @@ async function persistDailyAmal(nextRecord){
  if(!dailyAmalRecord||dailyAmalSaving)return false;dailyAmalSaving=true;
  try{
   const candidate=nextRecord||JSON.parse(JSON.stringify(dailyAmalRecord));candidate.updatedAt=Date.now();await putItem(candidate);dailyAmalRecord=candidate;
-  if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(candidate.id).set(candidate)}catch(e){console.warn("Daily amal sync pending",e)}}
+  if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(candidate.id).set(candidate)}catch(e){console.warn("Daily amal sync pending",e);scheduleCloudSyncRetry()}}
   return true;
  }catch(e){console.error("Daily Amal local save failed",e);toast("দৈনিক আমল সংরক্ষণ হয়নি—আগের তথ্য অক্ষত আছে, আবার চেষ্টা করুন।");return false}
  finally{dailyAmalSaving=false}
@@ -883,7 +883,7 @@ async function persistTasbih(nextRecord){
   await putItem(candidate);
   tasbihRecord=candidate;
   updateTasbihUI();
-  if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(candidate.id).set(candidate)}catch(e){console.warn("Tasbih cloud sync pending",e)}}
+  if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(candidate.id).set(candidate)}catch(e){console.warn("Tasbih cloud sync pending",e);scheduleCloudSyncRetry()}}
   return true;
  }catch(e){
   console.error("Tasbih local save failed",e);
@@ -948,6 +948,13 @@ function setSyncStatus(state,detail=""){
  el.textContent=detail||labels[state]||"";
  el.dataset.state=state;
  const retryButton=$("syncNowBtn");if(retryButton)retryButton.hidden=!(currentUser&&cloud);
+}
+function scheduleCloudSyncRetry(){
+ if(!currentUser||!cloud||!navigator.onLine||syncRetryTimer)return false;
+ const delay=syncRetryDelay;
+ syncRetryDelay=Math.min(syncRetryDelay*2,300000);
+ syncRetryTimer=setTimeout(()=>{syncRetryTimer=null;syncCloud()},delay);
+ return true;
 }
 async function syncCloud(){
  if(!currentUser||!cloud){setSyncStatus("signedout");return}
@@ -1028,7 +1035,7 @@ async function syncCloud(){
  }catch(e){
   console.error("Cloud sync diagnostic:",{code:e?.code||"unknown",message:e?.message||String(e)});
   if(e?.code==="account-changed"){syncAgain=true}else{const label=syncErrorLabel(e);setSyncStatus("retry",label);toast(label)}
-  if(e?.code!=="account-changed"&&currentUser&&navigator.onLine&&!syncRetryTimer){const delay=syncRetryDelay;syncRetryDelay=Math.min(syncRetryDelay*2,300000);syncRetryTimer=setTimeout(()=>{syncRetryTimer=null;syncCloud()},delay)}
+  if(e?.code!=="account-changed")scheduleCloudSyncRetry();
  }finally{
   syncBusy=false;render();
   if(syncAgain){syncAgain=false;if(currentUser&&cloud&&localCloudAccountAllowed(currentUser.uid))Promise.resolve().then(()=>syncCloud())}
