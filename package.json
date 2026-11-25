@@ -20,7 +20,8 @@
     "test:offline-shell": "node --test tests/service-worker-offline.test.js",
     "test:indexeddb-commit": "node --test tests/indexeddb-transaction.test.js",
     "test:cloud-retry": "node --test tests/cloud-sync-retry.test.js",
-    "test:tracker-load": "node --test tests/system-tracker-load-safety.test.js"
+    "test:tracker-load": "node --test tests/system-tracker-load-safety.test.js",
+    "test:keyboard-focus": "node --test tests/keyboard-focus-accessibility.test.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.3",
