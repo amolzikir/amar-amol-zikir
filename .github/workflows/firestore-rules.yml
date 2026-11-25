@@ -51,6 +51,8 @@ jobs:
         run: npm run test:daily-recovery
       - name: Run Daily Amal save safety tests
         run: npm run test:daily-amal-save
+      - name: Run Daily Amal history preservation tests
+        run: npm run test:daily-amal-history
       - name: Run backup and restore tests
         run: npm run test:backup
       - name: Run folder operation safety tests
