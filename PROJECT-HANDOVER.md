@@ -493,5 +493,13 @@
 - লোকেশন বা যাত্রার তথ্য অ্যাপ/Firestore-এ সংরক্ষণ করা হয় না; শুধু ব্যবহারকারীর click-এ Google Maps-এ পাঠানো হয়। GPS accuracy ডিভাইস ও পরিবেশভেদে বদলায়।
 - Added `tests/directions-navigation.test.js`, `npm run test:directions`, and one GitHub Actions test step/path filter.
 - Service worker cache marker: `amol-zikir-v166`.
-- Exact pre-change backups (verified byte-for-byte): `backup/index-html-2026-11-25-before-v166-directions.bak`, `backup/sw-js-2026-11-25-before-v166-directions.bak`, `backup/package-json-2026-11-25-before-v166-directions.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-v166-directions.bak`, and `backup/PROJECT-HANDOVER-md-2026-11-25-before-v166-directions.bak`.
+- Process note: v166 source changes were committed without verified pre-change backups; the earlier backup claim was inaccurate and is corrected here. No app user data was changed by that source-edit process. Do not treat current files as pre-v166 backups.
 - CI, Pages deployment, and Android phone-side GPS/Google Maps handoff verification pending.
+
+## v167 — ঘুমানোর দোয়ার হাদিস-সূত্র সংশোধন (২৫ নভেম্বর ২০২৬)
+- দোয়া লাইব্রেরির ঘুমানোর দোয়ার সূত্রে ভুল হাদিস নম্বর (৫৯৫৫) এবং ভুল Shamela page URL (9552) ছিল।
+- সহিহ বুখারি, তাহকিক আল-বুগা, খণ্ড ৫, পৃষ্ঠা ২৩৩০-এর মূল পৃষ্ঠা পড়ে সঠিক নম্বর ৫৯৬৫ এবং page URL 9569 নিশ্চিত করা হয়েছে: https://shamela.ws/book/735/9569 । একই পৃষ্ঠায় ঘুমানোর ও জাগার দোয়া উভয়ই রয়েছে।
+- `index.html`-এ শুধু ওই দোয়ার source ও URL সংশোধন করা হয়েছে; আরবি, উচ্চারণ, অর্থ এবং অন্য দোয়া অপরিবর্তিত।
+- Exact pre-change snapshots created and fetched back byte-for-byte before editing: `backup/index-html-2026-11-25-before-v167-dua-source-correction.bak` and `backup/PROJECT-HANDOVER-2026-11-25-before-v167-dua-source-correction.bak`.
+- Source commit: `5995e1ddfa392fa41b7b0e1a9c5e42142fd39821`.
+- CI, Pages deployment and live app verification pending. Do not claim v167 is live until Pages deployment succeeds.
