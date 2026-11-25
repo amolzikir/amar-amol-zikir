@@ -806,7 +806,7 @@ async function addDailyAmal(){
 }
 async function toggleDailyAmal(id,checked){
  if(!dailyAmalRecord)return;const next=JSON.parse(JSON.stringify(dailyAmalRecord)),date=$("dailyAmalDate").value||localDateKey();next.days=next.days||{};next.days[date]=next.days[date]||{};
- const item=next.items.find(x=>x.id===id);if(!item)return;next.days[date][id]=checked?(Number(item.target)||1):0;if(await persistDailyAmal(next))renderDailyAmal();
+ const item=next.items.find(x=>x.id===id);if(!item)return;next.days[date][id]=checked?(Number(item.target)||1):0;await persistDailyAmal(next);renderDailyAmal();
 }
 async function changeDailyAmalCount(id,delta){
  if(!dailyAmalRecord)return;const next=JSON.parse(JSON.stringify(dailyAmalRecord)),date=$("dailyAmalDate").value||localDateKey(),item=next.items.find(x=>x.id===id);if(!item)return;
