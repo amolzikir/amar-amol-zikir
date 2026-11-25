@@ -27,7 +27,7 @@ function cloudStub({ remote = null, readError = null, writeError = null } = {}) 
   };
 }
 
-function contextFor(loaderSource, { local = null, remote = null, readError = null, writeError = null, putItem = async () => {} } = {}) {
+function contextFor(loaderSource, { local = null, remote = null, readError = null, writeError = null, online = true, putItem = async () => {} } = {}) {
   const context = {
     retries: 0,
     dailyAmalRecord: null,
@@ -36,7 +36,7 @@ function contextFor(loaderSource, { local = null, remote = null, readError = nul
     putItem,
     currentUser: { uid: "test-user" },
     cloud: cloudStub({ remote, readError, writeError }),
-    navigator: { onLine: true },
+    navigator: { onLine: online },
     scheduleCloudSyncRetry: () => { context.retries++; },
     toast: () => {},
     renderDailyAmal: () => {},
@@ -101,4 +101,20 @@ test("Tasbih keeps the previous local counter when a newer cloud copy cannot be 
   assert.equal(ctx.record(), local);
   assert.equal(ctx.record().count, 8);
   assert.equal(ctx.retries(), 1);
+});
+
+test("Daily Amal does not create a new empty record offline before cloud data can be checked", async () => {
+  let writes = 0;
+  const ctx = contextFor(dailySource, { online: false, putItem: async () => { writes++; } });
+  assert.equal(await ctx.load(), false);
+  assert.equal(ctx.record(), null);
+  assert.equal(writes, 0);
+});
+
+test("Tasbih does not create a new zero counter offline before cloud data can be checked", async () => {
+  let writes = 0;
+  const ctx = contextFor(tasbihSource, { online: false, putItem: async () => { writes++; } });
+  assert.equal(await ctx.load(), false);
+  assert.equal(ctx.record(), null);
+  assert.equal(writes, 0);
 });
