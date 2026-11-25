@@ -51,7 +51,7 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ যাচাইকৃত app release: **v162**; CI run `45639105197` এবং GitHub Pages run `45639102420`—দুটিই success; service worker cache marker `amol-zikir-v162`। v163 হলো শুধু Firestore Rules test-coverage hardening (কোনো app code/cache পরিবর্তন নয়); CI/Pages যাচাই pending।
+- সর্বশেষ যাচাইকৃত app release: **v162**; CI run `45639105197` এবং GitHub Pages run `45639102420`—দুটিই success; service worker cache marker `amol-zikir-v162`। v163 Firestore Rules test-coverage hardening: anonymous read/write denial-সহ Emulator test; CI run `45644601904` success। v163-এ app code বদলায়নি, তাই আলাদা Pages deploy প্রয়োজন হয়নি। v164 Hijri sunset rollover fix; CI/Pages pending; cache marker `amol-zikir-v164`।
 - v136-এ Backup v2 export-এ account-scoped Dua favorites যুক্ত; restore v1/v2 গ্রহণ করে, records ও favorites merge করে এবং local write read-back যাচাই করে।
 - v136-এ চারটি সূত্র-উল্লেখসহ দোয়া যোগ হয়েছে: ঘর থেকে বের হওয়া, সকাল-সন্ধ্যার আফিয়াত, মসজিদে প্রবেশ ও মসজিদ থেকে বের হওয়া।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৪-১১-২০২৬): `index.html` blob SHA `65a44f0240a2110d3fec1b5f019dfc614f1a84ba`; `sw.js` blob SHA `316a388da4e09b71303df9ff978c9128657110d4`।
@@ -59,10 +59,10 @@
 - SHA-গুলো কেবল এই নথি হালনাগাদের সময়ের রেফারেন্স; প্রতিটি update-এর আগে নতুন করে fetch করতে হবে।
 - Automated tests pass করলেও Android ফোনে backup download/restore, account switch, offline sync, app lock/biometric-এর বাস্তব পরীক্ষা এখনও ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়।
 
-## ৫. পরবর্তী কাজের অগ্রাধিকার (v162-এর পর)
+## ৫. পরবর্তী কাজের অগ্রাধিকার (v164-এর পর)
 1. **Android বাস্তব পরীক্ষা:** নিরাপদ test note দিয়ে backup download/restore, offline-to-online sync, account isolation এবং App Lock/biometric আচরণ যাচাই; আসল ডেটায় destructive test নয়।
 2. **Firebase Rules live verification:** GitHub emulator test pass করলেই Firebase Console-এ live rules deploy নিশ্চিত হয় না; আলাদা যাচাই প্রয়োজন।
-3. **ধর্মীয় কনটেন্ট ও Hijri date যাচাই:** নির্ভরযোগ্য উৎসে আরবি, উচ্চারণ, অর্থ, হাদিসের সূত্র এবং স্থানীয় তারিখ যাচাই।
+3. **ধর্মীয় কনটেন্ট যাচাই:** দোয়ার আরবি, উচ্চারণ, অর্থ এবং হাদিসের সূত্র নির্ভরযোগ্য মূল উৎসে যাচাই; Hijri month-start ঘোষণার পাশাপাশি sunset rollover v164-এ সংশোধন করা হয়েছে।
 4. **অবশিষ্ট regression audit:** Calendar, Daily Amal, Tasbih, Quran tracker, search ও navigation—শুধু নতুন প্রমাণিত ঘাটতি থাকলে পরিবর্তন; পুনরাবৃত্ত পরীক্ষা/কোড নয়.
 
 **নিরাপদ পরীক্ষার নিয়ম:** ব্যবহারকারীর ফোনে বাস্তব পরীক্ষা না হলে সেটিকে pending বলতে হবে; আসল ডেটা মুছে/ওভাররাইট করার মতো পরীক্ষা করা যাবে না।
@@ -459,3 +459,18 @@
 - `firestore.rules`, Firebase config, app code এবং service-worker cache অপরিবর্তিত; এটি test-only change।
 - Exact pre-change backups (fetched and SHA-verified): `backup/tests-firestore-rules-2026-11-25-before-v163-firestore-anonymous-write-test.bak` and `backup/PROJECT-HANDOVER-2026-11-25-before-v163-firestore-anonymous-write-test.bak`.
 - GitHub CI and Pages verification pending. This emulator test does not prove the rules currently deployed in Firebase Console; live deployment status remains unverified.
+
+
+## v163 — Firestore anonymous-write test coverage (২৫ নভেম্বর ২০২৬)
+- `tests/firestore.rules.test.js`-এ signed-out user-এর write denial test যোগ করা হয়েছে; আগের read denial, own-account allow এবং cross-account denial tests বহাল।
+- Existing workflow-তেই Emulator test চলেছে; CI run `45644601904` success। App code বদলায়নি; Pages deploy দরকার হয়নি।
+- Live Firebase Console rules publish status এখনও আলাদা করে যাচাই করা বাকি।
+
+## v164 — Bangladesh Hijri sunset rollover (২৫ নভেম্বর ২০২৬)
+- Hijri day number এখন Dhaka local estimated sunset-এর পরের civil date ধরে গণনা করে; sunset-এর আগে আগের দিনই থাকে। ফলে ১১ নভেম্বর সূর্যাস্তের পর ঘোষিত ১ জমাদিউস সানি শুরু এবং ২৫ নভেম্বর সূর্যাস্তের পর ১৫ তারিখ দেখানোর নিয়ম।
+- Sunset estimate: Dhaka (23.8103°N, 90.4125°E); অন্যান্য বাংলাদেশি এলাকার Maghrib time-এ কয়েক মিনিট পার্থক্য হতে পারে। UI note-এ এই সীমা জানানো হয়েছে।
+- Source date: Bangladesh National Moon Sighting Committee announcement reported by BSS: ১২ নভেম্বর ২০২৬ থেকে জমাদিউস সানি ১৪৪৮ শুরু।
+- Added `tests/hijri-calendar-sunset.test.js` with pre-/post-sunset, month-eve rollover and leap-day checks; npm script `test:hijri-calendar` and CI step added.
+- Service worker cache: `amol-zikir-v164`.
+- Pre-change exact backups: `backup/index-html-2026-11-25-before-hijri-sunset-fix.bak`, `backup/sw-js-2026-11-25-before-hijri-sunset-fix.bak`, `backup/package-json-2026-11-25-before-hijri-sunset-fix.bak`, `backup/-github-workflows-firestore-rules-yml-2026-11-25-before-hijri-sunset-fix.bak`, `backup/PROJECT-HANDOVER-md-2026-11-25-before-hijri-sunset-fix.bak`.
+- CI, Pages এবং Android বাস্তব আচরণ যাচাই pending।
