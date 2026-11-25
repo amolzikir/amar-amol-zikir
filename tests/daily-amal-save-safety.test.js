@@ -63,3 +63,28 @@ test("parallel Daily Amal writes are serialized and the second write is rejected
   assert.equal(await first, true);
   assert.equal(context.dailyAmalRecord.items[0].name, "প্রথম");
 });
+
+
+test("editing an Amal target preserves historical daily counts", async () => {
+  const source = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  const start = source.indexOf("async function editDailyAmal(id){");
+  const end = source.indexOf("\\nasync function moveDailyAmal", start);
+  if (start < 0 || end < 0) throw new Error("Daily Amal edit function was not found");
+  const context = {
+    dailyAmalRecord: {
+      id: "system-daily-amal",
+      items: [{ id: "a", name: "ফজর", target: 100 }],
+      days: { "2026-11-24": { a: 80 } }
+    },
+    prompt: (() => { const answers = ["ফজর", "50"]; return () => answers.shift(); })(),
+    currentLocale: () => "bn-BD",
+    tr: value => value,
+    toast: () => {},
+    renderDailyAmal: () => {},
+    persistDailyAmal: async next => { context.dailyAmalRecord = next; return true; }
+  };
+  vm.runInNewContext(source.slice(start, end) + "\\nglobalThis.edit=editDailyAmal;", context);
+  await context.edit("a");
+  assert.equal(context.dailyAmalRecord.items[0].target, 50);
+  assert.equal(context.dailyAmalRecord.days["2026-11-24"].a, 80);
+});
