@@ -1,5 +1,5 @@
-const CACHE="amol-zikir-v192";
-const FILES=["./","./index.html","./manifest.webmanifest","./assets/app-icon.svg","./assets/app-icon-maskable.svg","./assets/app-icon-256.png"];
+const CACHE="amol-zikir-v193";
+const FILES=["./","./index.html","./manifest.webmanifest","./assets/app-icon.svg","./assets/app-icon-maskable.svg","./assets/app-icon-256.png","./quran-reader.js"];
 const FIREBASE=[
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js",
