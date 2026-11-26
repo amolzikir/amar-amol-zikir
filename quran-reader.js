@@ -291,6 +291,13 @@ function wire(){
    button.textContent="✓";button.setAttribute("aria-label","শেষ-পড়া অবস্থান সংরক্ষিত");
   }
  });
+ const savedList=el("quranReaderSavedAyahs");
+ if(savedList)savedList.addEventListener("click",function(event){
+  const open=event.target.closest("[data-quran-reader-open-saved]");
+  if(open){const parts=open.dataset.quranReaderOpenSaved.split(":").map(Number);if(parts.length===2){if(select)select.value=String(parts[0]);loadSurah(parts[0],parts[1])}return}
+  const remove=event.target.closest("[data-quran-reader-remove-saved]");
+  if(remove){const parts=remove.dataset.quranReaderRemoveSaved.split(":").map(Number);const next=readSavedAyahs().filter(function(x){return x.surah!==parts[0]||x.ayah!==parts[1]});if(persistSavedAyahs(next)){renderSavedAyahs();if(currentSurah)renderSurah(currentSurah,currentTranslation,1);status("সংরক্ষিত আয়াত ও তার নোট সরানো হয়েছে।")}else status("সংরক্ষিত তালিকা হালনাগাদ করা যায়নি।",true)}
+ });
  if(smaller)smaller.addEventListener("click",function(){fontSize=Math.max(24,fontSize-2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
  if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
  renderBookmarkLabel();
