@@ -13,8 +13,8 @@
 - [x] PWA ও Firestore/security automated workflow সফল (run `45781113163`)
 - [x] Free root-level hosting repository and GitHub Pages deployment (run `45799381952`)
 - [ ] `/.well-known/assetlinks.json` after release fingerprint; then TWA verified fullscreen configuration
-- [ ] Release keystore ও নিরাপদ signing secrets
-- [ ] Signed Release APK/AAB ও signature verification
+- [x] Release signing key generation এবং signed-build workflows প্রস্তুত; [ ] keystore তৈরি ও secret setup বাকি
+- [ ] Signed Release APK/AAB ও signature verification (workflow প্রস্তুত)
 - [ ] Android ফোনে বাস্তব install/login/offline/data-preservation test
 - [ ] Firebase Console live rules ও auth domain verification
 - [ ] Religious content source review
