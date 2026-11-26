@@ -90,7 +90,7 @@ test("daily hadith still changes by local date when browser storage cannot be wr
 });
 
 test("daily hadith migrates legacy saved state without cursor or seen history", () => {
-  const fnMatch = html.match(/function dailyHadithIndex\\(date=new Date\\(\\),storage=window\\.localStorage\\)\\{[\\s\\S]*?\\n\\}/);
+  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\),storage=window\.localStorage\)\{[\s\S]*?\n\}/);
   assert.ok(fnMatch);
   const values = new Map([[ "amol-zikir-daily-hadith-v172", JSON.stringify({day:"2026-01-01",index:0}) ]]);
   const storage = { getItem(key){return values.get(key)||null;}, setItem(key,value){values.set(key,String(value));} };
