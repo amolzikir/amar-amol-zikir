@@ -39,3 +39,10 @@
 - User device-এ পরীক্ষা না হলে pass দাবি করবেন না।
 - Debug APK-কে release APK বলবেন না।
 - Free hosting-এর availability/quota পরিবর্তন হতে পারে; paid plan স্বয়ংক্রিয়ভাবে চালু করবেন না।
+
+
+## Newly completed — 2026-11-26
+- Signed APK/AAB build succeeded (run `45809097119`); artifact ID `15110798104`.
+- APK signature, certificate fingerprint, and package ID `com.zikra.app` were verified by CI; AAB signature verification passed.
+- Published root `.well-known/assetlinks.json` in `amolzikir/amolzikir.github.io`; Pages deployment run `45809850977` succeeded.
+- Still required: verify the live endpoint over HTTPS and install/test the signed APK on a physical Android device. Do not regenerate the keystore.
