@@ -12,9 +12,9 @@
 - [x] Android Debug APK build সফল (run `45781113240`, artifact `15098470990`)
 - [x] PWA ও Firestore/security automated workflow সফল (run `45781113163`)
 - [x] Free root-level hosting repository and GitHub Pages deployment (run `45799381952`)
-- [ ] `/.well-known/assetlinks.json` after release fingerprint; then TWA verified fullscreen configuration
-- [x] Release signing key generation এবং signed-build workflows প্রস্তুত; [ ] keystore তৈরি ও secret setup বাকি
-- [ ] Signed Release APK/AAB ও signature verification (workflow প্রস্তুত)
+- [ ] `/.well-known/assetlinks.json` publish after signed-build fingerprint; then verify TWA fullscreen
+- [x] Release signing key created (run `45804627552`); user kept private Drive backup; signed-build workflow hardened
+- [ ] Signed Release APK/AAB build and APK/AAB signature verification (workflow updated; run pending)
 - [ ] Android ফোনে বাস্তব install/login/offline/data-preservation test
 - [ ] Firebase Console live rules ও auth domain verification
 - [ ] Religious content source review
@@ -22,11 +22,11 @@
 
 ## কাজের বাধ্যতামূলক ক্রম
 
-1. **Root hosting:** বিনামূল্যে `https://amolzikir.github.io/.well-known/assetlinks.json` serve করার ব্যবস্থা। বর্তমান project site শুধু `/amar-amol-zikir/` path-এ; `amolzikir.github.io` user Pages repo এখনও নেই।
-2. **TWA assets/config:** PNG ও adaptive icon/splash, app name, package ID, start URL, scope, theme color এবং fallback যাচাই।
-3. **Release signing:** keystore তৈরি; ব্যবহারকারী নিরাপদে offline backup রাখবেন; GitHub Actions Secrets-এ প্রয়োজনীয় encoded keystore/password রাখা হবে। কখনো repository-তে নয়।
-4. **Asset Links:** release certificate-এর SHA-256 fingerprint দিয়ে root `/.well-known/assetlinks.json` প্রকাশ এবং Chrome verification।
-5. **Release build:** versionCode/version bump, signed APK/AAB build, package ID ও signature পরীক্ষা।
+1. **Root hosting:** Free user Pages repository `amolzikir/amolzikir.github.io` is deployed. Publish `/.well-known/assetlinks.json` there after release fingerprint verification.
+2. **TWA assets/config:** PNG icon, app name, package ID `com.zikra.app`, start URL, scope, theme color and fallback are configured; verify in signed build.
+3. **Release signing:** Keystore created and user has privately backed up ZIP and raw key in Drive; password is stored as GitHub Actions secret. Never commit it to repository.
+4. **Asset Links:** Build workflow derives SHA-256 fingerprint and creates JSON; publish to root Pages and verify Chrome Digital Asset Links.
+5. **Release build:** signed APK/AAB build; package ID and signatures checked by CI. Keep versionCode/version stable for first release.
 6. **Device QA:** Android-এ install/update, Google sign-in, Firestore, offline notes, notes preservation, navigation, app lock, reminders ও notifications। Browser/site data clear নয়।
 7. **Firebase live config:** Console-এর published Firestore rules, Authentication providers ও authorized domains পরীক্ষা।
 8. **Content review:** আয়াত, হাদিস, দোয়া—আরবি, বাংলা উচ্চারণ, অর্থ ও source reference যাচাই।
