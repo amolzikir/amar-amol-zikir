@@ -697,3 +697,14 @@
 9. কুরআন/হাদিস/দোয়ার আরবি, বাংলা উচ্চারণ, অর্থ ও উৎস যাচাই; তারপর final release checklist সম্পন্ন।
 
 **গুরুত্বপূর্ণ:** Debug APK তৈরি হয়েছে—এটি release-ready হওয়ার প্রমাণ নয়। Phone test, release signing, Digital Asset Links এবং live Firebase verification সম্পন্ন না হওয়া পর্যন্ত অ্যাপকে চূড়ান্তভাবে প্রকাশিত বলা যাবে না।
+
+
+## ১১. Root Hosting প্রতিষ্ঠিত — ২৬ নভেম্বর ২০২৬
+- ব্যবহারকারী GitHub-এ Public user Pages repository `amolzikir/amolzikir.github.io` তৈরি করেছেন এবং GitHub App-কে নির্দিষ্ট repository-তে access দিয়েছেন; পুরোনো app repository access অক্ষত আছে।
+- Root repository-তে `index.html` এবং `.nojekyll` যোগ করা হয়েছে; উভয় ফাইল fetch করে যাচাই করা হয়েছে।
+- GitHub Pages source: `main` / `/(root)`; ব্যবহারকারীর স্ক্রিনশটে “GitHub Pages source saved” এবং site live URL দেখা গেছে।
+- Root Pages deployment run `45799381952` — build, status report ও deploy job সব success; head commit `a12eecb1482e19b284fc2e88f62d4a0dc660d33a`।
+- Root origin: `https://amolzikir.github.io/`; project PWA origin একই host, app path `/amar-amol-zikir/`। ফলে root-level Digital Asset Links প্রকাশের hosting বাধা দূর হয়েছে।
+- এখনো `/.well-known/assetlinks.json` প্রকাশ করা হয়নি; final release signing certificate-এর SHA-256 fingerprint না পাওয়া পর্যন্ত এটি তৈরি/প্রকাশ করা যাবে না।
+- TWA config `android/twa-manifest.json`-এ host `amolzikir.github.io`, package `com.zikra.app`, start URL `/amar-amol-zikir/index.html`, full scope `https://amolzikir.github.io/amar-amol-zikir/`। Release fingerprint এখনো নেই; verified fullscreen TWA দাবি করা যাবে না।
+- পরবর্তী বাধ্যতামূলক ধাপ: (১) root site ও .well-known path যাচাই, (২) নিরাপদ release keystore workflow/secret setup, (৩) release signing fingerprint, (৪) assetlinks প্রকাশ, (৫) signed release build, (৬) Android ফোনে বাস্তব QA।
