@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="যিকরা">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#064b24"/><stop offset=".55" stop-color="#087333"/><stop offset="1" stop-color="#023d20"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0a6"/><stop offset=".42" stop-color="#f5c64d"/><stop offset="1" stop-color="#b87918"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#fff8cf" stop-opacity=".95"/><stop offset=".18" stop-color="#e9bd3f" stop-opacity=".4"/><stop offset="1" stop-color="#e9bd3f" stop-opacity="0"/></radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="5"/><feOffset dy="5"/><feComponentTransfer><feFuncA type="linear" slope=".35"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="170" fill="url(#glow)"/>
+  <g filter="url(#shadow)" fill="none" stroke="url(#gold)" stroke-width="17" stroke-linejoin="round">
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(45 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(90 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(135 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(180 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(225 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(270 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(315 256 256)"/>
+  </g>
+  <circle cx="256" cy="256" r="14" fill="#fff4b0"/>
+  <circle cx="256" cy="256" r="31" fill="none" stroke="#f5c64d" stroke-opacity=".55" stroke-width="2"/>
+</svg>
