@@ -70,3 +70,21 @@ test("daily hadith stays fixed per date and does not repeat until the collection
   assert.equal(indexFor(new Date(2026, 0, hadiths.length + 1)), 0, "start a fresh cycle only after all entries were shown");
   assert.match(html, /renderDailyHadith\(\)/);
 });
+
+test("daily hadith refreshes when local day changes while visible or after app resume", () => {
+  assert.match(html, /function refreshDailyHadithIfVisible\(\)/);
+  assert.match(html, /document\.addEventListener\(["']visibilitychange["'],refreshDailyHadithIfVisible\)/);
+  assert.match(html, /window\.addEventListener\(["']focus["'],refreshDailyHadithIfVisible\)/);
+  assert.match(html, /function scheduleDailyHadithRollover\(\)/);
+  assert.match(html, /window\.setTimeout\(\(\)=>\{refreshDailyHadithIfVisible\(\);scheduleDailyHadithRollover\(\)\}/);
+});
+
+test("daily hadith still changes by local date when browser storage cannot be written", () => {
+  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\),storage=window\.localStorage\)\{[\s\S]*?\n\}/);
+  const failingStorage = { getItem() { return null; }, setItem() { throw new Error("storage unavailable"); } };
+  const context = { DAILY_HADITHS: hadiths, DAILY_HADITH_STATE_KEY: "amol-zikir-daily-hadith-v172", Date, Math, window: { localStorage: failingStorage } };
+  const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", context);
+  const a = indexFor(new Date(2026, 0, 1));
+  const b = indexFor(new Date(2026, 0, 2));
+  assert.notEqual(a, b, "storage failure must not freeze the same hadith every day");
+});
