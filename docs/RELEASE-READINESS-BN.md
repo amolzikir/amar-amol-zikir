@@ -11,8 +11,8 @@
 - [x] Android Bubblewrap project generation সফল
 - [x] Android Debug APK build সফল (run `45781113240`, artifact `15098470990`)
 - [x] PWA ও Firestore/security automated workflow সফল (run `45781113163`)
-- [ ] Free root-level Digital Asset Links hosting
-- [ ] TWA verified fullscreen configuration
+- [x] Free root-level hosting repository and GitHub Pages deployment (run `45799381952`)
+- [ ] `/.well-known/assetlinks.json` after release fingerprint; then TWA verified fullscreen configuration
 - [ ] Release keystore ও নিরাপদ signing secrets
 - [ ] Signed Release APK/AAB ও signature verification
 - [ ] Android ফোনে বাস্তব install/login/offline/data-preservation test
