@@ -648,3 +648,14 @@
 - Final code commit 5ec05f97449db9aeae46290a50e2f67e1e467ab2; Firestore/CI run 45757459992 success; GitHub Pages deployment run 45757459683 success।
 - Phone screenshot confirmed the updated hadith card displays Muslim 2318, but next-day change on the physical phone remains unverified until 27 November 2026. User should not clear site data or browser storage. No user notes, IndexedDB records, Firestore records, or Firebase settings were altered.
 - APK work remains paused until next-day rotation is confirmed on the phone.
+
+
+## v182 — যিকরা নতুন আইকন ও Android APK build অগ্রগতি (২৬ নভেম্বর ২০২৬)
+- পুরোনো বই/চাঁদ-ভিত্তিক SVG icon-এর বদলে গাঢ় পান্না-সবুজ পটভূমিতে সোনালি আট-পাপড়ির জ্যামিতিক emblem তৈরি ও প্রকাশিত: `assets/app-icon.svg`, `assets/app-icon-maskable.svg`। PWA manifest ও TWA manifest-এর বিদ্যমান URL একই রাখা হয়েছে; নতুন artwork ওই URL-এ এসেছে।
+- Icon পরিবর্তনের আগে exact backups তৈরি ও byte-for-byte যাচাই: `backup/app-icon-svg-2026-11-26-before-zikra-emblem.bak`, `backup/app-icon-maskable-svg-2026-11-26-before-zikra-emblem.bak`। Service worker backup: `backup/sw-js-2026-11-26-before-zikra-icon-cache.bak`।
+- Service Worker cache marker `amol-zikir-v182`; icon files precache list-এ রয়েছে। নতুন cache key পুরোনো cache থেকে update আনবে।
+- পূর্বের APK build run `45764455228` সফল; `zikra-debug-apk` artifact ID `15091367050`, ZIP size 4,678,164 bytes, expires 10 Dec 2026। এতে `app-debug.apk` আছে; এটি debug-signed test APK, release APK নয়।
+- নতুন icon-সহ Android APK build স্বয়ংক্রিয়ভাবে চালু হয়েছে: run `45765907585` pending at last check; আর Pages deployment/Firestore workflow-ও নতুন commits-এর পর চলছিল। Final artifact তৈরি না হওয়া পর্যন্ত নতুন APK success দাবি করা যাবে না।
+- বর্তমান site: `https://amolzikir.github.io/amar-amol-zikir/`; TWA manifest এখনও `com.zikra.app`, start URL `/amar-amol-zikir/index.html`, minSdk 24। Digital Asset Links-এর প্রয়োজনীয় root URL `https://amolzikir.github.io/.well-known/assetlinks.json` বর্তমান project Pages path থেকে পরিবেশন করা যায় না; free root-host solution ও final signing fingerprint এখনো বাকি। এর আগে verified fullscreen TWA নিশ্চিত নয়; Custom Tabs fallback থাকবে।
+- Next steps: icon commit-সহ APK build success/artifact যাচাই; Pages ও Firestore workflows success যাচাই; পরে free root-host/assetlinks solution; secure release keystore workflow (secret values repo-তে নয়); final release APK এবং বাস্তব Android install test।
+- কোনো user note, IndexedDB, Firestore বা Firebase setting পরিবর্তন করা হয়নি। Daily hadith rotation-এর পরদিনের ফোন পরীক্ষা ২৭ নভেম্বরের জন্য আলাদা; browser/site data clear করা যাবে না।
