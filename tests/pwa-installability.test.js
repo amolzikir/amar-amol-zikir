@@ -21,7 +21,7 @@ test('index links the app icon and manifest', () => {
 
 test('service worker precaches both app icons for offline installation shell', () => {
   const sw = read('sw.js');
-  assert.match(sw, /amol-zikir-v178/);
+  assert.match(sw, /const CACHE="amol-zikir-v\\d+"/);
   assert.match(sw, /\.\/assets\/app-icon\.svg/);
   assert.match(sw, /\.\/assets\/app-icon-maskable\.svg/);
   for (const file of ['assets/app-icon.svg', 'assets/app-icon-maskable.svg']) {
