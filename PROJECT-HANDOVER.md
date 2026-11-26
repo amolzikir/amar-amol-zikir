@@ -55,10 +55,12 @@
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
 - সর্বশেষ সফল app release: **v179**; deterministic calendar-date daily hadith selection implemented and user confirmed the visible hadith changed after update. ২৬ নভেম্বর ২০২৬-এর প্রত্যাশিত হাদিস: সহিহ মুসলিম ২৩১৮; পরবর্তী দিনের rotation user will verify on ২৭ নভেম্বর.
-- **v180 branding update:** ওয়েবসাইটের শিরোনাম, PWA manifest display name, header brand, নির্বাচিত স্লোগান ও মূল কুরআনিক আয়াত যুক্ত; service-worker cache marker `amol-zikir-v181`। Commit `104cc4d35f20690a3d1035679ab4dd4915452416`; automated deployment/build status must be checked after the commit.
-- Domain purchase not required: keep the existing GitHub Pages URL `https://amolzikir.github.io/amar-amol-zikir/` for now.
-- Android APK package ID remains unapproved/unfinalized. Do not assume `com.zikra.app` or `com.amolzikir.zikra` is approved. TWA/Bubblewrap APK work remains a separate next phase; no APK artifact has been produced yet.
-- Android phone real-world verification of the new display branding is pending user confirmation. Existing app icon SVG artwork has not yet been redesigned for Zikra.
+- **v181 Zikra branding update:** website title/header, PWA manifest display name, selected slogan and core Qur'anic ayah added; service-worker cache marker `amol-zikir-v181`. Branding code was fetched back and checked; phone display verification and Pages deployment confirmation remain pending.
+- Domain purchase is not required for the existing GitHub Pages URL: `https://amolzikir.github.io/amar-amol-zikir/`.
+- **Android package ID approved by user:** `com.zikra.app` (26 Nov 2026). It is the stable Android application identity and is separate from the website URL.
+- **APK bootstrap committed:** Bubblewrap/TWA config `android/twa-manifest.json`, Bengali setup notes `android/README-BN.md`, and GitHub Actions workflow `.github/workflows/android-apk.yml` added in commit `e930dd6cfbb97bb16e88ccbfbf0b57338eb0f662`. Workflow should generate a debug APK artifact; build result still needs verification. No signed release APK exists; no keystore/password committed.
+- **TWA root-hosting limitation:** Digital Asset Links must be served at `https://amolzikir.github.io/.well-known/assetlinks.json`, but this project GitHub Pages site is under `/amar-amol-zikir/`. Need a free root-hosting option (e.g. a user Pages site or suitable Firebase Hosting origin) before verified fullscreen TWA can be claimed. Until then, Custom Tabs fallback is expected.
+- Existing SVG app icon artwork still uses the old book/crescent mark; redesign for Zikra before release. Physical Android install/login/offline tests remain pending.
 - v136-এ Backup v2 export-এ account-scoped Dua favorites যুক্ত; restore v1/v2 গ্রহণ করে, records ও favorites merge করে এবং local write read-back যাচাই করে।
 - v136-এ চারটি সূত্র-উল্লেখসহ দোয়া যোগ হয়েছে: ঘর থেকে বের হওয়া, সকাল-সন্ধ্যার আফিয়াত, মসজিদে প্রবেশ ও মসজিদ থেকে বের হওয়া।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৪-১১-২০২৬): `index.html` blob SHA `65a44f0240a2110d3fec1b5f019dfc614f1a84ba`; `sw.js` blob SHA `316a388da4e09b71303df9ff978c9128657110d4`।
@@ -66,11 +68,14 @@
 - SHA-গুলো কেবল এই নথি হালনাগাদের সময়ের রেফারেন্স; প্রতিটি update-এর আগে নতুন করে fetch করতে হবে।
 - Automated tests pass করলেও Android ফোনে backup download/restore, account switch, offline sync, app lock/biometric-এর বাস্তব পরীক্ষা এখনও ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়।
 
-## ৫. পরবর্তী কাজের অগ্রাধিকার (v164-এর পর)
-1. **Android বাস্তব পরীক্ষা:** নিরাপদ test note দিয়ে backup download/restore, offline-to-online sync, account isolation এবং App Lock/biometric আচরণ যাচাই; আসল ডেটায় destructive test নয়।
-2. **Firebase Rules live verification:** GitHub emulator test pass করলেই Firebase Console-এ live rules deploy নিশ্চিত হয় না; আলাদা যাচাই প্রয়োজন।
-3. **ধর্মীয় কনটেন্ট যাচাই:** দোয়ার আরবি, উচ্চারণ, অর্থ এবং হাদিসের সূত্র নির্ভরযোগ্য মূল উৎসে যাচাই; Hijri month-start ঘোষণার পাশাপাশি sunset rollover v164-এ সংশোধন করা হয়েছে।
-4. **অবশিষ্ট regression audit:** Calendar, Daily Amal, Tasbih, Quran tracker, search ও navigation—শুধু নতুন প্রমাণিত ঘাটতি থাকলে পরিবর্তন; পুনরাবৃত্ত পরীক্ষা/কোড নয়.
+## ৫. পরবর্তী কাজের অগ্রাধিকার (APK ও অ্যাপ স্থিতিশীলতা)
+1. **APK build pipeline:** Bubblewrap-generated Android project-কে GitHub Actions-এ debug APK হিসেবে build করে artifact প্রকাশ; build logs ও APK artifact যাচাই।
+2. **Zikra launcher icon/splash:** 512px PNG ও Android adaptive icon assets তৈরি; release-এর আগে পুরোনো artwork বদলানো।
+3. **TWA Digital Asset Links root hosting:** package ID ও final signing fingerprint অনুযায়ী root-level `/.well-known/assetlinks.json` host করার বিনামূল্যের সমাধান স্থির করা; fingerprint ছাড়া assetlinks প্রকাশ নয়।
+4. **Release signing:** release keystore ও password নিরাপদে সংরক্ষণ; কোনো key/password repository-তে commit নয়। প্রথমে debug build, পরে user-controlled signing secrets।
+5. **Android বাস্তব পরীক্ষা:** install/open, Google Sign-in, Firestore sync, offline notes, tasbih ও notifications; আসল ডেটায় destructive test নয়।
+6. **Firebase Rules live verification:** emulator tests pass করলেই Firebase Console-এ live rules publish নিশ্চিত হয় না; আলাদা যাচাই প্রয়োজন।
+7. **ধর্মীয় কনটেন্ট যাচাই:** দোয়ার আরবি, উচ্চারণ, অর্থ ও হাদিসের সূত্র নির্ভরযোগ্য মূল উৎসে যাচাই।
 
 **নিরাপদ পরীক্ষার নিয়ম:** ব্যবহারকারীর ফোনে বাস্তব পরীক্ষা না হলে সেটিকে pending বলতে হবে; আসল ডেটা মুছে/ওভাররাইট করার মতো পরীক্ষা করা যাবে না।
 
@@ -81,7 +86,7 @@
 - GitHub Pages ও Firebase-এর বিনামূল্যের quota/নীতিমালা ভবিষ্যতে পরিবর্তিত হতে পারে; বিনামূল্যে চিরকাল চলবে—এমন নিশ্চয়তা দেওয়া যাবে না। ব্যবহারকারী নিজে billing plan না বদলালে স্বয়ংক্রিয়ভাবে paid plan ধরে নেওয়া যাবে না।
 
 ## ৭. নতুন ChatGPT-তে কাজ শুরু করার জন্য কপি-পেস্ট নির্দেশনা
-“আমি ‘আমার আমল ও জিকির’ নামে একটি Android-friendly PWA তৈরি করছি। এই প্রকল্পের হস্তান্তর নথি পড়ুন: https://github.com/amolzikir/amar-amol-zikir/blob/main/PROJECT-HANDOVER.md । Repository-এর সর্বশেষ index.html ও sw.js নিজে fetch করে বর্তমান অবস্থা যাচাই করুন। নথির কাজের নিয়মগুলো কঠোরভাবে মানুন: আগে backup, সর্বশেষ SHA, JavaScript syntax check, service-worker cache version bump, শেষে GitHub থেকে verify। বিদ্যমান ফিচার বা ডেটা নষ্ট করবেন না। আমাকে দীর্ঘ নির্দেশনা না দিয়ে সংক্ষেপে বাস্তব কাজ এগিয়ে নিন। আমার ফোন Android; আমি নিজে কোড edit করতে পারি না।”
+“আমি ‘যিকরা (ذِكْرَى)’ নামে একটি Android-friendly PWA ও APK তৈরি করছি। Android package ID `com.zikra.app` ব্যবহারকারী অনুমোদিত। এই প্রকল্পের হস্তান্তর নথি পড়ুন: https://github.com/amolzikir/amar-amol-zikir/blob/main/PROJECT-HANDOVER.md । Repository-এর সর্বশেষ index.html ও sw.js নিজে fetch করে বর্তমান অবস্থা যাচাই করুন। নথির কাজের নিয়মগুলো কঠোরভাবে মানুন: আগে backup, সর্বশেষ SHA, JavaScript syntax check, service-worker cache version bump, শেষে GitHub থেকে verify। বিদ্যমান ফিচার বা ডেটা নষ্ট করবেন না। আমাকে দীর্ঘ নির্দেশনা না দিয়ে সংক্ষেপে বাস্তব কাজ এগিয়ে নিন। আমার ফোন Android; আমি নিজে কোড edit করতে পারি না।”
 
 ## ৮. গুরুত্বপূর্ণ সীমাবদ্ধতা
 এই নথি প্রকল্পের অবস্থা ও কাজের নিয়ম ধরে রাখে; এটি ChatGPT-এর পুরোনো চ্যাটের হুবহু বিকল্প নয়। নতুন সহকারীকে প্রতিবার repository-এর live code দেখে যাচাই করতে হবে। Firebase console-এর private account settings বা ব্যবহারকারীর ব্যক্তিগত credentials এই নথিতে নেই এবং থাকা উচিতও নয়।
