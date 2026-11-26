@@ -19,8 +19,8 @@ GitHub Actions-এর **Build Zikra Android debug APK** workflow চালু �
 
 - Debug APK production release key দিয়ে signed নয়; Gradle-এর ephemeral debug key দিয়ে local testing-এর জন্য তৈরি।
 - কোনো keystore/password GitHub repository-তে রাখা হবে না।
-- Fullscreen verified TWA চালাতে Digital Asset Links প্রয়োজন। সেটি host root-এ থাকতে হবে: `https://amolzikir.github.io/.well-known/assetlinks.json`। বর্তমান GitHub Pages project site কেবল `/amar-amol-zikir/` path প্রকাশ করে; root-level hosting সমাধান না হওয়া পর্যন্ত Custom Tabs fallback-ই প্রত্যাশিত।
-- বর্তমান app icon SVG এখনও পুরোনো artwork; release-এর আগে Zikra-branded PNG/adaptive icons তৈরি করতে হবে।
+- Root-level Digital Asset Links hosting এখন প্রস্তুত: `https://amolzikir.github.io/` user Pages site live এবং deployment সফল (run `45799381952`)। তবে `/.well-known/assetlinks.json` এখনো প্রকাশ করা হয়নি; release signing certificate-এর SHA-256 fingerprint পাওয়ার পরই প্রকাশ করতে হবে। তার আগে Custom Tabs fallback-ই প্রত্যাশিত।
+- অনুমোদিত সবুজ-সোনালি কুফিক artwork PWA manifest-এর PNG icon ও SVG compatibility wrapper-এ যুক্ত; Android TWA manifest icon URL-ও PNG। Android launcher-এ ব্যবহারকারীর ফোনে বাস্তব রূপ যাচাই বাকি।
 - Google Sign-in, Firestore, offline behavior ও notifications বাস্তব Android ফোনে পরীক্ষা না হওয়া পর্যন্ত verified বলা যাবে না।
 
 ## সর্বশেষ যাচাইকৃত অবস্থা — ২৬-১১-২০২৬
@@ -30,3 +30,10 @@ GitHub Actions-এর **Build Zikra Android debug APK** workflow চালু �
 - PWA ও Firestore/security automated workflow সফল (run `45781113163`)।
 - আগের অনুচ্ছেদের পুরোনো আইকন-সংক্রান্ত নোটটি superseded; নতুন artwork repository-তে যুক্ত হয়েছে।
 - Root-level Digital Asset Links hosting, release keystore, signed release build এবং বাস্তব Android ফোনে পরীক্ষা এখনো বাকি।
+
+
+## Root hosting status — ২৬-১১-২০২৬
+- User Pages repository `amolzikir/amolzikir.github.io` তৈরি, Pages source `main/(root)` সেট এবং deployment run `45799381952` সফল।
+- Root origin: `https://amolzikir.github.io/`; `index.html` ও `.nojekyll` তৈরি এবং fetch করে যাচাই।
+- Root hosting প্রস্তুত হলেও assetlinks.json ইচ্ছাকৃতভাবে এখনো তৈরি হয়নি; release keystore থেকে SHA-256 fingerprint পাওয়ার পরই তৈরি হবে।
+- Release keystore, signed release APK/AAB এবং real-device QA এখনও বাকি।
