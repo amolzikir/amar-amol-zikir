@@ -727,3 +727,12 @@
 - পরবর্তী user action: Actions → Build Zikra signed Android release → Run workflow; input `keystore_run_id=45804627552`।
 - Successful artifact থেকে `assetlinks.json` নিয়ে root Pages repository `amolzikir/amolzikir.github.io`-এর `.well-known/assetlinks.json`-এ publish করতে হবে। তারপর live URL verify করতে হবে।
 - Signed release APK/AAB এখনো তৈরি হয়নি; phone install/QA-ও pending।
+
+
+## Android signed release and Digital Asset Links — 2026-11-26
+- Signed release workflow run `45809097119` completed successfully on commit `cc289167be60aa305ce2d10cc2875434e9d96f60`.
+- Artifact `zikra-signed-release` ID `15110798104` contains `android/app-release-signed.apk`, `android/app-release-bundle.aab`, `release-fingerprint.txt`, `assetlinks.json`, and `apk-signature.txt`.
+- Workflow verified the APK signature and certificate fingerprint against the protected PKCS12 keystore; APK package ID verified as `com.zikra.app`; AAB JAR signature verification passed.
+- Root Pages repository `amolzikir/amolzikir.github.io` now contains `.well-known/assetlinks.json`, commit `50e7865265f3ec81842e045cd1e90c4e6625a0e4`. Pages deployment run `45809850977` succeeded.
+- The file is present on the GitHub Pages source and deployment succeeded. Direct HTTP retrieval from this runtime was unavailable, so live endpoint verification and Android device TWA verification remain pending.
+- Do not regenerate the release keystore. Preserve the original Drive copy and GitHub Actions protected artifact. Artifact expires 2026-12-26; keep the user's Drive backup.
