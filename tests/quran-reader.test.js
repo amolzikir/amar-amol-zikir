@@ -80,3 +80,15 @@ test("Quran reader validates saved surah and ayah positions", () => {
 test("Quran reader escapes untrusted strings before rendering markup", () => {
   assert.equal(reader.escapeHtml("<img src=x onerror=alert(1)>"), "&lt;img src=x onerror=alert(1)&gt;");
 });
+
+
+test("Quran reader allows only supported reciters and valid surah audio URLs", () => {
+  assert.equal(reader.normalizeAudioEdition("ar.alafasy"), "ar.alafasy");
+  assert.equal(reader.normalizeAudioEdition("ar.husary"), "ar.husary");
+  assert.equal(reader.normalizeAudioEdition("https://evil.example/audio.mp3"), null);
+  assert.equal(reader.buildSurahAudioUrl(1, "ar.alafasy"), "https://cdn.islamic.network/quran/audio-surah/64/ar.alafasy/1.mp3");
+  assert.equal(reader.buildSurahAudioUrl(114, "ar.sudais"), "https://cdn.islamic.network/quran/audio-surah/64/ar.sudais/114.mp3");
+  assert.equal(reader.buildSurahAudioUrl(0, "ar.alafasy"), null);
+  assert.equal(reader.buildSurahAudioUrl(115, "ar.alafasy"), null);
+  assert.equal(reader.buildSurahAudioUrl(1, "unknown"), null);
+});
