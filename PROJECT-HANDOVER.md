@@ -718,3 +718,12 @@
 - তারপর Actions → Create Zikra Android release signing key → Run workflow। সফল হলে workflow run ID ও SHA-256 fingerprint নথিভুক্ত করতে হবে। Keystore artifact offline backup না নিয়ে মুছবেন না।
 - Fingerprint পাওয়ার পর `https://amolzikir.github.io/.well-known/assetlinks.json` তৈরি/প্রকাশ করা যাবে; তার আগে নয়। তারপর signed release workflow চালানো হবে।
 - Release workflow এখনো চালানো হয়নি; release APK/AAB তৈরি হয়েছে—এমন দাবি করা যাবে না।
+
+## ১৩. Release signing key সফল — ২৬ নভেম্বর ২০২৬
+- GitHub Actions workflow run `45804627552` সফল; release keystore artifact ID `15108887761` তৈরি হয়েছে.
+- User জানিয়েছেন ZIP ও extracted `android.keystore` Google Drive-এ ব্যক্তিগতভাবে রেখেছেন। Private key/password repository-তে commit করা হয়নি।
+- Secret `ZIKRA_KEYSTORE_PASSWORD` configured; secret value অজানা/প্রকাশ করা হয়নি।
+- Release workflow hardening commit `98aa4ece5b5efe42c365710a7431f5f32fcc82a7`: SHA-256 fingerprint এবং Digital Asset Links JSON generate, APK package ID, APK signer fingerprint equality, APK signature এবং AAB signature verify, artifacts upload করে।
+- পরবর্তী user action: Actions → Build Zikra signed Android release → Run workflow; input `keystore_run_id=45804627552`।
+- Successful artifact থেকে `assetlinks.json` নিয়ে root Pages repository `amolzikir/amolzikir.github.io`-এর `.well-known/assetlinks.json`-এ publish করতে হবে। তারপর live URL verify করতে হবে।
+- Signed release APK/AAB এখনো তৈরি হয়নি; phone install/QA-ও pending।
