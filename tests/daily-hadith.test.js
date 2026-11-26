@@ -74,37 +74,14 @@ test("daily hadith refreshes when local day changes while visible or after app r
   assert.match(html, /window\.setTimeout\(\(\)=>\{refreshDailyHadithIfVisible\(\);scheduleDailyHadithRollover\(\)\}/);
 });
 
-test("daily hadith still changes by local date when browser storage cannot be written", () => {
-  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\),storage=window\.localStorage\)\{[\s\S]*?\n\}/);
-  const failingStorage = { getItem() { return null; }, setItem() { throw new Error("storage unavailable"); } };
-  const context = { DAILY_HADITHS: hadiths, DAILY_HADITH_STATE_KEY: "amol-zikir-daily-hadith-v172", Date, Math, window: { localStorage: failingStorage } };
-  const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", context);
+test("daily hadith rotation ignores unavailable or legacy browser storage", () => {
+  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\)\)\{[\s\S]*?\n\}/);
+  assert.ok(fnMatch);
+  const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", { DAILY_HADITHS: hadiths, Date, Math });
   const a = indexFor(new Date(2026, 0, 1));
   const b = indexFor(new Date(2026, 0, 2));
-  assert.notEqual(a, b, "storage failure must not freeze the same hadith every day");
+  assert.notEqual(a, b);
+  assert.equal(indexFor(new Date(2026, 0, 1)), a);
+  assert.equal(indexFor(new Date(2026, 0, 19)), a);
 });
 
-test("daily hadith migrates legacy saved state without cursor or seen history", () => {
-  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\),storage=window\.localStorage\)\{[\s\S]*?\n\}/);
-  assert.ok(fnMatch);
-  const values = new Map([[ "amol-zikir-daily-hadith-v172", JSON.stringify({day:"2026-01-01",index:0}) ]]);
-  const storage = { getItem(key){return values.get(key)||null;}, setItem(key,value){values.set(key,String(value));} };
-  const context = { DAILY_HADITHS: hadiths, DAILY_HADITH_STATE_KEY:"amol-zikir-daily-hadith-v172", Date, Math, window:{localStorage:storage} };
-  const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", context);
-  assert.equal(indexFor(new Date(2026,0,2)),1,"legacy first hadith should advance to the next entry");
-  const sequence=[1];
-  for(let day=3;day<=hadiths.length;day++) sequence.push(indexFor(new Date(2026,0,day)));
-  assert.equal(new Set(sequence).size,hadiths.length-1,"legacy migration must preserve no-repeat history");
-});
-
-test("daily hadith migrates same-day legacy state before returning a saved index", () => {
-  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\),storage=window\.localStorage\)\{[\s\S]*?\n\}/);
-  assert.ok(fnMatch);
-  const values = new Map([[ "amol-zikir-daily-hadith-v172", JSON.stringify({day:"2026-01-02",index:0}) ]]);
-  const storage = { getItem(key){return values.get(key)||null;}, setItem(key,value){values.set(key,String(value));} };
-  const context = { DAILY_HADITHS: hadiths, DAILY_HADITH_STATE_KEY:"amol-zikir-daily-hadith-v172", Date, Math, window:{localStorage:storage} };
-  const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", context);
-  assert.equal(indexFor(new Date(2026,0,2)),1,"same-day legacy index must be migrated rather than returned unchanged");
-  assert.equal(indexFor(new Date(2026,0,2)),1,"migrated selection must remain stable for the rest of the day");
-  assert.equal(indexFor(new Date(2026,0,3)),2,"next date must continue the no-repeat sequence");
-});
