@@ -103,7 +103,7 @@ test("daily hadith migrates legacy saved state without cursor or seen history", 
 });
 
 test("daily hadith migrates same-day legacy state before returning a saved index", () => {
-  const fnMatch = html.match(/function dailyHadithIndex\\(date=new Date\\(\\),storage=window\\.localStorage\\)\\{[\\s\\S]*?\\n\\}/);
+  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\),storage=window\.localStorage\)\{[\s\S]*?\n\}/);
   assert.ok(fnMatch);
   const values = new Map([[ "amol-zikir-daily-hadith-v172", JSON.stringify({day:"2026-01-02",index:0}) ]]);
   const storage = { getItem(key){return values.get(key)||null;}, setItem(key,value){values.set(key,String(value));} };
