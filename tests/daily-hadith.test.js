@@ -43,34 +43,29 @@ test("daily hadith library contains eighteen distinct source-backed entries", ()
   assert.match(html, /সব হাদিস শেষ না হওয়া পর্যন্ত একই হাদিস আবার আসবে না/);
 });
 
-test("daily hadith stays fixed per date and does not repeat until the collection is exhausted", () => {
-  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\),storage=window\.localStorage\)\{[\s\S]*?\n\}/);
-  assert.ok(fnMatch, "persistent no-repeat index function should exist");
-  const values = new Map();
-  const storage = {
-    getItem(key) { return values.has(key) ? values.get(key) : null; },
-    setItem(key, value) { values.set(key, String(value)); }
-  };
-  const context = {
-    DAILY_HADITHS: hadiths,
-    DAILY_HADITH_STATE_KEY: "amol-zikir-daily-hadith-v172",
-    Date,
-    Math,
-    window: { localStorage: storage }
-  };
-  const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", context);
+test("daily hadith is deterministic by local date and cycles without repeats", () => {
+  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\)\)\{[\s\S]*?\n\}/);
+  assert.ok(fnMatch, "date-based daily index function should exist");
+  const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", { DAILY_HADITHS: hadiths, Date, Math });
   const first = indexFor(new Date(2026, 0, 1));
-  assert.equal(first, 0);
-  assert.equal(indexFor(new Date(2026, 0, 1)), first, "same day should keep the same hadith");
-  const sequence = [first];
-  for (let day = 2; day <= hadiths.length; day++) {
-    sequence.push(indexFor(new Date(2026, 0, day)));
-  }
-  assert.equal(new Set(sequence).size, hadiths.length, "each entry should appear once before reset");
-  assert.equal(indexFor(new Date(2026, 0, hadiths.length + 1)), 0, "start a fresh cycle only after all entries were shown");
+  assert.equal(indexFor(new Date(2026, 0, 1)), first, "same date should keep the same hadith");
+  const sequence = [];
+  for (let day = 1; day <= hadiths.length; day++) sequence.push(indexFor(new Date(2026, 0, day)));
+  assert.equal(new Set(sequence).size, hadiths.length, "18 consecutive dates must show 18 different entries");
+  assert.equal(indexFor(new Date(2026, 0, hadiths.length + 1)), first, "cycle may repeat only after all entries were shown");
   assert.match(html, /renderDailyHadith\(\)/);
 });
 
+test("daily hadith selection is independent of stale or unavailable browser storage", () => {
+  const fnMatch = html.match(/function dailyHadithIndex\(date=new Date\(\)\)\{[\s\S]*?\n\}/);
+  const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", { DAILY_HADITHS: hadiths, Date, Math });
+  const stale = JSON.stringify({day:"2026-01-01",index:0,cursor:1,seen:[0]});
+  const untouched = stale;
+  const a = indexFor(new Date(2026, 0, 2));
+  const b = indexFor(new Date(2026, 0, 3));
+  assert.notEqual(a, b, "successive dates must advance regardless of persisted legacy state");
+  assert.equal(stale, untouched, "legacy storage data is not modified or deleted");
+});
 test("daily hadith refreshes when local day changes while visible or after app resume", () => {
   assert.match(html, /function refreshDailyHadithIfVisible\(\)/);
   assert.match(html, /document\.addEventListener\(["']visibilitychange["'],refreshDailyHadithIfVisible\)/);
