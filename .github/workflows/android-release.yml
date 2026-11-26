@@ -60,9 +60,24 @@ jobs:
         run: npm install --global @bubblewrap/cli
 
       - name: Configure Bubblewrap SDK paths
+        shell: bash
         run: |
-          mkdir -p "$HOME/.bubblewrap"
+          set -euo pipefail
+          # Bubblewrap validates that the SDK root contains tools/ or bin/.
+          # GitHub's modern Android SDK layout uses cmdline-tools/latest/bin instead.
+          mkdir -p "$ANDROID_SDK_ROOT/bin" "$HOME/.bubblewrap"
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [ -x "$SDKMANAGER" ]; then
+            ln -sf "$SDKMANAGER" "$ANDROID_SDK_ROOT/bin/sdkmanager"
+          elif ! [ -x "$ANDROID_SDK_ROOT/bin/sdkmanager" ]; then
+            echo "::error::Android SDK manager was not found in the expected SDK locations."
+            exit 1
+          fi
+          test -d "$ANDROID_SDK_ROOT/bin"
+          test -x "$ANDROID_SDK_ROOT/bin/sdkmanager"
           printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$ANDROID_SDK_ROOT" > "$HOME/.bubblewrap/config.json"
+          cat "$HOME/.bubblewrap/config.json"
+          bubblewrap doctor
 
       - name: Wait for the approved app icon on GitHub Pages
         shell: bash
