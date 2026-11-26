@@ -8,15 +8,15 @@
   "description": "আল্লাহর স্মরণে হৃদয় ভরে, নেক আমলে জীবন গড়ে। কুরআন-সুন্নাহর আলোকে স্মরণ, আমল, জিকির ও উপকারী কথা।",
   "icons": [
     {
-      "src": "./assets/app-icon-256.jpg",
+      "src": "./assets/app-icon-256.png",
       "sizes": "256x256",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./assets/app-icon-256.jpg",
+      "src": "./assets/app-icon-256.png",
       "sizes": "256x256",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ]
