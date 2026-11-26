@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="আমার আমল ও জিকির">
+  <rect width="512" height="512" fill="#176b50"/>
+  <circle cx="256" cy="225" r="106" fill="#f7faf7"/>
+  <circle cx="300" cy="190" r="91" fill="#176b50"/>
+  <path d="M354 126l12 27 30 3-23 20 7 29-26-15-26 15 7-29-23-20 30-3z" fill="#d7a94b"/>
+  <path d="M158 330c32-22 65-22 98 0 33-22 66-22 98 0v60c-32-22-65-22-98 0-33-22-66-22-98 0z" fill="#fff"/>
+  <path d="M256 330v60" stroke="#176b50" stroke-width="8" stroke-linecap="round"/>
+  <path d="M179 345c19-9 38-9 57 0M276 345c19-9 38-9 57 0" fill="none" stroke="#d7a94b" stroke-width="7" stroke-linecap="round"/>
+</svg>
