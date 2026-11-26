@@ -20,8 +20,8 @@
     "path": "./android.keystore",
     "alias": "android"
   },
-  "appVersionCode": 1,
-  "appVersion": "0.1.0",
+  "appVersionCode": 2,
+  "appVersion": "0.1.1",
   "webManifestUrl": "https://amolzikir.github.io/amar-amol-zikir/manifest.webmanifest",
   "fallbackType": "customtabs",
   "features": {},
