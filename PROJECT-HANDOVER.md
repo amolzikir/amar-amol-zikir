@@ -708,3 +708,13 @@
 - এখনো `/.well-known/assetlinks.json` প্রকাশ করা হয়নি; final release signing certificate-এর SHA-256 fingerprint না পাওয়া পর্যন্ত এটি তৈরি/প্রকাশ করা যাবে না।
 - TWA config `android/twa-manifest.json`-এ host `amolzikir.github.io`, package `com.zikra.app`, start URL `/amar-amol-zikir/index.html`, full scope `https://amolzikir.github.io/amar-amol-zikir/`। Release fingerprint এখনো নেই; verified fullscreen TWA দাবি করা যাবে না।
 - পরবর্তী বাধ্যতামূলক ধাপ: (১) root site ও .well-known path যাচাই, (২) নিরাপদ release keystore workflow/secret setup, (৩) release signing fingerprint, (৪) assetlinks প্রকাশ, (৫) signed release build, (৬) Android ফোনে বাস্তব QA।
+
+
+## ১২. Release signing workflow প্রস্তুত — ২৬ নভেম্বর ২০২৬
+- নতুন manual workflow `.github/workflows/android-release-key.yml`: GitHub Actions secret `ZIKRA_KEYSTORE_PASSWORD` দিয়ে ২০+ অক্ষরের পাসওয়ার্ড যাচাই করে PKCS12 RSA-2048 release keystore তৈরি করে; SHA-256 certificate fingerprint workflow summary-তে দেখায়; password-protected keystore artifact `zikra-release-keystore` নামে ৯০ দিনের জন্য সংরক্ষণ করে।
+- নতুন manual workflow `.github/workflows/android-release.yml`: key-creation workflow run ID ইনপুট নিয়ে আগের run-এর keystore artifact ডাউনলোড করে Bubblewrap দিয়ে signed APK ও AAB তৈরি এবং APK signature যাচাই করার জন্য প্রস্তুত।
+- কোনো keystore বা password repository-তে commit করা হয়নি। Keystore artifact-টি নিজস্ব PKCS12 password দ্বারা সুরক্ষিত; তবু ব্যবহারকারীকে artifact ডাউনলোড করে ব্যক্তিগত offline backup রাখতে হবে। Artifact ৯০ দিন পর মুছে যাবে।
+- ব্যবহারকারীর পরবর্তী কাজ: repository Settings → Secrets and variables → Actions → New repository secret; Name `ZIKRA_KEYSTORE_PASSWORD`; Value হিসেবে নতুন, অনন্য, কমপক্ষে ২০ অক্ষরের password নিজে তৈরি করে বসাবেন। Password ChatGPT-তে পাঠাবেন না এবং অন্য কোথাও পুনর্ব্যবহার করবেন না।
+- তারপর Actions → Create Zikra Android release signing key → Run workflow। সফল হলে workflow run ID ও SHA-256 fingerprint নথিভুক্ত করতে হবে। Keystore artifact offline backup না নিয়ে মুছবেন না।
+- Fingerprint পাওয়ার পর `https://amolzikir.github.io/.well-known/assetlinks.json` তৈরি/প্রকাশ করা যাবে; তার আগে নয়। তারপর signed release workflow চালানো হবে।
+- Release workflow এখনো চালানো হয়নি; release APK/AAB তৈরি হয়েছে—এমন দাবি করা যাবে না।
