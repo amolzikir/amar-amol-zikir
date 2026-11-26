@@ -40,7 +40,7 @@ GitHub Actions-এর **Build Zikra Android debug APK** workflow চালু �
 
 
 ## Release signing workflow — ২৬ নভেম্বর ২০২৬
-- `.github/workflows/android-release-key.yml` সফলভাবে run `45804627552`-এ PKCS12 release keystore তৈরি করেছে; artifact ID `15108887761`।
+- One-time key-generation workflow run `45804627552`-এ PKCS12 release keystore তৈরি করেছে; artifact ID `15108887761`। নিরাপত্তার জন্য সফল key তৈরির পর runnable workflow সরিয়ে exact backup `backup/android-release-key-yml-2026-11-26-after-key-created.bak`-এ রাখা হয়েছে; এটিকে পুনরায় চালিয়ে নতুন key তৈরি করা যাবে না।
 - ব্যবহারকারী ZIP ও `android.keystore` আলাদা করে Google Drive-এ ব্যক্তিগত backup রেখেছেন। Repository-তে private key/password নেই।
 - GitHub Actions secret `ZIKRA_KEYSTORE_PASSWORD` সেট করা হয়েছে; secret value কখনো প্রকাশ/লগ করা হয় না।
 - `.github/workflows/android-release.yml`-এ signing fingerprint, assetlinks JSON, APK package identity এবং APK/AAB signature verification যুক্ত করা হয়েছে। Workflow update commit `98aa4ece5b5efe42c365710a7431f5f32fcc82a7`।
