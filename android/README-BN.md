@@ -37,3 +37,11 @@ GitHub Actions-এর **Build Zikra Android debug APK** workflow চালু �
 - Root origin: `https://amolzikir.github.io/`; `index.html` ও `.nojekyll` তৈরি এবং fetch করে যাচাই।
 - Root hosting প্রস্তুত হলেও assetlinks.json ইচ্ছাকৃতভাবে এখনো তৈরি হয়নি; release keystore থেকে SHA-256 fingerprint পাওয়ার পরই তৈরি হবে।
 - Release keystore, signed release APK/AAB এবং real-device QA এখনও বাকি।
+
+
+## Release signing workflow — পরবর্তী নিরাপদ ধাপ
+- Workflow `.github/workflows/android-release-key.yml` তৈরি হয়েছে; এটি এখনো চালানো হয়নি।
+- GitHub repository Settings → Secrets and variables → Actions → New repository secret-এ secret name `ZIKRA_KEYSTORE_PASSWORD` এবং value হিসেবে নতুন, অনন্য, কমপক্ষে ২০ অক্ষরের password নিজে সেট করুন। Password ChatGPT-তে বা repository-তে দেবেন না।
+- এরপর Actions → Create Zikra Android release signing key → Run workflow চালান। Workflow PKCS12 release keystore তৈরি করে SHA-256 fingerprint summary-তে দেখাবে এবং password-protected keystore artifact ৯০ দিনের জন্য রাখবে। Artifact ডাউনলোড করে ব্যক্তিগত offline backup রাখুন।
+- Fingerprint পাওয়ার পরই root `/.well-known/assetlinks.json` তৈরি হবে। এরপর Android release workflow-তে key-creation run ID দিয়ে signed APK/AAB build করা যাবে।
+- `.github/workflows/android-release.yml` প্রস্তুত, কিন্তু এখনো চালানো হয়নি। তাই signed release APK/AAB এখনো নেই।
