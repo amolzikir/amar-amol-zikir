@@ -593,3 +593,12 @@
 - v174 পরিবর্তনের আগে index.html, sw.js, tests/daily-hadith.test.js, PWA assertion test এবং এই handover-এর exact backups তৈরি ও যাচাই করা হয়েছে; backup files repository-তে সংরক্ষিত।
 - Final commit ba5e605ff4727707c4bfe772d5ee3526214e05b3-এ CI run 45685572167 সফল এবং GitHub Pages deployment 45685572121 সফল।
 - কোনো ব্যবহারকারীর note, IndexedDB record, Firestore record বা Firebase setting পরিবর্তন করা হয়নি। Android ফোনে বাস্তব display/দৈনিক rollover পরীক্ষা এখনো ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়; browser site data মুছবেন না, এতে no-repeat history হারাতে পারে।
+
+
+## v175 — দৈনিক হাদিস সংগ্রহ ১৮টি ও পুনরাবৃত্তিহীন চক্র (২৬ নভেম্বর ২০২৬) — প্রকাশিত ও CI যাচাইকৃত
+- v174-এর ১৫টি হাদিস অক্ষত রেখে আরও ৩টি মূল-উৎস যাচাইকৃত সহিহ মুসলিমের হাদিস যোগ হয়েছে; এখন সংগ্রহে মোট ১৮টি। নতুন বিষয়: ভালো কাজকে তুচ্ছ না করা (মুসলিম ২৬২৬ — https://shamela.ws/book/711/8000), সদকা/ক্ষমা/বিনয় (মুসলিম ২৫৮৮ — https://shamela.ws/book/711/7876), ভালো কাজের পথ দেখানোর সওয়াব (মুসলিম ১৮৯৩ — https://shamela.ws/book/711/5841)। আরবি পাঠ ও নম্বর মূল Shamela পৃষ্ঠায় মিলিয়ে দেখা হয়েছে; বাংলা লেখা সহজ ভাবার্থ, প্রকাশকের অনুবাদ নয়।
+- আগের no-repeat history key `amol-zikir-daily-hadith-v172` অপরিবর্তিত; পূর্বে দেখা হাদিসের ইতিহাস reset হয়নি। একই দিনে একই হাদিস স্থির থাকে; ১৮টি শেষ না হওয়া পর্যন্ত পুনরাবৃত্তি এড়িয়ে চলে, তারপর নতুন চক্র শুরু হয়। ইতিহাস browser localStorage-এ; site data মুছলে ইতিহাস হারাতে পারে।
+- Service Worker cache marker `amol-zikir-v175`; daily-hadith test ১৮টি entry ও নতুন তিনটি source URL যাচাই করে। PWA install/update cache assertions-ও v175-এ উন্নীত।
+- v175-এর আগে index.html, sw.js, daily-hadith test, PWA installability test, PWA update-notice test এবং package.json-এর exact backups তৈরি ও পুনরায় fetch করে byte-for-byte যাচাই করা হয়েছে। Workflow file পরিবর্তন করা হয়নি; তাই তার নতুন backup প্রয়োজন হয়নি। এই handover update-এর আগের কপিও `backup/PROJECT-HANDOVER-2026-11-26-before-v175-final-status.bak` নামে তৈরি ও byte-for-byte যাচাই করা হয়েছে।
+- Final commit `37700ec4e15de2213eec3e31f5207425e372663a`-এ CI run `45686683390` সফল এবং GitHub Pages deployment `45686683604` সফল।
+- কোনো ব্যবহারকারীর note, IndexedDB record, Firestore record বা Firebase setting পরিবর্তন করা হয়নি। Android ফোনে বাস্তব display/দৈনিক rollover পরীক্ষা এখনো ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়; browser site data মুছবেন না, এতে no-repeat history হারাতে পারে।
