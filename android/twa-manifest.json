@@ -13,8 +13,8 @@
   "backgroundColor": "#f7faf7",
   "enableNotifications": false,
   "startUrl": "/amar-amol-zikir/index.html",
-  "iconUrl": "https://amolzikir.github.io/amar-amol-zikir/assets/app-icon.svg",
-  "maskableIconUrl": "https://amolzikir.github.io/amar-amol-zikir/assets/app-icon-maskable.svg",
+  "iconUrl": "https://amolzikir.github.io/amar-amol-zikir/assets/app-icon-512.png",
+  "maskableIconUrl": "https://amolzikir.github.io/amar-amol-zikir/assets/app-icon-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android.keystore",
