@@ -939,7 +939,7 @@ async function loadTasbih(){
   catch(e){console.error("Tasbih initial local save failed",e);toast("তাসবিহ কাউন্টার সংরক্ষণ করা যায়নি—আবার চেষ্টা করুন।");return false}
   if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(local.id).set(local)}catch(e){console.warn("Tasbih cloud save failed",e);scheduleCloudSyncRetry()}}
  }
- if(!local.history||typeof local.history!=="object"){const legacyCount=Number(local.count||0);local={...local,history:{total:legacyCount,legacyCount,days:{}},updatedAt:Date.now()};try{await putItem(local);if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(local.id).set(local)}catch(e){console.warn("Tasbih history migration cloud sync pending",e);scheduleCloudSyncRetry()}}}catch(e){console.error("Tasbih history migration failed",e);toast("পুরোনো গণনা অক্ষত আছে; ইতিহাসের প্রস্তুতি পরে আবার হবে।")}}
+ if(!local.history||typeof local.history!=="object"){const legacyCount=Number(local.count||0),migrated={...local,history:{total:legacyCount,legacyCount,days:{}},updatedAt:Date.now()};try{await putItem(migrated);local=migrated;if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(local.id).set(local)}catch(e){console.warn("Tasbih history migration cloud sync pending",e);scheduleCloudSyncRetry()}}}catch(e){console.error("Tasbih history migration failed",e);toast("পুরোনো গণনা অক্ষত আছে; ইতিহাসের প্রস্তুতি পরে আবার হবে।")}}
  tasbihRecord=local;updateTasbihUI();return true;
 }
 I18N["নিজস্ব জিকির"]=["Custom dhikr","ذكر مخصص","اپنا ذکر"];
