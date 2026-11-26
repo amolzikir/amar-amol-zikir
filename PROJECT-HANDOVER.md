@@ -1,10 +1,13 @@
-# আমার আমল ও জিকির — প্রকল্প হস্তান্তর নথি
+# যিকরা (ذِكْرَى) — প্রকল্প হস্তান্তর নথি
 
 **সর্বশেষ হালনাগাদ:** ২৬ নভেম্বর ২০২৬  
 **উদ্দেশ্য:** ChatGPT-এর পুরোনো চ্যাট হারালেও অন্য ফোন বা অন্য ChatGPT অ্যাকাউন্ট থেকে প্রকল্পের কাজ নিরাপদে চালিয়ে যাওয়া।
 
 ## ১. প্রকল্প পরিচিতি
-- অ্যাপ: আমার আমল ও জিকির
+- ব্র্যান্ড/অ্যাপের নাম: যিকরা (ذِكْرَى)
+- মূল লক্ষ্য/আয়াত: وَذَكِّرْ فَإِنَّ الذِّكْرَىٰ تَنْفَعُ الْمُؤْمِنِينَ — সূরা আয-যারিয়াত ৫১:৫৫
+- নির্বাচিত স্লোগান: আল্লাহর স্মরণে হৃদয় ভরে, নেক আমলে জীবন গড়ে।
+- পরিচিতি: কুরআন ও সুন্নাহর আলোকে নিজেকে স্মরণ করানো, দৈনন্দিন আমল ও জিকিরে যত্নবান হওয়া এবং উপকারী কথা অন্যের কাছে পৌঁছে দেওয়ার একটি ক্ষুদ্র প্রয়াস।
 - ধরন: বিনামূল্যের Android-friendly Progressive Web App (PWA)
 - লাইভ ঠিকানা: https://amolzikir.github.io/amar-amol-zikir/
 - GitHub repository: https://github.com/amolzikir/amar-amol-zikir
@@ -51,7 +54,11 @@
 - App Lock & Privacy: PIN lock, ১০ মিনিট inactivity auto-lock, WebAuthn biometric option এবং PIN দিয়ে lock সম্পূর্ণ বন্ধ/পুনরায় চালুর ব্যবস্থা প্রকাশিত; Android ফোনে বাস্তব আচরণ ব্যবহারকারীর নিশ্চিতকরণসাপেক্ষ।
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
-- সর্বশেষ সফল app release: **v170**; CI run `45665115279` এবং GitHub Pages run `45665115733` সফল। নতুন v171 candidate-এ প্রতিদিনের হাদিস ৩ দিনের ঘূর্ণায়মান তালিকায় বাড়ানো হয়েছে; সর্বশেষ CI run `45667421683` ও Pages run `45667421858` এখনও in progress, তাই v171-কে প্রকাশিত/সম্পূর্ণ বলা যাবে না। Candidate service-worker cache marker `amol-zikir-v171`। Android ফোনে নতুন সংস্করণ নোটিশ/আপডেট, হিজরি display ও GPS handoff বাস্তব যাচাই বাকি। v163 Firestore emulator test CI-তে pass করেছে, তবে Firebase Console-এর live Rules publish status এখনও অযাচাইকৃত।
+- সর্বশেষ সফল app release: **v179**; deterministic calendar-date daily hadith selection implemented and user confirmed the visible hadith changed after update. ২৬ নভেম্বর ২০২৬-এর প্রত্যাশিত হাদিস: সহিহ মুসলিম ২৩১৮; পরবর্তী দিনের rotation user will verify on ২৭ নভেম্বর.
+- **v180 branding update:** ওয়েবসাইটের শিরোনাম, PWA manifest display name, header brand, নির্বাচিত স্লোগান ও মূল কুরআনিক আয়াত যুক্ত; service-worker cache marker `amol-zikir-v180`। Commit `104cc4d35f20690a3d1035679ab4dd4915452416`; automated deployment/build status must be checked after the commit.
+- Domain purchase not required: keep the existing GitHub Pages URL `https://amolzikir.github.io/amar-amol-zikir/` for now.
+- Android APK package ID remains unapproved/unfinalized. Do not assume `com.zikra.app` or `com.amolzikir.zikra` is approved. TWA/Bubblewrap APK work remains a separate next phase; no APK artifact has been produced yet.
+- Android phone real-world verification of the new display branding is pending user confirmation. Existing app icon SVG artwork has not yet been redesigned for Zikra.
 - v136-এ Backup v2 export-এ account-scoped Dua favorites যুক্ত; restore v1/v2 গ্রহণ করে, records ও favorites merge করে এবং local write read-back যাচাই করে।
 - v136-এ চারটি সূত্র-উল্লেখসহ দোয়া যোগ হয়েছে: ঘর থেকে বের হওয়া, সকাল-সন্ধ্যার আফিয়াত, মসজিদে প্রবেশ ও মসজিদ থেকে বের হওয়া।
 - সর্বশেষ যাচাইকৃত GitHub fetch (২৪-১১-২০২৬): `index.html` blob SHA `65a44f0240a2110d3fec1b5f019dfc614f1a84ba`; `sw.js` blob SHA `316a388da4e09b71303df9ff978c9128657110d4`।
