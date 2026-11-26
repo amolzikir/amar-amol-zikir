@@ -10,17 +10,17 @@ const end = source.indexOf("\nfunction renderQuranTracker", start);
 if (start < 0 || end < 0) throw new Error("Quran tracker persistence helpers were not found");
 const helperSource = source.slice(start, end);
 
-function makeContext({ local = null, remote = null, putItem = async () => {} } = {}) {
+function makeContext({ local = null, remote = null, cloudGetError = false, putItem = async () => {} } = {}) {
   const context = {
     quranTrackerRecord: null,
     allItems: async () => local ? [local] : [],
     putItem,
-    currentUser: remote ? { uid: "test-user" } : null,
-    cloud: remote ? { collection: () => ({ doc: () => ({ collection: () => ({ doc: () => ({
-      get: async () => ({ exists: true, data: () => remote }),
+    currentUser: remote || cloudGetError ? { uid: "test-user" } : null,
+    cloud: remote || cloudGetError ? { collection: () => ({ doc: () => ({ collection: () => ({ doc: () => ({
+      get: async () => { if (cloudGetError) throw new Error("network unavailable"); return { exists: !!remote, data: () => remote }; },
       set: async () => {}
     }) }) }) }) } : null,
-    navigator: { onLine: !!remote },
+    navigator: { onLine: !!(remote || cloudGetError) },
     toast: () => {},
     renderQuranTracker: () => {},
     syncCloud: () => {},
@@ -82,4 +82,24 @@ test("failed initial Quran tracker creation does not expose an unsaved empty rec
   const context = makeContext({ putItem: async () => { throw new Error("disk full"); } });
   assert.equal(await context.load(), false);
   assert.equal(context.record(), null);
+});
+
+
+test("cloud read failure still loads an existing local Quran tracker", async () => {
+  const local = { id: "system-quran-tracker", entries: [{ entryId: "safe-local" }], updatedAt: 10 };
+  const context = makeContext({ local, cloudGetError: true });
+  assert.equal(await context.load(), true);
+  assert.equal(context.record(), local);
+  assert.equal(context.record().entries[0].entryId, "safe-local");
+});
+
+test("newer cloud Quran data is persisted locally before becoming active", async () => {
+  const local = { id: "system-quran-tracker", entries: [{ entryId: "old-local" }], updatedAt: 10 };
+  const remote = { id: "system-quran-tracker", entries: [{ entryId: "new-cloud" }], updatedAt: 20 };
+  let stored;
+  const context = makeContext({ local, remote, putItem: async value => { stored = value; } });
+  assert.equal(await context.load(), true);
+  assert.equal(stored, remote);
+  assert.equal(context.record(), remote);
+  assert.equal(context.record().entries[0].entryId, "new-cloud");
 });
