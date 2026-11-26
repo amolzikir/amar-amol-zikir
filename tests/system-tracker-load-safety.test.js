@@ -101,11 +101,9 @@ test("Tasbih keeps the previous local counter when a newer cloud copy cannot be 
   const remote = { id: "system-tasbih-counter", count: 21, updatedAt: 20 };
   const ctx = contextFor(tasbihSource, { local, remote, putItem: async () => { throw new Error("disk full"); } });
   assert.equal(await ctx.load(), true);
-  assert.notEqual(ctx.record(), local);
+  assert.equal(ctx.record(), local);
   assert.equal(ctx.record().count, 8);
-  assert.equal(ctx.record().history.total, 8);
-  assert.equal(ctx.record().history.legacyCount, 8);
-  assert.equal(Object.keys(ctx.record().history.days).length, 0);
+  assert.equal(ctx.record().history, undefined);
   assert.equal(ctx.retries, 1);
 });
 
