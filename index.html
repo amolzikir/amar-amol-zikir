@@ -706,7 +706,7 @@ async function loadDailyAmal(){
 let dailyCalendarMonth=localDateKey().slice(0,7);
 function dailyDateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function parseDailyDateKey(value){
- if(typeof value!=="string"||!/^\\d{4}-\\d{2}-\\d{2}$/.test(value))return null;
+ if(typeof value!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(value))return null;
  const [y,m,d]=value.split("-").map(Number);if(m<1||m>12||d<1||d>31)return null;
  const date=new Date(y,m-1,d,12,0,0,0);
  return date.getFullYear()===y&&date.getMonth()===m-1&&date.getDate()===d?date:null;
@@ -1330,14 +1330,14 @@ async function loadQuranTracker(){
  quranTrackerRecord=local;$("quranDate").value=localDateKey();renderQuranTracker();return true;
 }
 function getQuranProgress(entries,todayKey=localDateKey()){
- const dates=[...new Set((entries||[]).map(x=>String(x.date||"")).filter(x=>/^\\d{4}-\\d{2}-\\d{2}$/.test(x)))].sort();
+ const dates=[...new Set((entries||[]).map(x=>String(x.date||"")).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)))].sort();
  let best=0,run=0,previous=null;
  for(const key of dates){const day=Date.parse(key+"T00:00:00Z");run=previous!==null&&day-previous===86400000?run+1:1;best=Math.max(best,run);previous=day}
  const today=Date.parse(todayKey+"T00:00:00Z"),latest=dates.length?Date.parse(dates[dates.length-1]+"T00:00:00Z"):0;
  let current=0,anchor=latest===today?today:latest===today-86400000?today-86400000:0;
  if(anchor){for(let day=anchor;dates.includes(new Date(day).toISOString().slice(0,10));day-=86400000)current++}
  const pageMap=new Map();
- for(const x of entries||[]){if(/^\\d{4}-\\d{2}-\\d{2}$/.test(String(x.date||"")))pageMap.set(x.date,(pageMap.get(x.date)||0)+Math.max(0,Number(x.pages)||0))}
+ for(const x of entries||[]){if(/^\d{4}-\d{2}-\d{2}$/.test(String(x.date||"")))pageMap.set(x.date,(pageMap.get(x.date)||0)+Math.max(0,Number(x.pages)||0))}
  const last7Days=Array.from({length:7},(_,i)=>{const day=today-(6-i)*86400000,key=new Date(day).toISOString().slice(0,10);return {date:key,pages:pageMap.get(key)||0}});
  return {currentStreak:current,bestStreak:best,last7Days};
 }
