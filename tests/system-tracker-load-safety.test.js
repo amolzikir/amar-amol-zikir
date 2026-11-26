@@ -91,7 +91,9 @@ test("Tasbih initial cloud seed failure schedules the shared retry", async () =>
   assert.equal(await ctx.load(), true);
   assert.equal(ctx.record().count, 0);
   assert.equal(ctx.retries, 1);
-  assert.deepEqual(ctx.record().history, { total: 0, legacyCount: 0, days: {} });
+  assert.equal(ctx.record().history.total, 0);
+  assert.equal(ctx.record().history.legacyCount, 0);
+  assert.equal(Object.keys(ctx.record().history.days).length, 0);
 });
 
 test("Tasbih keeps the previous local counter when a newer cloud copy cannot be saved", async () => {
@@ -103,7 +105,7 @@ test("Tasbih keeps the previous local counter when a newer cloud copy cannot be 
   assert.equal(ctx.record().count, 8);
   assert.equal(ctx.record().history.total, 8);
   assert.equal(ctx.record().history.legacyCount, 8);
-  assert.deepEqual(ctx.record().history.days, {});
+  assert.equal(Object.keys(ctx.record().history.days).length, 0);
   assert.equal(ctx.retries, 1);
 });
 
