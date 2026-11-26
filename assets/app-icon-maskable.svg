@@ -1,9 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="আমার আমল ও জিকির">
-  <rect width="512" height="512" fill="#176b50"/>
-  <circle cx="256" cy="225" r="106" fill="#f7faf7"/>
-  <circle cx="300" cy="190" r="91" fill="#176b50"/>
-  <path d="M354 126l12 27 30 3-23 20 7 29-26-15-26 15 7-29-23-20 30-3z" fill="#d7a94b"/>
-  <path d="M158 330c32-22 65-22 98 0 33-22 66-22 98 0v60c-32-22-65-22-98 0-33-22-66-22-98 0z" fill="#fff"/>
-  <path d="M256 330v60" stroke="#176b50" stroke-width="8" stroke-linecap="round"/>
-  <path d="M179 345c19-9 38-9 57 0M276 345c19-9 38-9 57 0" fill="none" stroke="#d7a94b" stroke-width="7" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="যিকরা">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#064b24"/><stop offset=".55" stop-color="#087333"/><stop offset="1" stop-color="#023d20"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0a6"/><stop offset=".42" stop-color="#f5c64d"/><stop offset="1" stop-color="#b87918"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#fff8cf" stop-opacity=".95"/><stop offset=".18" stop-color="#e9bd3f" stop-opacity=".4"/><stop offset="1" stop-color="#e9bd3f" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="170" fill="url(#glow)"/>
+  <g transform="translate(41 41) scale(.84)" fill="none" stroke="url(#gold)" stroke-width="17" stroke-linejoin="round">
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(45 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(90 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(135 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(180 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(225 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(270 256 256)"/>
+    <path d="M256 256 C220 222 191 176 256 92 C321 176 292 222 256 256Z" transform="rotate(315 256 256)"/>
+  </g>
+  <circle cx="256" cy="256" r="12" fill="#fff4b0"/>
+  <circle cx="256" cy="256" r="26" fill="none" stroke="#f5c64d" stroke-opacity=".55" stroke-width="2"/>
 </svg>
