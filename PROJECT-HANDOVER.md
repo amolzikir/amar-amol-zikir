@@ -626,3 +626,13 @@
 - Final code commit `8d2f065163ec3a8278956d71a07f62d5d735025f`; CI run `45753746624` success; GitHub Pages run `45753746412` success।
 - কোনো note, IndexedDB, Firestore বা Firebase data পরিবর্তন করা হয়নি। ফোনে নতুন v178 আপডেট ইনস্টল/চালু হওয়ার পর বাস্তব হাদিস পরিবর্তন user confirmation অপেক্ষমাণ। সাইটের ডেটা মুছবেন না।
 - APK কাজ এখনো শুরু হয়নি; v178 ফোনে যাচাইয়ের পরেই APK পরিকল্পনা শুরু হবে।
+
+
+## v179 — তারিখভিত্তিক দৈনিক হাদিস নির্বাচন (২৬ নভেম্বর ২০২৬) — CI ও Pages সফল
+- আগের localStorage cursor/seen state-এর ওপর নির্ভরতা সরিয়ে তারিখের day-number modulo ১৮ দিয়ে হাদিস নির্বাচন করা হয়েছে। একই স্থানীয় তারিখে একই হাদিস স্থিতিশীল থাকবে; পরের তারিখে পরবর্তী index আসবে; ১৮ দিনের চক্রে ১৮টি হাদিস একবার করে দেখিয়ে ১৯তম দিনে চক্র পুনরায় শুরু হবে।
+- এই নকশা deterministic date-cycle; এটি ব্যবহারকারীর পূর্বে দেখা/পড়া history গণনা করে না। পুরোনো stored state key/history মুছে ফেলা বা পরিবর্তন করা হয়নি।
+- Service Worker cache marker: amol-zikir-v179।
+- Pre-v179 byte-for-byte backups verified: backup/index-html-2026-11-26-before-v179-date-deterministic-hadith.bak, backup/tests-daily-hadith-test-js-2026-11-26-before-v179-date-deterministic-hadith.bak, backup/sw-js-2026-11-26-before-v179-date-deterministic-hadith.bak, backup/package-json-2026-11-26-before-v179-date-deterministic-hadith.bak, backup/-github-workflows-firestore-rules-yml-2026-11-26-before-v179-date-deterministic-hadith.bak। PWA test fixes-এর আগের copies: backup/tests-pwa-installability-test-js-2026-11-26-before-v179-cache-test-fix.bak এবং backup/tests-pwa-update-notice-test-js-2026-11-26-before-v179-cache-test-fix.bak; উভয়ই byte-for-byte verified।
+- Final code commit 5ec05f97449db9aeae46290a50e2f67e1e467ab2; Firestore/CI run 45757459992 success; GitHub Pages deployment run 45757459683 success।
+- Phone screenshot confirmed the updated hadith card displays Muslim 2318, but next-day change on the physical phone remains unverified until 27 November 2026. User should not clear site data or browser storage. No user notes, IndexedDB records, Firestore records, or Firebase settings were altered.
+- APK work remains paused until next-day rotation is confirmed on the phone.
