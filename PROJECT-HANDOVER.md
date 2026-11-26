@@ -602,3 +602,17 @@
 - v175-এর আগে index.html, sw.js, daily-hadith test, PWA installability test, PWA update-notice test এবং package.json-এর exact backups তৈরি ও পুনরায় fetch করে byte-for-byte যাচাই করা হয়েছে। Workflow file পরিবর্তন করা হয়নি; তাই তার নতুন backup প্রয়োজন হয়নি। এই handover update-এর আগের কপিও `backup/PROJECT-HANDOVER-2026-11-26-before-v175-final-status.bak` নামে তৈরি ও byte-for-byte যাচাই করা হয়েছে।
 - Final commit `37700ec4e15de2213eec3e31f5207425e372663a`-এ CI run `45686683390` সফল এবং GitHub Pages deployment `45686683604` সফল।
 - কোনো ব্যবহারকারীর note, IndexedDB record, Firestore record বা Firebase setting পরিবর্তন করা হয়নি। Android ফোনে বাস্তব display/দৈনিক rollover পরীক্ষা এখনো ব্যবহারকারীর নিশ্চিতকরণের অপেক্ষায়; browser site data মুছবেন না, এতে no-repeat history হারাতে পারে।
+
+
+## v176 — দৈনিক হাদিস rollover visibility refresh (২৬ নভেম্বর ২০২৬)
+- নতুন দিনের শুরুতে দৃশ্যমান হাদিস প্যানেল refresh, tab visibility/focus-এ refresh যোগ করা হয়েছিল। তবে ব্যবহারকারীর ফোনে v176 আপডেটের পরও হাদিস অপরিবর্তিত থাকার প্রতিবেদন পাওয়া যায়; তাই v176-কে সমস্যার সমাধান হিসেবে গণ্য করা যাবে না।
+- v176-এর rollover test-গুলো বাস্তব browser persistence migration যথেষ্ট যাচাই করেনি। মূল সমস্যা অনুসন্ধানে পুরোনো localStorage state schema-তে শুধু `day` ও `index` থাকতে পারে, কিন্তু `cursor`/ `seen` না থাকার সম্ভাবনা শনাক্ত হয়।
+
+## v177 — পুরোনো দৈনিক হাদিস state migration (২৬ নভেম্বর ২০২৬) — CI ও Pages সফল
+- `DAILY_HADITH_STATE_KEY="amol-zikir-daily-hadith-v172"` অপরিবর্তিত রাখা হয়েছে; কোনো user data/history reset করা হয়নি।
+- পুরোনো state-এ `cursor` না থাকলেও পূর্বের `index`-কে দেখা-হওয়া তালিকায় যোগ করে পরের index থেকে rotation শুরু করে। বিদ্যমান `seen` তালিকা থাকলে সেটি বজায় থাকে। ১৮টি হাদিস শেষ না হওয়া পর্যন্ত পুনরাবৃত্তি এড়ানোর migration test যোগ হয়েছে।
+- Service Worker cache marker `amol-zikir-v177`; PWA installability/update tests-এ v177 marker হালনাগাদ।
+- পরিবর্তনের আগে exact backups তৈরি ও byte-for-byte যাচাই করা হয়েছে: `backup/index-html-2026-11-26-before-v177-legacy-hadith-state-fix.bak`, `backup/tests-daily-hadith-test-js-2026-11-26-before-v177-legacy-hadith-state-fix.bak`, `backup/sw-js-2026-11-26-before-v177-legacy-hadith-state-fix.bak`, `backup/tests-pwa-installability-test-js-2026-11-26-before-v177-legacy-hadith-state-fix.bak`, `backup/tests-pwa-update-notice-test-js-2026-11-26-before-v177-legacy-hadith-state-fix.bak`, `backup/PROJECT-HANDOVER-md-2026-11-26-before-v177-legacy-hadith-state-fix.bak`।
+- Final code commit `ad6f30f82af98270d18274dec1510ea79960a9bd`-এ CI run `45748859367` সফল এবং GitHub Pages deployment `45748858902` সফল।
+- কোনো note, IndexedDB record, Firestore record বা Firebase setting পরিবর্তন করা হয়নি। ফোনে v177 update notice আসলে সেটি চাপ দিয়ে আপডেট করে হাদিস rotation যাচাই করতে হবে। Site data মুছবেন না—no-repeat history হারাতে পারে।
+- APK নির্মাণ এখনো শুরু হয়নি; TWA-ভিত্তিক APK build-কে পরবর্তী পৃথক কাজ হিসেবে বিবেচনা করতে হবে। Android signing key নিরাপদে সংরক্ষণ ও package identity স্থির না করে release APK প্রকাশ করা যাবে না।
