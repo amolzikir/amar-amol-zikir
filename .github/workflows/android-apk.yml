@@ -7,7 +7,7 @@ on:
       - "android/twa-manifest.json"
       - ".github/workflows/android-apk.yml"
       - "manifest.webmanifest"
-      - "assets/app-icon-256.png"
+      - "assets/app-icon-256.jpg"
       - "assets/app-icon.svg"
       - "assets/app-icon-maskable.svg"
 
