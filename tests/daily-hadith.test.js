@@ -88,3 +88,16 @@ test("daily hadith still changes by local date when browser storage cannot be wr
   const b = indexFor(new Date(2026, 0, 2));
   assert.notEqual(a, b, "storage failure must not freeze the same hadith every day");
 });
+
+test("daily hadith migrates legacy saved state without cursor or seen history", () => {
+  const fnMatch = html.match(/function dailyHadithIndex\\(date=new Date\\(\\),storage=window\\.localStorage\\)\\{[\\s\\S]*?\\n\\}/);
+  assert.ok(fnMatch);
+  const values = new Map([[ "amol-zikir-daily-hadith-v172", JSON.stringify({day:"2026-01-01",index:0}) ]]);
+  const storage = { getItem(key){return values.get(key)||null;}, setItem(key,value){values.set(key,String(value));} };
+  const context = { DAILY_HADITHS: hadiths, DAILY_HADITH_STATE_KEY:"amol-zikir-daily-hadith-v172", Date, Math, window:{localStorage:storage} };
+  const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", context);
+  assert.equal(indexFor(new Date(2026,0,2)),1,"legacy first hadith should advance to the next entry");
+  const sequence=[1];
+  for(let day=3;day<=hadiths.length;day++) sequence.push(indexFor(new Date(2026,0,day)));
+  assert.equal(new Set(sequence).size,hadiths.length-1,"legacy migration must preserve no-repeat history");
+});
