@@ -1,0 +1,40 @@
+{
+  "packageId": "com.zikra.app",
+  "host": "amolzikir.github.io",
+  "name": "যিকরা | ذِكْرَى",
+  "launcherName": "যিকরা",
+  "display": "standalone",
+  "themeColor": "#176b50",
+  "themeColorDark": "#176b50",
+  "navigationColor": "#176b50",
+  "navigationColorDark": "#176b50",
+  "navigationDividerColor": "#00000000",
+  "navigationDividerColorDark": "#00000000",
+  "backgroundColor": "#f7faf7",
+  "enableNotifications": false,
+  "startUrl": "/amar-amol-zikir/index.html",
+  "iconUrl": "https://amolzikir.github.io/amar-amol-zikir/assets/app-icon-256.jpg",
+  "maskableIconUrl": "https://amolzikir.github.io/amar-amol-zikir/assets/app-icon-256.jpg",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersionCode": 2,
+  "appVersion": "0.1.1",
+  "webManifestUrl": "https://amolzikir.github.io/amar-amol-zikir/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://amolzikir.github.io/amar-amol-zikir/",
+  "minSdkVersion": 24,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": []
+}
