@@ -54,6 +54,20 @@ jobs:
           mkdir -p "$HOME/.bubblewrap"
           printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$ANDROID_SDK_ROOT" > "$HOME/.bubblewrap/config.json"
 
+      - name: Wait for the new icon to be available on GitHub Pages
+        run: |
+          ICON_URL="https://amolzikir.github.io/amar-amol-zikir/assets/app-icon-256.png"
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error --head "$ICON_URL" >/dev/null 2>&1; then
+              echo "New app icon is reachable."
+              exit 0
+            fi
+            echo "Waiting for GitHub Pages deployment ($attempt/30)..."
+            sleep 10
+          done
+          echo "Icon did not become available on GitHub Pages within 5 minutes."
+          exit 1
+
       - name: Generate Android Trusted Web Activity project
         run: bubblewrap update --manifest=android/twa-manifest.json --directory=android --skipVersionUpgrade
 
