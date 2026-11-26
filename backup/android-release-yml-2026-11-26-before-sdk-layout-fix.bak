@@ -1,0 +1,157 @@
+name: Build Zikra signed Android release
+
+on:
+  workflow_dispatch:
+    inputs:
+      keystore_run_id:
+        description: "Successful run ID of Create Zikra Android release signing key"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: zikra-android-release
+  cancel-in-progress: false
+
+jobs:
+  build-release:
+    name: Build signed APK and AAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ZIKRA_KEYSTORE_PASSWORD: ${{ secrets.ZIKRA_KEYSTORE_PASSWORD }}
+      BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ZIKRA_KEYSTORE_PASSWORD }}
+      BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ZIKRA_KEYSTORE_PASSWORD }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify signing secret is configured
+        shell: bash
+        run: |
+          if [ -z "$ZIKRA_KEYSTORE_PASSWORD" ]; then
+            echo "::error::Add the repository Actions secret ZIKRA_KEYSTORE_PASSWORD."
+            exit 1
+          fi
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Install Bubblewrap CLI
+        run: npm install --global @bubblewrap/cli
+
+      - name: Configure Bubblewrap SDK paths
+        run: |
+          mkdir -p "$HOME/.bubblewrap"
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$ANDROID_SDK_ROOT" > "$HOME/.bubblewrap/config.json"
+
+      - name: Wait for the approved app icon on GitHub Pages
+        shell: bash
+        run: |
+          ICON_URL="https://amolzikir.github.io/amar-amol-zikir/assets/app-icon-256.png"
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error --head "$ICON_URL" >/dev/null 2>&1; then
+              echo "App icon is reachable."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::App icon is not reachable from GitHub Pages."
+          exit 1
+
+      - name: Regenerate Android project from approved TWA manifest
+        run: bubblewrap update --manifest=android/twa-manifest.json --directory=android --skipVersionUpgrade
+
+      - name: Download protected release keystore from its creation run
+        uses: actions/download-artifact@v4
+        with:
+          name: zikra-release-keystore
+          path: android/
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.keystore_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify keystore and certificate fingerprint
+        shell: bash
+        run: |
+          test -s android/android.keystore
+          keytool -list -v -keystore android/android.keystore -storetype PKCS12 -alias android -storepass "$ZIKRA_KEYSTORE_PASSWORD" | grep -E 'SHA256:|SHA-256:'
+
+      - name: Extract release certificate fingerprint and prepare Digital Asset Links
+        shell: bash
+        run: |
+          set -euo pipefail
+          FINGERPRINT="$(keytool -list -v -keystore android/android.keystore -storetype PKCS12 -alias android -storepass "$ZIKRA_KEYSTORE_PASSWORD" | awk -F': ' '/SHA256:/{print $2; exit}')"
+          test -n "$FINGERPRINT"
+          printf '%s\n' "$FINGERPRINT" | tee release-fingerprint.txt
+          echo "## Zikra release certificate SHA-256 fingerprint" >> "$GITHUB_STEP_SUMMARY"
+          echo "$FINGERPRINT" >> "$GITHUB_STEP_SUMMARY"
+          cat > assetlinks.json <<EOF
+          [
+            {
+              "relation": ["delegate_permission/common.handle_all_urls"],
+              "target": {
+                "namespace": "android_app",
+                "package_name": "com.zikra.app",
+                "sha256_cert_fingerprints": ["$FINGERPRINT"]
+              }
+            }
+          ]
+          EOF
+          python -m json.tool assetlinks.json >/dev/null
+
+      - name: Build signed release APK and App Bundle
+        working-directory: android
+        run: bubblewrap build --skipPwaValidation --manifest=twa-manifest.json --signingKeyPath=./android.keystore --signingKeyAlias=android
+
+      - name: Verify APK and App Bundle signatures and package identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="android/app-release-signed.apk"
+          AAB="android/app-release-bundle.aab"
+          test -s "$APK"
+          test -s "$AAB"
+          APKSIGNER="$ANDROID_SDK_ROOT/build-tools/36.0.0/apksigner"
+          AAPT="$ANDROID_SDK_ROOT/build-tools/36.0.0/aapt"
+          "$APKSIGNER" verify --verbose --print-certs "$APK" | tee apk-signature.txt
+          jarsigner -verify -verbose -certs "$AAB" >/dev/null
+          "$AAPT" dump badging "$APK" | grep -F "package: name='com.zikra.app'"
+          EXPECTED="$(tr -d ':' < release-fingerprint.txt | tr '[:upper:]' '[:lower:]')"
+          ACTUAL="$(awk '/Signer #1 certificate SHA-256 digest:/{print tolower($NF); exit}' apk-signature.txt)"
+          test -n "$ACTUAL"
+          test "$EXPECTED" = "$ACTUAL"
+          echo "APK certificate matches the release keystore."
+          echo "AAB signature verification passed."
+
+      - name: Upload signed release artifacts and verified domain-link file
+        uses: actions/upload-artifact@v4
+        with:
+          name: zikra-signed-release
+          path: |
+            android/app-release-signed.apk
+            android/app-release-bundle.aab
+            release-fingerprint.txt
+            assetlinks.json
+            apk-signature.txt
+          if-no-files-found: error
+          retention-days: 30
