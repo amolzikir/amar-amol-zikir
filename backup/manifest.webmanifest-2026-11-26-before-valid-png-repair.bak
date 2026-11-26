@@ -1,0 +1,23 @@
+{
+  "name": "যিকরা | ذِكْرَى",
+  "short_name": "যিকরা",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7faf7",
+  "theme_color": "#176b50",
+  "description": "আল্লাহর স্মরণে হৃদয় ভরে, নেক আমলে জীবন গড়ে। কুরআন-সুন্নাহর আলোকে স্মরণ, আমল, জিকির ও উপকারী কথা।",
+  "icons": [
+    {
+      "src": "./assets/app-icon-256.jpg",
+      "sizes": "256x256",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/app-icon-256.jpg",
+      "sizes": "256x256",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ]
+}
