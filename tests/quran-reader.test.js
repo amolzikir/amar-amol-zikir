@@ -92,3 +92,36 @@ test("Quran reader allows only supported reciters and valid surah audio URLs", (
   assert.equal(reader.buildSurahAudioUrl(115, "ar.alafasy"), null);
   assert.equal(reader.buildSurahAudioUrl(1, "unknown"), null);
 });
+
+ 
+test("Quran reader normalizes and safely parses multiple saved ayahs", () => {
+  const items = reader.normalizeSavedAyahs([
+    { surah: 2, ayah: 255, note: "আয়াতুল কুরসি", bookmarked: true, savedAt: 10 },
+    { surah: 1, ayah: 1, note: "", bookmarked: true },
+    { surah: 115, ayah: 1, bookmarked: true },
+    { surah: 2, ayah: 287, bookmarked: true },
+    { surah: 3, ayah: 1, note: "   ", bookmarked: false },
+    { surah: 2, ayah: 255, note: "সর্বশেষ নোট", bookmarked: true }
+  ]);
+  assert.equal(items.length, 2);
+  assert.equal(items[1].note, "সর্বশেষ নোট");
+  assert.deepEqual(JSON.parse(JSON.stringify(reader.parseSavedAyahs("{bad json"))), []);
+  assert.equal(reader.parseSavedAyahs(JSON.stringify([{surah:1,ayah:1,bookmarked:true}])).length, 1);
+});
+
+test("Quran reader toggles bookmarks without losing notes and saves private notes", () => {
+  const first = reader.toggleSavedAyah([], 2, 255);
+  assert.equal(first.length, 1);
+  assert.equal(first[0].bookmarked, true);
+  const withNote = reader.saveAyahNote(first, 2, 255, "মহান শিক্ষা");
+  assert.equal(withNote[0].note, "মহান শিক্ষা");
+  const unbookmarked = reader.toggleSavedAyah(withNote, 2, 255);
+  assert.equal(unbookmarked.length, 1);
+  assert.equal(unbookmarked[0].bookmarked, false);
+  assert.equal(unbookmarked[0].note, "মহান শিক্ষা");
+  const noteOnly = reader.saveAyahNote([], 3, 18, "নিজের উপলব্ধি");
+  assert.equal(noteOnly.length, 1);
+  assert.equal(noteOnly[0].bookmarked, false);
+  assert.equal(reader.saveAyahNote([], 3, 18, "   ").length, 0);
+  assert.equal(reader.saveAyahNote([], 3, 18, "x".repeat(2500))[0].note.length, 2000);
+});
