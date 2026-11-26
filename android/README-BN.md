@@ -22,3 +22,11 @@ GitHub Actions-এর **Build Zikra Android debug APK** workflow চালু �
 - Fullscreen verified TWA চালাতে Digital Asset Links প্রয়োজন। সেটি host root-এ থাকতে হবে: `https://amolzikir.github.io/.well-known/assetlinks.json`। বর্তমান GitHub Pages project site কেবল `/amar-amol-zikir/` path প্রকাশ করে; root-level hosting সমাধান না হওয়া পর্যন্ত Custom Tabs fallback-ই প্রত্যাশিত।
 - বর্তমান app icon SVG এখনও পুরোনো artwork; release-এর আগে Zikra-branded PNG/adaptive icons তৈরি করতে হবে।
 - Google Sign-in, Firestore, offline behavior ও notifications বাস্তব Android ফোনে পরীক্ষা না হওয়া পর্যন্ত verified বলা যাবে না।
+
+## সর্বশেষ যাচাইকৃত অবস্থা — ২৬-১১-২০২৬
+
+- অনুমোদিত সবুজ-সোনালি কুফিক artwork PWA manifest-এ PNG icon এবং SVG compatibility wrapper হিসেবে যুক্ত; GitHub Pages deployment সফল (run `45781113113`)।
+- Android Bubblewrap project generation ও Debug APK build সফল (run `45781113240`, artifact ID `15098470990`)। এটি debug build, release-signed নয়।
+- PWA ও Firestore/security automated workflow সফল (run `45781113163`)।
+- আগের অনুচ্ছেদের পুরোনো আইকন-সংক্রান্ত নোটটি superseded; নতুন artwork repository-তে যুক্ত হয়েছে।
+- Root-level Digital Asset Links hosting, release keystore, signed release build এবং বাস্তব Android ফোনে পরীক্ষা এখনো বাকি।
