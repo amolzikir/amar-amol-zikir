@@ -51,6 +51,24 @@ test("Quran reader accepts only complete sequential Uthmani surah text", () => {
   assert.equal(reader.validSurahData({ ...surah, number: 2 }, 1), false);
 });
 
+test("Quran reader accepts complete sequential Bengali translation from the selected edition", () => {
+  const translation = {
+    number: 1,
+    numberOfAyahs: 2,
+    edition: { identifier: "bn.bengali" },
+    ayahs: [
+      { numberInSurah: 1, text: "পরম করুণাময়, অতি দয়ালু আল্লাহর নামে।" },
+      { numberInSurah: 2, text: "সমস্ত প্রশংসা আল্লাহর জন্য।" }
+    ]
+  };
+  assert.equal(reader.validTranslationData(translation, 1, 2), true);
+  assert.equal(reader.validTranslationData({ ...translation, ayahs: translation.ayahs.slice(0, 1) }, 1, 2), false);
+  assert.equal(reader.validTranslationData({ ...translation, edition: { identifier: "bn.other" } }, 1, 2), false);
+  assert.equal(reader.validTranslationData({ ...translation, ayahs: [{ ...translation.ayahs[0], numberInSurah: 2 }, translation.ayahs[1]] }, 1, 2), false);
+  assert.equal(reader.validTranslationData({ ...translation, number: 2 }, 1, 2), false);
+  assert.equal(reader.validTranslationData({ ...translation, ayahs: [{ numberInSurah: 1, text: " " }, translation.ayahs[1]] }, 1, 2), false);
+});
+
 test("Quran reader validates saved surah and ayah positions", () => {
   assert.deepEqual(JSON.parse(JSON.stringify(reader.normalizeBookmark({ surah: 2, ayah: 255, savedAt: 10 }))), { surah: 2, ayah: 255, savedAt: 10 });
   assert.equal(reader.normalizeBookmark({ surah: 0, ayah: 1 }), null);
