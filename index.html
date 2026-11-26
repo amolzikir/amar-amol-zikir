@@ -1277,7 +1277,7 @@ function dailyHadithIndex(date=new Date(),storage=window.localStorage){
  const day=date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
  let state=null;
  try{state=JSON.parse(storage.getItem(DAILY_HADITH_STATE_KEY)||"null")}catch(e){}
- if(state&&state.day===day&&Number.isInteger(state.index)&&state.index>=0&&state.index<DAILY_HADITHS.length)return state.index;
+ if(state&&state.day===day&&Number.isInteger(state.index)&&state.index>=0&&state.index<DAILY_HADITHS.length&&Number.isInteger(state.cursor)&&Array.isArray(state.seen))return state.index;
  let seen=state&&Array.isArray(state.seen)?[...new Set(state.seen.filter(i=>Number.isInteger(i)&&i>=0&&i<DAILY_HADITHS.length))]:[];
  const previousIndex=state&&Number.isInteger(state.index)&&state.index>=0&&state.index<DAILY_HADITHS.length?state.index:null;
  if(previousIndex!==null&&!seen.includes(previousIndex))seen.push(previousIndex);
