@@ -934,7 +934,7 @@ async function loadTasbih(){
  }
  if(!local){
   if(cloudReadFailed||(currentUser&&cloud&&!navigator.onLine)){toast("ক্লাউডের গণনা যাচাই করা যায়নি—নিরাপত্তার জন্য নতুন শূন্য গণনা তৈরি করা হয়নি।");return false}
-  const fresh={id:"system-tasbih-counter",type:"counter",tab:"__system__",title:"তাসবিহ কাউন্টার",zikr:"سُبْحَانَ اللَّهِ",count:0,target:33,updatedAt:Date.now()};
+  const fresh={id:"system-tasbih-counter",type:"counter",tab:"__system__",title:"তাসবিহ কাউন্টার",zikr:"سُبْحَانَ اللَّهِ",count:0,target:33,history:{total:0,legacyCount:0,days:{}},updatedAt:Date.now()};
   try{await putItem(fresh);local=fresh}
   catch(e){console.error("Tasbih initial local save failed",e);toast("তাসবিহ কাউন্টার সংরক্ষণ করা যায়নি—আবার চেষ্টা করুন।");return false}
   if(currentUser&&cloud&&navigator.onLine){try{await cloud.collection("users").doc(currentUser.uid).collection("items").doc(local.id).set(local)}catch(e){console.warn("Tasbih cloud save failed",e);scheduleCloudSyncRetry()}}
