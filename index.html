@@ -1273,28 +1273,9 @@ const DAILY_HADITHS=[
   }
 ];
 const DAILY_HADITH_STATE_KEY="amol-zikir-daily-hadith-v172";
-function dailyHadithIndex(date=new Date(),storage=window.localStorage){
- const day=date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
- let state=null;
- try{state=JSON.parse(storage.getItem(DAILY_HADITH_STATE_KEY)||"null")}catch(e){}
- if(state&&state.day===day&&Number.isInteger(state.index)&&state.index>=0&&state.index<DAILY_HADITHS.length&&Number.isInteger(state.cursor)&&Array.isArray(state.seen))return state.index;
- let seen=state&&Array.isArray(state.seen)?[...new Set(state.seen.filter(i=>Number.isInteger(i)&&i>=0&&i<DAILY_HADITHS.length))]:[];
- const previousIndex=state&&Number.isInteger(state.index)&&state.index>=0&&state.index<DAILY_HADITHS.length?state.index:null;
- if(previousIndex!==null&&!seen.includes(previousIndex))seen.push(previousIndex);
- const hasCursor=state&&Number.isInteger(state.cursor);
- let cursor=hasCursor?((state.cursor%DAILY_HADITHS.length)+DAILY_HADITHS.length)%DAILY_HADITHS.length:(previousIndex===null?0:(previousIndex+1)%DAILY_HADITHS.length);
- if(seen.length>=DAILY_HADITHS.length){seen=[];cursor=0}
- let index=cursor;
- for(let n=0;n<DAILY_HADITHS.length&&seen.includes(index);n++)index=(index+1)%DAILY_HADITHS.length;
- if(seen.includes(index)){seen=[];index=0}
- seen.push(index);
- const next={day,index,cursor:(index+1)%DAILY_HADITHS.length,seen};
- try{storage.setItem(DAILY_HADITH_STATE_KEY,JSON.stringify(next))}
- catch(e){
-  const dayNumber=Math.floor(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())/86400000);
-  return ((dayNumber%DAILY_HADITHS.length)+DAILY_HADITHS.length)%DAILY_HADITHS.length;
- }
- return index;
+function dailyHadithIndex(date=new Date()){
+ const dayNumber=Math.floor(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())/86400000);
+ return ((dayNumber%DAILY_HADITHS.length)+DAILY_HADITHS.length)%DAILY_HADITHS.length;
 }
 function refreshDailyHadithIfVisible(){
  if(document.visibilityState==="visible"&&$("dailyHadith").classList.contains("show"))renderDailyHadith();
