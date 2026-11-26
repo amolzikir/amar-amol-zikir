@@ -101,3 +101,15 @@ test("daily hadith migrates legacy saved state without cursor or seen history", 
   for(let day=3;day<=hadiths.length;day++) sequence.push(indexFor(new Date(2026,0,day)));
   assert.equal(new Set(sequence).size,hadiths.length-1,"legacy migration must preserve no-repeat history");
 });
+
+test("daily hadith migrates same-day legacy state before returning a saved index", () => {
+  const fnMatch = html.match(/function dailyHadithIndex\\(date=new Date\\(\\),storage=window\\.localStorage\\)\\{[\\s\\S]*?\\n\\}/);
+  assert.ok(fnMatch);
+  const values = new Map([[ "amol-zikir-daily-hadith-v172", JSON.stringify({day:"2026-01-02",index:0}) ]]);
+  const storage = { getItem(key){return values.get(key)||null;}, setItem(key,value){values.set(key,String(value));} };
+  const context = { DAILY_HADITHS: hadiths, DAILY_HADITH_STATE_KEY:"amol-zikir-daily-hadith-v172", Date, Math, window:{localStorage:storage} };
+  const indexFor = vm.runInNewContext("(" + fnMatch[0] + ")", context);
+  assert.equal(indexFor(new Date(2026,0,2)),1,"same-day legacy index must be migrated rather than returned unchanged");
+  assert.equal(indexFor(new Date(2026,0,2)),1,"migrated selection must remain stable for the rest of the day");
+  assert.equal(indexFor(new Date(2026,0,3)),2,"next date must continue the no-repeat sequence");
+});
