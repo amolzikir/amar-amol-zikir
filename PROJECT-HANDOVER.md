@@ -616,3 +616,13 @@
 - Final code commit `ad6f30f82af98270d18274dec1510ea79960a9bd`-এ CI run `45748859367` সফল এবং GitHub Pages deployment `45748858902` সফল।
 - কোনো note, IndexedDB record, Firestore record বা Firebase setting পরিবর্তন করা হয়নি। ফোনে v177 update notice আসলে সেটি চাপ দিয়ে আপডেট করে হাদিস rotation যাচাই করতে হবে। Site data মুছবেন না—no-repeat history হারাতে পারে।
 - APK নির্মাণ এখনো শুরু হয়নি; TWA-ভিত্তিক APK build-কে পরবর্তী পৃথক কাজ হিসেবে বিবেচনা করতে হবে। Android signing key নিরাপদে সংরক্ষণ ও package identity স্থির না করে release APK প্রকাশ করা যাবে না।
+
+
+## v178 — একই দিনের পুরোনো হাদিস state migration (২৬ নভেম্বর ২০২৬) — CI ও Pages সফল
+- v177-এর migration একই দিনে আগে থেকেই সংরক্ষিত legacy `{day,index}` state থাকলে early-return-এর কারণে চালু হচ্ছিল না। v178-এ same-day fast path কেবল সম্পূর্ণ নতুন schema (`cursor` ও `seen` উপস্থিত) হলে ব্যবহার করা হয়; পুরোনো schema-কে migration path-এ পাঠানো হয়।
+- `DAILY_HADITH_STATE_KEY` অপরিবর্তিত; আগের `index` seen history-তে যুক্ত হয় এবং cursor পরের hadith-এ এগোয়। একই দিনে স্থিতিশীল selection ও পরের দিনে no-repeat sequence যাচাইয়ের test যোগ করা হয়েছে।
+- v178 Service Worker cache marker: `amol-zikir-v178`। সংশ্লিষ্ট PWA installability ও update notice assertions v178-এ আপডেট।
+- Pre-v178 byte-for-byte backups: `backup/index.html-2026-11-26-before-v178-same-day-legacy-migration.bak`, `backup/tests-daily-hadith.test.js-2026-11-26-before-v178-same-day-legacy-migration.bak`, `backup/sw.js-2026-11-26-before-v178-same-day-legacy-migration.bak`, `backup/tests-pwa-installability.test.js-2026-11-26-before-v178-same-day-legacy-migration.bak`, `backup/tests-pwa-update-notice.test.js-2026-11-26-before-v178-same-day-legacy-migration.bak`, `backup/PROJECT-HANDOVER.md-2026-11-26-before-v178-same-day-legacy-migration.bak`। অতিরিক্ত test-regex সংশোধনের আগে `backup/tests-daily-hadith.test.js-2026-11-26-before-v178-test-regex-fix.bak` তৈরি ও যাচাই করা হয়েছে।
+- Final code commit `8d2f065163ec3a8278956d71a07f62d5d735025f`; CI run `45753746624` success; GitHub Pages run `45753746412` success।
+- কোনো note, IndexedDB, Firestore বা Firebase data পরিবর্তন করা হয়নি। ফোনে নতুন v178 আপডেট ইনস্টল/চালু হওয়ার পর বাস্তব হাদিস পরিবর্তন user confirmation অপেক্ষমাণ। সাইটের ডেটা মুছবেন না।
+- APK কাজ এখনো শুরু হয়নি; v178 ফোনে যাচাইয়ের পরেই APK পরিকল্পনা শুরু হবে।
