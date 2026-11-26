@@ -5,6 +5,8 @@ const CACHE_NAME="zikra-quran-reader-v1";
 const SURAH_LIST_URL=API+"/surah";
 const BOOKMARK_KEY="zikra-quran-reader-last-read-v1";
 const BN_TRANSLATION="bn.bengali";
+const AUDIO_EDITIONS=Object.freeze({"ar.alafasy":"মিশারি রাশিদ আল-আফাসি","ar.husary":"মাহমুদ খলিল আল-হুসারি","ar.minshawi":"মুহাম্মদ সিদ্দিক আল-মিনশাওয়ি","ar.sudais":"আবদুর রহমান আস-সুদাইস"});
+const AUDIO_BASE="https://cdn.islamic.network/quran/audio-surah/64/";
 let surahList=[];
 let currentSurah=null;
 let currentTranslation=null;
@@ -12,6 +14,9 @@ let translationEnabled=true;
 let loading=false;
 let fontSize=30;
 
+function normalizeAudioEdition(value){return Object.prototype.hasOwnProperty.call(AUDIO_EDITIONS,value)?value:null;}
+function buildSurahAudioUrl(surah,edition){const n=Number(surah),id=normalizeAudioEdition(edition);if(!Number.isInteger(n)||n<1||n>114||!id)return null;return AUDIO_BASE+id+"/"+n+".mp3";}
+function configureSurahAudio(surah){const audio=el("quranReaderAudio"),reciter=el("quranReaderReciter"),label=el("quranReaderAudioStatus");if(!audio||!reciter)return;const edition=normalizeAudioEdition(reciter.value)||"ar.alafasy";const url=buildSurahAudioUrl(surah,edition);if(!url)return;audio.pause();audio.src=url;audio.load();if(label)label.textContent="তিলাওয়াত প্রস্তুত: "+AUDIO_EDITIONS[edition]+"। শুনতে প্লে চাপুন।";}
 function validSurahList(data){
  if(!Array.isArray(data)||data.length!==114)return false;
  const seen=new Set();
@@ -144,6 +149,7 @@ async function loadSurah(number,jumpAyah){
   if(container)container.innerHTML="";
   const data=await cachedJson(API+"/surah/"+n+"/quran-uthmani",function(value){return validSurahData(value,n)});
   currentSurah=data;
+  configureSurahAudio(n);
   currentTranslation=null;
   if(select)select.value=String(n);
   try{currentTranslation=await cachedJson(API+"/surah/"+n+"/"+BN_TRANSLATION,function(value){return validTranslationData(value,n,data.numberOfAyahs)})}catch(translationError){currentTranslation=null}
@@ -191,6 +197,7 @@ function openQuranReader(){
 function closeQuranReader(){
  const reader=el("quranReader"),tracker=el("quranTracker");
  if(reader)reader.classList.remove("show");
+ const audio=el("quranReaderAudio");if(audio)audio.pause();
  if(tracker)tracker.classList.add("show");
 }
 function applyFontSize(){
@@ -207,6 +214,9 @@ function resumeReading(){
 }
 function wire(){
  const open=el("openQuranReader"),close=el("closeQuranReader"),select=el("quranReaderSurah"),prev=el("quranReaderPrev"),next=el("quranReaderNext"),resume=el("quranReaderResume"),ayahs=el("quranReaderAyahs"),smaller=el("quranReaderSmaller"),larger=el("quranReaderLarger"),translationToggle=el("quranReaderTranslationToggle");
+ const reciter=el("quranReaderReciter"),audio=el("quranReaderAudio"),audioStatus=el("quranReaderAudioStatus");
+ if(reciter)reciter.addEventListener("change",function(){if(currentSurah)configureSurahAudio(currentSurah.number)});
+ if(audio)audio.addEventListener("error",function(){if(audioStatus)audioStatus.textContent="এই মুহূর্তে তিলাওয়াত চালানো যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।"});
  if(open)open.addEventListener("click",openQuranReader);
  if(close)close.addEventListener("click",closeQuranReader);
  if(select)select.addEventListener("change",function(){loadSurah(Number(select.value),1)});
@@ -227,7 +237,7 @@ function wire(){
  if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
  renderBookmarkLabel();
 }
-root.ZikraQuranReader={validSurahList:validSurahList,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,escapeHtml:escapeHtml};
+root.ZikraQuranReader={validSurahList:validSurahList,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,buildSurahAudioUrl:buildSurahAudioUrl,escapeHtml:escapeHtml};
 root.openQuranReader=openQuranReader;
 root.closeQuranReader=closeQuranReader;
 if(typeof document!=="undefined"){
