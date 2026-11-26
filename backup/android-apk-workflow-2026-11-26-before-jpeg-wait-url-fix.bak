@@ -1,0 +1,86 @@
+name: Build Zikra Android debug APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "android/twa-manifest.json"
+      - ".github/workflows/android-apk.yml"
+      - "manifest.webmanifest"
+      - "assets/app-icon-256.jpg"
+      - "assets/app-icon.svg"
+      - "assets/app-icon-maskable.svg"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zikra-android-apk
+  cancel-in-progress: false
+
+jobs:
+  build-debug-apk:
+    name: Generate Android project and build debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+
+      - name: Install required Android SDK packages
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Install Bubblewrap CLI
+        run: npm install --global @bubblewrap/cli
+
+      - name: Configure Bubblewrap with runner SDK paths (non-interactive)
+        run: |
+          mkdir -p "$HOME/.bubblewrap"
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$ANDROID_SDK_ROOT" > "$HOME/.bubblewrap/config.json"
+
+      - name: Wait for the new icon to be available on GitHub Pages
+        run: |
+          ICON_URL="https://amolzikir.github.io/amar-amol-zikir/assets/app-icon-256.png"
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error --head "$ICON_URL" >/dev/null 2>&1; then
+              echo "New app icon is reachable."
+              exit 0
+            fi
+            echo "Waiting for GitHub Pages deployment ($attempt/30)..."
+            sleep 10
+          done
+          echo "Icon did not become available on GitHub Pages within 5 minutes."
+          exit 1
+
+      - name: Generate Android Trusted Web Activity project
+        run: bubblewrap update --manifest=android/twa-manifest.json --directory=android --skipVersionUpgrade
+
+      - name: Build unsigned debug variant (Gradle debug signing only)
+        working-directory: android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --stacktrace assembleDebug
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: zikra-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
