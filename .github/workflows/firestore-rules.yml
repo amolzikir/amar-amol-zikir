@@ -33,8 +33,6 @@ on:
       - "tests/quran-tracker-safety.test.js"
       - "quran-reader.js"
       - "tests/quran-reader.test.js"
-      - "quran-reader.js"
-      - "tests/quran-reader.test.js"
       - "tests/backup-restore.test.js"
       - "tests/note-reminder-safety.test.js"
       - "tests/folder-operations.test.js"
@@ -49,6 +47,8 @@ on:
   pull_request:
     paths:
       - "firestore.rules"
+      - "quran-reader.js"
+      - "tests/quran-reader.test.js"
       - "sw.js"
       - "manifest.webmanifest"
       - "assets/app-icon.svg"
