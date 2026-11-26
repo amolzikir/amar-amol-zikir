@@ -67,21 +67,21 @@ function renderBookmarkLabel(){
   }
  }
 }
-async function cachedJson(url){
+async function cachedJson(url,validator){
  let cache=null;
  try{if(root.caches&&typeof root.caches.open==="function")cache=await root.caches.open(CACHE_NAME)}catch(e){}
  try{
   const response=await root.fetch(url,{method:"GET",headers:{Accept:"application/json"},cache:"no-store"});
   if(!response||!response.ok)throw new Error("Quran service returned "+(response&&response.status));
   const payload=await response.json();
-  if(!payload||payload.code!==200||!payload.data)throw new Error("Quran service returned invalid data");
+  if(!payload||payload.code!==200||!payload.data||validator&&!validator(payload.data))throw new Error("Quran service returned invalid or unverified data");
   if(cache)try{await cache.put(url,new Response(JSON.stringify(payload),{status:200,headers:{"Content-Type":"application/json"}}))}catch(e){}
   return payload.data;
  }catch(networkError){
   if(cache){
    try{
     const stored=await cache.match(url);
-    if(stored){const payload=await stored.json();if(payload&&payload.code===200&&payload.data)return payload.data}
+    if(stored){const payload=await stored.json();if(payload&&payload.code===200&&payload.data&&(!validator||validator(payload.data)))return payload.data}
    }catch(e){}
   }
   throw networkError;
@@ -124,8 +124,11 @@ async function loadSurah(number,jumpAyah){
  if(next)next.disabled=true;
  status("সূরার আরবি পাঠ আনা হচ্ছে…");
  try{
-  const data=await cachedJson(API+"/surah/"+n+"/quran-uthmani");
-  if(!validSurahData(data,n))throw new Error("সূরার পাঠের যাচাই সম্পন্ন হয়নি");
+  currentSurah=null;
+  const info=el("quranReaderInfo"),container=el("quranReaderAyahs");
+  if(info)info.textContent="";
+  if(container)container.innerHTML="";
+  const data=await cachedJson(API+"/surah/"+n+"/quran-uthmani",function(value){return validSurahData(value,n)});
   currentSurah=data;
   if(select)select.value=String(n);
   renderSurah(data,jumpAyah||1);
@@ -149,8 +152,7 @@ async function loadSurahList(){
  }
  status("সূরার তালিকা আনা হচ্ছে…");
  try{
-  const data=await cachedJson(SURAH_LIST_URL);
-  if(!validSurahList(data))throw new Error("Surah list validation failed");
+  const data=await cachedJson(SURAH_LIST_URL,validSurahList);
   surahList=data;
   renderSurahOptions();
   renderBookmarkLabel();
@@ -164,7 +166,8 @@ function openQuranReader(){
  const tracker=el("quranTracker"),reader=el("quranReader");
  if(tracker)tracker.classList.remove("show");
  if(reader)reader.classList.add("show");
- const savedFont=Number(root.localStorage.getItem("zikra-quran-font-size-v1"));
+ let savedFont=30;
+ try{savedFont=Number(root.localStorage.getItem("zikra-quran-font-size-v1"))||30}catch(e){}
  fontSize=Number.isFinite(savedFont)&&savedFont>=24&&savedFont<=42?savedFont:30;
  applyFontSize();
  loadSurahList();
