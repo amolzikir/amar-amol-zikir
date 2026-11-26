@@ -56,7 +56,7 @@ jobs:
 
       - name: Wait for the new icon to be available on GitHub Pages
         run: |
-          ICON_URL="https://amolzikir.github.io/amar-amol-zikir/assets/app-icon-256.png"
+          ICON_URL="https://amolzikir.github.io/amar-amol-zikir/assets/app-icon-256.jpg"
           for attempt in {1..30}; do
             if curl --fail --silent --show-error --head "$ICON_URL" >/dev/null 2>&1; then
               echo "New app icon is reachable."
