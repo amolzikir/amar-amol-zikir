@@ -4,8 +4,11 @@ const API="https://api.alquran.cloud/v1";
 const CACHE_NAME="zikra-quran-reader-v1";
 const SURAH_LIST_URL=API+"/surah";
 const BOOKMARK_KEY="zikra-quran-reader-last-read-v1";
+const BN_TRANSLATION="bn.bengali";
 let surahList=[];
 let currentSurah=null;
+let currentTranslation=null;
+let translationEnabled=true;
 let loading=false;
 let fontSize=30;
 
@@ -26,6 +29,15 @@ function validSurahData(data,expectedNumber){
  for(let i=0;i<data.ayahs.length;i++){
   const a=data.ayahs[i];
   if(!a||a.numberInSurah!==i+1||!Number.isInteger(a.number)||typeof a.text!=="string"||!a.text.trim())return false;
+ }
+ return true;
+}
+function validTranslationData(data,expectedNumber,expectedAyahCount){
+ if(!data||data.number!==expectedNumber||!Number.isInteger(data.numberOfAyahs)||data.numberOfAyahs!==expectedAyahCount||!Array.isArray(data.ayahs)||data.ayahs.length!==expectedAyahCount)return false;
+ if(!data.edition||data.edition.identifier!==BN_TRANSLATION)return false;
+ for(let i=0;i<data.ayahs.length;i++){
+  const a=data.ayahs[i];
+  if(!a||a.numberInSurah!==i+1||typeof a.text!=="string"||!a.text.trim())return false;
  }
  return true;
 }
@@ -98,13 +110,15 @@ function renderSurahOptions(){
   select.appendChild(option);
  });
 }
-function renderSurah(data,jumpAyah){
+function renderSurah(data,translation,jumpAyah){
  const info=el("quranReaderInfo"),container=el("quranReaderAyahs");
  if(!info||!container)return;
  const meta=surahList.find(x=>x.number===data.number)||data;
  info.textContent=meta.name+"  •  "+meta.englishName+"  •  "+bn(data.numberOfAyahs)+" আয়াত  •  "+(meta.revelationType==="Meccan"?"মাক্কি":"মাদানি");
  container.innerHTML=data.ayahs.map(function(a){
-  return '<article class="quran-reader-ayah" id="quran-reader-ayah-'+a.numberInSurah+'"><div class="quran-reader-ayah-tools"><span>আয়াত '+bn(a.numberInSurah)+'</span><button type="button" class="quran-reader-bookmark" data-quran-reader-save="'+a.numberInSurah+'" aria-label="এই আয়াত থেকে আবার পড়া শুরু করুন" title="শেষ-পড়া অবস্থান হিসেবে রাখুন">🔖</button></div><p class="quran-reader-arabic" lang="ar" dir="rtl">'+escapeHtml(a.text.trim())+'</p></article>';
+  const translated=translation&&translation.ayahs&&translation.ayahs[a.numberInSurah-1];
+  const bangla=translationEnabled&&translated?'<p class="quran-reader-bangla" lang="bn" dir="ltr">'+escapeHtml(translated.text.trim())+'</p>':"";
+  return '<article class="quran-reader-ayah" id="quran-reader-ayah-'+a.numberInSurah+'"><div class="quran-reader-ayah-tools"><span>আয়াত '+bn(a.numberInSurah)+'</span><button type="button" class="quran-reader-bookmark" data-quran-reader-save="'+a.numberInSurah+'" aria-label="এই আয়াত থেকে আবার পড়া শুরু করুন" title="শেষ-পড়া অবস্থান হিসেবে রাখুন">🔖</button></div><p class="quran-reader-arabic" lang="ar" dir="rtl">'+escapeHtml(a.text.trim())+'</p>'+bangla+'</article>';
  }).join("");
  const target=Number(jumpAyah)||1;
  if(target>1){
@@ -130,9 +144,11 @@ async function loadSurah(number,jumpAyah){
   if(container)container.innerHTML="";
   const data=await cachedJson(API+"/surah/"+n+"/quran-uthmani",function(value){return validSurahData(value,n)});
   currentSurah=data;
+  currentTranslation=null;
   if(select)select.value=String(n);
-  renderSurah(data,jumpAyah||1);
-  status("সূরা লোড হয়েছে। ইন্টারনেট ছাড়াও এই সূরাটি এই ডিভাইসে পড়তে পারবেন।");
+  try{currentTranslation=await cachedJson(API+"/surah/"+n+"/"+BN_TRANSLATION,function(value){return validTranslationData(value,n,data.numberOfAyahs)})}catch(translationError){currentTranslation=null}
+  renderSurah(data,currentTranslation,jumpAyah||1);
+  status(currentTranslation?"আরবি পাঠ ও বাংলা অনুবাদ লোড হয়েছে। অনুবাদ: মুহিউদ্দীন খান।":"আরবি পাঠ লোড হয়েছে; বাংলা অনুবাদ এই মুহূর্তে পাওয়া যায়নি।",!currentTranslation);
  }catch(e){
   status("এই সূরাটি আনতে পারিনি। ইন্টারনেট পরীক্ষা করুন; আগে খোলা সূরা হলে অফলাইন কপি পাওয়া যাবে।",true);
   const container=el("quranReaderAyahs");
@@ -190,13 +206,14 @@ function resumeReading(){
  loadSurah(saved.surah,saved.ayah);
 }
 function wire(){
- const open=el("openQuranReader"),close=el("closeQuranReader"),select=el("quranReaderSurah"),prev=el("quranReaderPrev"),next=el("quranReaderNext"),resume=el("quranReaderResume"),ayahs=el("quranReaderAyahs"),smaller=el("quranReaderSmaller"),larger=el("quranReaderLarger");
+ const open=el("openQuranReader"),close=el("closeQuranReader"),select=el("quranReaderSurah"),prev=el("quranReaderPrev"),next=el("quranReaderNext"),resume=el("quranReaderResume"),ayahs=el("quranReaderAyahs"),smaller=el("quranReaderSmaller"),larger=el("quranReaderLarger"),translationToggle=el("quranReaderTranslationToggle");
  if(open)open.addEventListener("click",openQuranReader);
  if(close)close.addEventListener("click",closeQuranReader);
  if(select)select.addEventListener("change",function(){loadSurah(Number(select.value),1)});
  if(prev)prev.addEventListener("click",function(){if(currentSurah&&currentSurah.number>1)loadSurah(currentSurah.number-1,1)});
  if(next)next.addEventListener("click",function(){if(currentSurah&&currentSurah.number<114)loadSurah(currentSurah.number+1,1)});
  if(resume)resume.addEventListener("click",resumeReading);
+ if(translationToggle){translationEnabled=translationToggle.checked;translationToggle.addEventListener("change",function(){translationEnabled=translationToggle.checked;if(currentSurah)renderSurah(currentSurah,currentTranslation,1)})}
  if(ayahs)ayahs.addEventListener("click",function(event){
   const button=event.target.closest("[data-quran-reader-save]");
   if(!button||!currentSurah)return;
@@ -210,7 +227,7 @@ function wire(){
  if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
  renderBookmarkLabel();
 }
-root.ZikraQuranReader={validSurahList:validSurahList,validSurahData:validSurahData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,escapeHtml:escapeHtml};
+root.ZikraQuranReader={validSurahList:validSurahList,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,escapeHtml:escapeHtml};
 root.openQuranReader=openQuranReader;
 root.closeQuranReader=closeQuranReader;
 if(typeof document!=="undefined"){
