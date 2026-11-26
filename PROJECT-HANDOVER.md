@@ -659,3 +659,14 @@
 - বর্তমান site: `https://amolzikir.github.io/amar-amol-zikir/`; TWA manifest এখনও `com.zikra.app`, start URL `/amar-amol-zikir/index.html`, minSdk 24। Digital Asset Links-এর প্রয়োজনীয় root URL `https://amolzikir.github.io/.well-known/assetlinks.json` বর্তমান project Pages path থেকে পরিবেশন করা যায় না; free root-host solution ও final signing fingerprint এখনো বাকি। এর আগে verified fullscreen TWA নিশ্চিত নয়; Custom Tabs fallback থাকবে।
 - Next steps: icon commit-সহ APK build success/artifact যাচাই; Pages ও Firestore workflows success যাচাই; পরে free root-host/assetlinks solution; secure release keystore workflow (secret values repo-তে নয়); final release APK এবং বাস্তব Android install test।
 - কোনো user note, IndexedDB, Firestore বা Firebase setting পরিবর্তন করা হয়নি। Daily hadith rotation-এর পরদিনের ফোন পরীক্ষা ২৭ নভেম্বরের জন্য আলাদা; browser/site data clear করা যাবে না।
+
+
+## v183 — Selected Kufic style 3 app icon (26 Nov 2026)
+- User selected the third Kufic-style logo from the original 3x3 sample sheet and explicitly approved proceeding with the app integration.
+- Replaced `assets/app-icon.svg` and `assets/app-icon-maskable.svg` with SVG wrappers embedding the selected icon artwork; PWA manifest continues to reference the same asset paths.
+- Updated service-worker cache marker to `amol-zikir-v183`; icon asset paths remain precached.
+- Exact pre-change backups, verified byte-for-byte: `backup/app-icon-svg-2026-11-26-before-kufi3-install.bak`, `backup/app-icon-maskable-svg-2026-11-26-before-kufi3-install.bak`, `backup/sw-js-2026-11-26-before-kufi3-install.bak`.
+- Backup of this handover before the v183 note: `backup/PROJECT-HANDOVER-md-2026-11-26-before-v183-kufi3-icon.bak`.
+- Integration commit: `4b2512798ef0a9beae5d163659c23e2ac38ff2e3`.
+- GitHub Pages deployment for this commit succeeded (run `45769567315`). Android debug APK build also succeeded (run `45769567406`; artifact `zikra-debug-apk`, ID `15093547333`, 5,590,849 bytes). This remains a debug APK, not a release-signed APK.
+- Note: artwork is based on the user's selected generated sample; Arabic lettering should still receive human Arabic-script verification before any public brand lock-in.
