@@ -670,3 +670,30 @@
 - Integration commit: `4b2512798ef0a9beae5d163659c23e2ac38ff2e3`.
 - GitHub Pages deployment for this commit succeeded (run `45769567315`). Android debug APK build also succeeded (run `45769567406`; artifact `zikra-debug-apk`, ID `15093547333`, 5,590,849 bytes). This remains a debug APK, not a release-signed APK.
 - Note: artwork is based on the user's selected generated sample; Arabic lettering should still receive human Arabic-script verification before any public brand lock-in.
+
+
+## ৮. চূড়ান্ত Android প্রকাশের সর্বশেষ অবস্থা — ২৬-১১-২০২৬
+এই অংশটি আগের Android status/roadmap অংশের পরবর্তী হালনাগাদ; নিচের তথ্যই সর্বশেষ অবস্থা।
+
+- সর্বশেষ GitHub main commit: `32663a27bad14a37c75237e40b10d73b7c1c5b67`।
+- সর্বশেষ PWA Pages deployment run `45781113113`: **success**।
+- PWA manifest-এ অনুমোদিত সবুজ-সোনালি কুফিক artwork যুক্ত হয়েছে। PNG icon ও SVG compatibility wrapper—দুটিই repository-তে আছে। Android manifest-ও PNG icon URL ব্যবহার করছে।
+- Service worker cache marker: `amol-zikir-v191`।
+- Android debug build run `45781113240`: **success**; artifact `zikra-debug-apk`, artifact ID `15098470990`, ZIP size 5,610,127 bytes; retention 14 days। এটি debug APK, release APK নয়।
+- Firestore/security workflow run `45781113163`: **success**; PWA installability/update, daily hadith rotation, offline, IndexedDB, Cloud sync, DOM security, note safety, backup/restore, route planner, Firebase emulator security-সহ workflow-র সব ধাপ সফল।
+- নতুন PNG artwork, PWA metadata এবং Android Bubblewrap project build pipeline-এ যাচাই হয়েছে। ব্যবহারকারীর Android home screen-এ icon বদলেছে কি না এখনো ব্যবহারকারী নিশ্চিত করেননি।
+- Root-level Digital Asset Links এখনও নেই। `https://amolzikir.github.io/.well-known/assetlinks.json` URL-এ ফাইল পরিবেশনের জন্য আলাদা free root-host দরকার। `amolzikir.github.io` নামে user Pages repository বর্তমানে পাওয়া যায়নি। ফলে verified fullscreen TWA এখনো অসম্পূর্ণ; বর্তমান build Custom Tabs fallback ব্যবহার করবে।
+- Release keystore/fingerprint নেই; release signing শুরু হয়নি। কোনো signing key বা password repository-তে রাখা যাবে না।
+
+### চূড়ান্ত প্রকাশের বাধ্যতামূলক ক্রম
+1. এই handover ও Android build documentation হালনাগাদ রাখা।
+2. বিনামূল্যের root-hosting ব্যবস্থা তৈরি/নির্বাচন; root `/.well-known/assetlinks.json` serve করা সম্ভব কি না যাচাই।
+3. TWA-এর app icon, splash, start URL, scope ও theme metadata চূড়ান্ত করা।
+4. release keystore তৈরি এবং নিরাপদে user-controlled offline copy রাখা; password/keystore কেবল GitHub Actions Secrets-এ রাখা, repository-তে নয়।
+5. release SHA-256 fingerprint বের করে Digital Asset Links প্রকাশ; Chrome/TWA verification পরীক্ষা।
+6. versionCode/version bump করে signed release APK/AAB তৈরি ও signature যাচাই।
+7. ব্যবহারকারীর Android ফোনে install, Google sign-in, Firestore sync, offline notes, navigation, app lock, reminders/notifications ও data preservation পরীক্ষা।
+8. Firebase Console-এর live Firestore Rules ও Google sign-in authorized domains যাচাই।
+9. কুরআন/হাদিস/দোয়ার আরবি, বাংলা উচ্চারণ, অর্থ ও উৎস যাচাই; তারপর final release checklist সম্পন্ন।
+
+**গুরুত্বপূর্ণ:** Debug APK তৈরি হয়েছে—এটি release-ready হওয়ার প্রমাণ নয়। Phone test, release signing, Digital Asset Links এবং live Firebase verification সম্পন্ন না হওয়া পর্যন্ত অ্যাপকে চূড়ান্তভাবে প্রকাশিত বলা যাবে না।
