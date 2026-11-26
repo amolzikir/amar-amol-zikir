@@ -29,7 +29,7 @@ function makeContext({ local = null, remote = null, cloudGetError = false, putIt
     console: { error: () => {}, warn: () => {} },
     Date
   };
-  vm.runInNewContext(helperSource + "\nglobalThis.persist=persistQuranTracker; globalThis.load=loadQuranTracker; globalThis.isSaving=()=>quranTrackerSaving; globalThis.record=()=>quranTrackerRecord; globalThis.setRecord=(v)=>quranTrackerRecord=v;", context);
+  vm.runInNewContext(helperSource + "\nglobalThis.persist=persistQuranTracker; globalThis.load=loadQuranTracker; globalThis.isSaving=()=>quranTrackerSaving; globalThis.record=()=>quranTrackerRecord; globalThis.setRecord=(v)=>quranTrackerRecord=v; globalThis.progress=getQuranProgress;", context);
   return context;
 }
 
@@ -102,4 +102,34 @@ test("newer cloud Quran data is persisted locally before becoming active", async
   assert.equal(stored, remote);
   assert.equal(context.record(), remote);
   assert.equal(context.record().entries[0].entryId, "new-cloud");
+});
+
+test("Quran progress calculates current and best consecutive reading days", () => {
+  const context = makeContext();
+  const result = context.progress([
+    { date: "2026-11-23", pages: 2 },
+    { date: "2026-11-24", pages: 3 },
+    { date: "2026-11-25", pages: 1 },
+    { date: "2026-11-25", pages: 4 }
+  ], "2026-11-25");
+  assert.equal(result.currentStreak, 3);
+  assert.equal(result.bestStreak, 3);
+  assert.equal(result.last7Days.reduce((sum, day) => sum + day.pages, 0), 10);
+});
+
+test("Quran progress allows a streak to continue until today's reading is due", () => {
+  const context = makeContext();
+  const result = context.progress([
+    { date: "2026-11-23", pages: 2 },
+    { date: "2026-11-24", pages: 3 }
+  ], "2026-11-25");
+  assert.equal(result.currentStreak, 2);
+  assert.equal(result.bestStreak, 2);
+});
+
+test("Quran progress does not count an old streak as current", () => {
+  const context = makeContext();
+  const result = context.progress([{ date: "2026-11-20", pages: 5 }], "2026-11-25");
+  assert.equal(result.currentStreak, 0);
+  assert.equal(result.bestStreak, 1);
 });
