@@ -39,9 +39,11 @@ GitHub Actions-এর **Build Zikra Android debug APK** workflow চালু �
 - Release keystore, signed release APK/AAB এবং real-device QA এখনও বাকি।
 
 
-## Release signing workflow — পরবর্তী নিরাপদ ধাপ
-- Workflow `.github/workflows/android-release-key.yml` তৈরি হয়েছে; এটি এখনো চালানো হয়নি।
-- GitHub repository Settings → Secrets and variables → Actions → New repository secret-এ secret name `ZIKRA_KEYSTORE_PASSWORD` এবং value হিসেবে নতুন, অনন্য, কমপক্ষে ২০ অক্ষরের password নিজে সেট করুন। Password ChatGPT-তে বা repository-তে দেবেন না।
-- এরপর Actions → Create Zikra Android release signing key → Run workflow চালান। Workflow PKCS12 release keystore তৈরি করে SHA-256 fingerprint summary-তে দেখাবে এবং password-protected keystore artifact ৯০ দিনের জন্য রাখবে। Artifact ডাউনলোড করে ব্যক্তিগত offline backup রাখুন।
-- Fingerprint পাওয়ার পরই root `/.well-known/assetlinks.json` তৈরি হবে। এরপর Android release workflow-তে key-creation run ID দিয়ে signed APK/AAB build করা যাবে।
-- `.github/workflows/android-release.yml` প্রস্তুত, কিন্তু এখনো চালানো হয়নি। তাই signed release APK/AAB এখনো নেই।
+## Release signing workflow — ২৬ নভেম্বর ২০২৬
+- `.github/workflows/android-release-key.yml` সফলভাবে run `45804627552`-এ PKCS12 release keystore তৈরি করেছে; artifact ID `15108887761`।
+- ব্যবহারকারী ZIP ও `android.keystore` আলাদা করে Google Drive-এ ব্যক্তিগত backup রেখেছেন। Repository-তে private key/password নেই।
+- GitHub Actions secret `ZIKRA_KEYSTORE_PASSWORD` সেট করা হয়েছে; secret value কখনো প্রকাশ/লগ করা হয় না।
+- `.github/workflows/android-release.yml`-এ signing fingerprint, assetlinks JSON, APK package identity এবং APK/AAB signature verification যুক্ত করা হয়েছে। Workflow update commit `98aa4ece5b5efe42c365710a7431f5f32fcc82a7`।
+- পরবর্তী কাজ: Actions → Build Zikra signed Android release চালিয়ে key-creation run ID `45804627552` ইনপুট দিতে হবে। সফল হলে artifact `zikra-signed-release` থেকে APK/AAB ও generated `assetlinks.json` পাওয়া যাবে।
+- Fingerprint যাচাই করে root Pages repository `amolzikir/amolzikir.github.io`-এ `.well-known/assetlinks.json` প্রকাশ করতে হবে। তারপর live URL `https://amolzikir.github.io/.well-known/assetlinks.json` HTTP 200 ও সঠিক JSON দিয়ে পরীক্ষা করতে হবে।
+- Signed release APK/AAB এখনও তৈরি হয়নি।
