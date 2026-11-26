@@ -31,6 +31,10 @@ on:
       - "tests/daily-amal-save-safety.test.js"
       - "tests/tasbih-save-safety.test.js"
       - "tests/quran-tracker-safety.test.js"
+      - "quran-reader.js"
+      - "tests/quran-reader.test.js"
+      - "quran-reader.js"
+      - "tests/quran-reader.test.js"
       - "tests/backup-restore.test.js"
       - "tests/note-reminder-safety.test.js"
       - "tests/folder-operations.test.js"
@@ -112,6 +116,8 @@ jobs:
         run: npm run test:tasbih
       - name: Run Quran tracker safety tests
         run: npm run test:quran-tracker
+      - name: Run Quran reader validation and safety tests
+        run: npm run test:quran-reader
       - name: Run backup and restore tests
         run: npm run test:backup
       - name: Run folder operation safety tests
