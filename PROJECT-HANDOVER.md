@@ -55,7 +55,7 @@
 
 ## ৪. গুরুত্বপূর্ণ সাম্প্রতিক সংস্করণ ও অবস্থা
 - সর্বশেষ সফল app release: **v179**; deterministic calendar-date daily hadith selection implemented and user confirmed the visible hadith changed after update. ২৬ নভেম্বর ২০২৬-এর প্রত্যাশিত হাদিস: সহিহ মুসলিম ২৩১৮; পরবর্তী দিনের rotation user will verify on ২৭ নভেম্বর.
-- **v180 branding update:** ওয়েবসাইটের শিরোনাম, PWA manifest display name, header brand, নির্বাচিত স্লোগান ও মূল কুরআনিক আয়াত যুক্ত; service-worker cache marker `amol-zikir-v180`। Commit `104cc4d35f20690a3d1035679ab4dd4915452416`; automated deployment/build status must be checked after the commit.
+- **v180 branding update:** ওয়েবসাইটের শিরোনাম, PWA manifest display name, header brand, নির্বাচিত স্লোগান ও মূল কুরআনিক আয়াত যুক্ত; service-worker cache marker `amol-zikir-v181`। Commit `104cc4d35f20690a3d1035679ab4dd4915452416`; automated deployment/build status must be checked after the commit.
 - Domain purchase not required: keep the existing GitHub Pages URL `https://amolzikir.github.io/amar-amol-zikir/` for now.
 - Android APK package ID remains unapproved/unfinalized. Do not assume `com.zikra.app` or `com.amolzikir.zikra` is approved. TWA/Bubblewrap APK work remains a separate next phase; no APK artifact has been produced yet.
 - Android phone real-world verification of the new display branding is pending user confirmation. Existing app icon SVG artwork has not yet been redesigned for Zikra.
