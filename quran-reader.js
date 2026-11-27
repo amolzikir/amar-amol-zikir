@@ -69,7 +69,7 @@ async function toggleTafsirPanel(button){
  try{
   const data=await fetchTafsirData(surah,ayah,edition);
   if(!panel.isConnected)return;
-  panel.innerHTML='<div class="quran-reader-tafsir-text">'+escapeHtml(data.text).replace(/\\r?\\n/g,"<br>")+'</div><p class="small">গ্রন্থ: '+escapeHtml(TAFSIR_EDITIONS[edition])+'। সূত্র: <a href="https://github.com/spa5k/tafsir_api" target="_blank" rel="noopener">Tafsir API / উৎসতালিকা</a>।</p>';
+  panel.innerHTML='<div class="quran-reader-tafsir-text">'+escapeHtml(data.text).replace(/\r?\n/g,"<br>")+'</div><p class="small">গ্রন্থ: '+escapeHtml(TAFSIR_EDITIONS[edition])+'। সূত্র: <a href="https://github.com/spa5k/tafsir_api" target="_blank" rel="noopener">Tafsir API / উৎসতালিকা</a>।</p>';
   panel.dataset.loadedEdition=edition;
  }catch(e){
   if(panel.isConnected)panel.textContent="এই তাফসীরটি এখন আনা যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করুন; আগে খোলা থাকলে ক্যাশ কপি পাওয়া যেতে পারে।";
