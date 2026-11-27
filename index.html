@@ -584,6 +584,51 @@ function toast(s){$("toast").textContent=tr(s);$("toast").style.display="block";
 function allItems(db=dbLocal){return databaseItems(db)}
 function getItem(id,db=dbLocal){return new Promise((res,rej)=>{let r=db.transaction(STORE).objectStore(STORE).get(id);r.onsuccess=()=>res(r.result||null);r.onerror=()=>rej(r.error)})}
 function putItem(x,db=dbLocal){return new Promise((res,rej)=>{let tx;try{tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).put(x)}catch(e){rej(e);return}let settled=false;tx.oncomplete=()=>{if(!settled){settled=true;res()}};tx.onerror=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা সংরক্ষণ ব্যর্থ"))}};tx.onabort=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা সংরক্ষণ বাতিল"))}}})}
+const QURAN_PERSONAL_RECORD_ID="system-quran-personal-v1";
+function quranPersonalSnapshotHasData(snapshot){
+ return !!snapshot&&(!!snapshot.bookmark||(snapshot.savedAyahs||[]).length>0||(snapshot.memorizedAyahs||[]).length>0||Number(snapshot.fontSize)!==30);
+}
+async function persistQuranPersonalRecord(){
+ const uid=currentUser?.uid;
+ if(!uid||!cloud||!localCloudAccountAllowed(uid)||!window.ZikraQuranReader)return false;
+ const data=window.ZikraQuranReader.getPersonalDataSnapshot();
+ if(!quranPersonalSnapshotHasData(data))return false;
+ const previous=await getItem(QURAN_PERSONAL_RECORD_ID,dbLocal);
+ const record={id:QURAN_PERSONAL_RECORD_ID,type:"quran-personal",tab:"__system__",title:"কুরআনের ব্যক্তিগত অগ্রগতি",data,updatedAt:Date.now(),deletedAt:null};
+ if(previous&&Number(previous.updatedAt)>record.updatedAt)record.updatedAt=Number(previous.updatedAt)+1;
+ await putItem(record,dbLocal);
+ if(navigator.onLine)syncCloud();
+ return true;
+}
+window.ZikraQuranPersonalChanged=()=>{persistQuranPersonalRecord().catch(e=>console.warn("Quran personal data sync queued",e))};
+async function loadQuranPersonalAccountData(){
+ const uid=currentUser?.uid;
+ if(!uid||!cloud||!localCloudAccountAllowed(uid)||!window.ZikraQuranReader)return;
+ const local=await getItem(QURAN_PERSONAL_RECORD_ID,dbLocal);
+ let remote=null,remoteReadFailed=false;
+ if(navigator.onLine){
+  try{const snap=await cloud.collection("users").doc(uid).collection("items").doc(QURAN_PERSONAL_RECORD_ID).get();remote=snap.exists?snap.data():null}
+  catch(e){remoteReadFailed=true;console.warn("Quran personal cloud load deferred",e)}
+ }
+ if(remoteReadFailed){
+  if(local&&local.data)window.ZikraQuranReader.applyPersonalDataSnapshot(local.data);
+  return;
+ }
+ const localTime=Number(local?.updatedAt)||0,remoteTime=Number(remote?.updatedAt)||0;
+ if(remote&&(!local||remoteTime>localTime)){
+  if(remote.type==="quran-personal"&&remote.data&&typeof remote.data==="object"){
+   await putItem(remote,dbLocal);
+   window.ZikraQuranReader.applyPersonalDataSnapshot(remote.data);
+  }
+  return;
+ }
+ if(local&&local.data){window.ZikraQuranReader.applyPersonalDataSnapshot(local.data);return}
+ const snapshot=window.ZikraQuranReader.getPersonalDataSnapshot();
+ if(quranPersonalSnapshotHasData(snapshot)){
+  await putItem({id:QURAN_PERSONAL_RECORD_ID,type:"quran-personal",tab:"__system__",title:"কুরআনের ব্যক্তিগত অগ্রগতি",data:snapshot,updatedAt:Date.now(),deletedAt:null},dbLocal);
+ }
+}
+
 function delLocal(id){return new Promise((res,rej)=>{let tx;try{tx=dbLocal.transaction(STORE,"readwrite");tx.objectStore(STORE).delete(id)}catch(e){rej(e);return}let settled=false;tx.oncomplete=()=>{if(!settled){settled=true;res()}};tx.onerror=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা মুছতে ব্যর্থ"))}};tx.onabort=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা মুছা বাতিল"))}}})}
 function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -1165,8 +1210,10 @@ async function syncCloud(){
   const refreshedItems=await allItems(syncDb);
   const refreshedDaily=refreshedItems.find(x=>x.id==="system-daily-amal"&&!x.deletedAt);
   const refreshedTasbih=refreshedItems.find(x=>x.id==="system-tasbih-counter"&&!x.deletedAt);
+  const refreshedQuranPersonal=refreshedItems.find(x=>x.id===QURAN_PERSONAL_RECORD_ID&&!x.deletedAt);
   if(refreshedDaily)dailyAmalRecord=refreshedDaily;
   if(refreshedTasbih)tasbihRecord=refreshedTasbih;
+  if(refreshedQuranPersonal&&currentUser?.uid===syncUid&&window.ZikraQuranReader)window.ZikraQuranReader.applyPersonalDataSnapshot(refreshedQuranPersonal.data);
   if($("dailyAmalPanel")?.classList.contains("show")&&dailyAmalRecord)renderDailyAmal();
   if($("tasbihPanel")?.classList.contains("show")&&tasbihRecord)updateTasbihUI();
   if(contextValid())$("accountBtn").textContent="✓ "+(syncUser.displayName?.split(" ")[0]||"সিঙ্ক চালু");
@@ -1646,6 +1693,7 @@ function queueAccountDatabaseSwitch(user){
   document.body.style.pointerEvents="none";
   try{
    await selectLocalDatabase(user?.uid||null);
+   if(user)await loadQuranPersonalAccountData();
    await render();
    document.body.style.pointerEvents="";
    if(user){$("accountBtn").textContent="✓ "+(user.displayName?.split(" ")[0]||"লগইন");await syncCloud()}
@@ -1744,6 +1792,7 @@ $("moveFolderNow").onclick=moveFolderToSelected;
  try{
   if(authConfigured)await selectLocalDatabase(initialUser?.uid||null);
   else await openLocalFallback();
+  if(initialUser)await loadQuranPersonalAccountData();
   const restoredNavState=restoreNavState();await render();
   if(restoredNavState?.viewingId){const savedItems=await allItems();const savedNote=savedItems.find(x=>x.id===restoredNavState.viewingId&&x.type==="note"&&!x.deletedAt);if(savedNote)openViewer(savedNote)}
   if(restoredNavState?.screen==="daily"){await openDailyAmal();if(parseDailyDateKey(restoredNavState.dailyDate)){$("dailyAmalDate").value=restoredNavState.dailyDate;dailyCalendarMonth=validDailyMonth(restoredNavState.dailyCalendarMonth)?restoredNavState.dailyCalendarMonth:restoredNavState.dailyDate.slice(0,7);renderDailyAmal()}}else if(restoredNavState?.screen==="tasbih"){await openTasbih()}
