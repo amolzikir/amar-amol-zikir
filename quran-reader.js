@@ -23,6 +23,7 @@ let currentTranslation=null;
 let translationEnabled=true;
 let loading=false;
 let fontSize=30;
+let returnToTracker=false;
 
 function normalizeAudioEdition(value){return Object.prototype.hasOwnProperty.call(AUDIO_EDITIONS,value)?value:null;}
 function normalizeTafsirEdition(value){return Object.prototype.hasOwnProperty.call(TAFSIR_EDITIONS,value)?value:null;}
@@ -294,6 +295,7 @@ async function loadSurahList(){
 }
 function openQuranReader(){
  const tracker=el("quranTracker"),reader=el("quranReader");
+ returnToTracker=!!(tracker&&tracker.classList.contains("show"));
  if(tracker)tracker.classList.remove("show");
  if(reader)reader.classList.add("show");
  let savedFont=30;
@@ -306,7 +308,8 @@ function closeQuranReader(){
  const reader=el("quranReader"),tracker=el("quranTracker");
  if(reader)reader.classList.remove("show");
  const audio=el("quranReaderAudio");if(audio)audio.pause();
- if(tracker)tracker.classList.add("show");
+ if(returnToTracker&&tracker)tracker.classList.add("show");
+ returnToTracker=false;
 }
 function applyFontSize(){
  const node=el("quranReaderAyahs");
