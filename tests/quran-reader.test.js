@@ -125,3 +125,29 @@ test("Quran reader toggles bookmarks without losing notes and saves private note
   assert.equal(reader.saveAyahNote([], 3, 18, "   ").length, 0);
   assert.equal(reader.saveAyahNote([], 3, 18, "x".repeat(2500))[0].note.length, 2000);
 });
+
+\ntest("Quran reader accepts only the supported Bengali tafsir editions", () => {
+  assert.equal(reader.normalizeTafsirEdition("bn-tafsir-abu-bakr-zakaria"), "bn-tafsir-abu-bakr-zakaria");
+  assert.equal(reader.normalizeTafsirEdition("bn-tafsir-ahsanul-bayaan"), "bn-tafsir-ahsanul-bayaan");
+  assert.equal(reader.normalizeTafsirEdition("bn-tafseer-ibn-e-kaseer"), "bn-tafseer-ibn-e-kaseer");
+  assert.equal(reader.normalizeTafsirEdition("tafisr-fathul-majid-bn"), "tafisr-fathul-majid-bn");
+  assert.equal(reader.normalizeTafsirEdition("bengali-mokhtasar"), "bengali-mokhtasar");
+  assert.equal(reader.normalizeTafsirEdition("javascript:alert(1)"), null);
+});
+
+test("Quran reader builds safe tafsir URLs only for valid surah, ayah and edition", () => {
+  assert.equal(reader.buildTafsirUrl(1, 1, "bn-tafsir-abu-bakr-zakaria"), "https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@v1.2.3/tafsir/bn-tafsir-abu-bakr-zakaria/1/1.json");
+  assert.equal(reader.buildTafsirUrl(0, 1, "bn-tafsir-abu-bakr-zakaria"), null);
+  assert.equal(reader.buildTafsirUrl(115, 1, "bn-tafsir-abu-bakr-zakaria"), null);
+  assert.equal(reader.buildTafsirUrl(2, 287, "bn-tafsir-abu-bakr-zakaria"), null);
+  assert.equal(reader.buildTafsirUrl(2, 1, "unknown-edition"), null);
+});
+
+test("Quran reader accepts only non-empty bounded tafsir text and safely escapes it", () => {
+  assert.equal(reader.validTafsirData({ text: "তাফসীরের ব্যাখ্যা" }), true);
+  assert.equal(reader.validTafsirData({ text: " " }), false);
+  assert.equal(reader.validTafsirData({ text: 123 }), false);
+  assert.equal(reader.validTafsirData({ text: "x".repeat(300001) }), false);
+  assert.equal(reader.validTafsirData(null), false);
+  assert.equal(reader.escapeHtml("<script>alert(1)</script>"), "&lt;script&gt;alert(1)&lt;/script&gt;");
+});
