@@ -264,3 +264,12 @@ test("Quran personal bookmarks, notes and memorization stay isolated per Google 
   assert.equal(restoredA.memorizedAyahs.length, 1);
   assert.equal(restoredA.fontSize, 34);
 });
+
+test("Quran personal cloud bridge is restricted to the active account database", () => {
+  const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  assert.match(indexSource, /system-quran-personal-v1/);
+  assert.match(indexSource, /localCloudAccountAllowed\(uid\)/);
+  assert.match(indexSource, /dbLocal!==accountDb/);
+  assert.match(indexSource, /users\"\)\.doc\(uid\)/);
+  assert.match(indexSource, /applyPersonalDataSnapshot/);
+});
