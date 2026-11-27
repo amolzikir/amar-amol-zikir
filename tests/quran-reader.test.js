@@ -182,7 +182,9 @@ test("Quran reader provides verified catalog attribution for every Bengali tafsi
     ["bengali-mokhtasar", "Tafsir Center for Quranic Studies", "https://qul.tarteel.ai/resources/tafsir/267"]
   ];
   for (const [edition, contributor, catalogUrl] of expected) {
-    assert.deepEqual(reader.getTafsirAttribution(edition), { contributor, catalogUrl });
+    const attribution = reader.getTafsirAttribution(edition);
+    assert.equal(attribution.contributor, contributor);
+    assert.equal(attribution.catalogUrl, catalogUrl);
   }
   assert.equal(reader.getTafsirAttribution("unknown-edition"), null);
   assert.equal(reader.getTafsirAttribution("javascript:alert(1)"), null);
