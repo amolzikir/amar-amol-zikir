@@ -167,6 +167,8 @@ test("Quran reader accepts tafsir only when its surah and ayah metadata match", 
   assert.equal(reader.validTafsirData({ ...valid, text: "x".repeat(300001) }, 2, 255), false);
   assert.equal(reader.validTafsirData({ text: valid.text }, 2, 255), false);
   assert.equal(reader.validTafsirData(null, 2, 255), false);
+  assert.match(reader.getTafsirErrorMessage({ status: 404 }), /এই আয়াতের আলাদা ব্যাখ্যা নেই/);
+  assert.match(reader.getTafsirErrorMessage(new Error("offline")), /ইন্টারনেট সংযোগ পরীক্ষা করুন/);
   assert.equal(reader.escapeHtml("<script>alert(1)</script>"), "&lt;script&gt;alert(1)&lt;/script&gt;");
 });
 
