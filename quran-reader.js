@@ -16,6 +16,13 @@ const TAFSIR_EDITIONS=Object.freeze({
  "tafisr-fathul-majid-bn":"তাফসীর ফাতহুল মাজীদ",
  "bengali-mokhtasar":"বাংলা সংক্ষিপ্ত তাফসীর"
 });
+const TAFSIR_ATTRIBUTION=Object.freeze({
+ "bn-tafsir-abu-bakr-zakaria":Object.freeze({contributor:"King Fahd Quran Printing Complex",catalogUrl:"https://qul.tarteel.ai/resources/tafsir/33"}),
+ "bn-tafsir-ahsanul-bayaan":Object.freeze({contributor:"Bayaan Foundation",catalogUrl:"https://qul.tarteel.ai/resources/tafsir/32"}),
+ "bn-tafseer-ibn-e-kaseer":Object.freeze({contributor:"Tawheed Publication",catalogUrl:"https://qul.tarteel.ai/resources/tafsir/31"}),
+ "tafisr-fathul-majid-bn":Object.freeze({contributor:"Tafsir Fathul Majid (QUL edition)",catalogUrl:"https://qul.tarteel.ai/resources/tafsir/39"}),
+ "bengali-mokhtasar":Object.freeze({contributor:"Tafsir Center for Quranic Studies",catalogUrl:"https://qul.tarteel.ai/resources/tafsir/267"})
+});
 const DEFAULT_TAFSIR_EDITION="bn-tafsir-abu-bakr-zakaria";
 let surahList=[];
 let currentSurah=null;
@@ -27,6 +34,7 @@ let returnToTracker=false;
 
 function normalizeAudioEdition(value){return Object.prototype.hasOwnProperty.call(AUDIO_EDITIONS,value)?value:null;}
 function normalizeTafsirEdition(value){return Object.prototype.hasOwnProperty.call(TAFSIR_EDITIONS,value)?value:null;}
+function getTafsirAttribution(value){const id=normalizeTafsirEdition(value);return id?TAFSIR_ATTRIBUTION[id]:null;}
 function buildTafsirUrl(surah,ayah,edition){
  const s=Number(surah),a=Number(ayah),id=normalizeTafsirEdition(edition);
  if(!Number.isInteger(s)||s<1||s>114||!Number.isInteger(a)||a<1||a>286||!id)return null;
@@ -70,7 +78,8 @@ async function toggleTafsirPanel(button){
  try{
   const data=await fetchTafsirData(surah,ayah,edition);
   if(!panel.isConnected)return;
-  panel.innerHTML='<div class="quran-reader-tafsir-text">'+escapeHtml(data.text).replace(/\r?\n/g,"<br>")+'</div><p class="small">গ্রন্থ: '+escapeHtml(TAFSIR_EDITIONS[edition])+'। সূত্র: <a href="https://github.com/spa5k/tafsir_api" target="_blank" rel="noopener">Tafsir API / উৎসতালিকা</a>।</p>';
+  const attribution=getTafsirAttribution(edition);
+  panel.innerHTML='<div class="quran-reader-tafsir-text">'+escapeHtml(data.text).replace(/\\r?\\n/g,"<br>")+'</div><p class="small">গ্রন্থ: '+escapeHtml(TAFSIR_EDITIONS[edition])+'। সংকলন/প্রকাশক: '+escapeHtml(attribution.contributor)+'। গ্রন্থতথ্য: <a href="'+escapeHtml(attribution.catalogUrl)+'" target="_blank" rel="noopener">QUL</a>। ডেটা-উৎস: <a href="https://github.com/spa5k/tafsir_api" target="_blank" rel="noopener">Tafsir API</a>।</p>';
   panel.dataset.loadedEdition=edition;
  }catch(e){
   if(panel.isConnected)panel.textContent="এই তাফসীরটি এখন আনা যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করুন; আগে খোলা থাকলে ক্যাশ কপি পাওয়া যেতে পারে।";
@@ -384,7 +393,7 @@ function wire(){
  if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
  renderBookmarkLabel();
 }
-root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,buildSurahAudioUrl:buildSurahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeTafsirEdition:normalizeTafsirEdition,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,escapeHtml:escapeHtml};
+root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,buildSurahAudioUrl:buildSurahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeTafsirEdition:normalizeTafsirEdition,getTafsirAttribution:getTafsirAttribution,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,escapeHtml:escapeHtml};
 root.openQuranReader=openQuranReader;
 root.closeQuranReader=closeQuranReader;
 if(typeof document!=="undefined"){
