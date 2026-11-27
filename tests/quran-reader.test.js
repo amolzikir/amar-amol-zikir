@@ -107,6 +107,15 @@ test("Quran reader allows only supported reciters and valid surah audio URLs", (
 });
 
  
+test("Quran reader builds safe individual ayah audio URLs", () => {
+  assert.equal(reader.buildAyahAudioUrl(1, "ar.alafasy"), "https://cdn.islamic.network/quran/audio/64/ar.alafasy/1.mp3");
+  assert.equal(reader.buildAyahAudioUrl(262, "ar.husary"), "https://cdn.islamic.network/quran/audio/64/ar.husary/262.mp3");
+  assert.equal(reader.buildAyahAudioUrl(6236, "ar.sudais"), "https://cdn.islamic.network/quran/audio/64/ar.sudais/6236.mp3");
+  assert.equal(reader.buildAyahAudioUrl(0, "ar.alafasy"), null);
+  assert.equal(reader.buildAyahAudioUrl(6237, "ar.alafasy"), null);
+  assert.equal(reader.buildAyahAudioUrl(1, "javascript:alert(1)"), null);
+});
+
 test("Quran reader normalizes and safely parses multiple saved ayahs", () => {
   const items = reader.normalizeSavedAyahs([
     { surah: 2, ayah: 255, note: "আয়াতুল কুরসি", bookmarked: true, savedAt: 10 },
