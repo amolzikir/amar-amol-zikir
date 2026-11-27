@@ -584,6 +584,10 @@ function toast(s){$("toast").textContent=tr(s);$("toast").style.display="block";
 function allItems(db=dbLocal){return databaseItems(db)}
 function getItem(id,db=dbLocal){return new Promise((res,rej)=>{let r=db.transaction(STORE).objectStore(STORE).get(id);r.onsuccess=()=>res(r.result||null);r.onerror=()=>rej(r.error)})}
 function putItem(x,db=dbLocal){return new Promise((res,rej)=>{let tx;try{tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).put(x)}catch(e){rej(e);return}let settled=false;tx.oncomplete=()=>{if(!settled){settled=true;res()}};tx.onerror=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা সংরক্ষণ ব্যর্থ"))}};tx.onabort=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা সংরক্ষণ বাতিল"))}}})}
+
+function delLocal(id){return new Promise((res,rej)=>{let tx;try{tx=dbLocal.transaction(STORE,"readwrite");tx.objectStore(STORE).delete(id)}catch(e){rej(e);return}let settled=false;tx.oncomplete=()=>{if(!settled){settled=true;res()}};tx.onerror=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা মুছতে ব্যর্থ"))}};tx.onabort=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা মুছা বাতিল"))}}})}
+function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+
 const QURAN_PERSONAL_RECORD_ID="system-quran-personal-v1";
 function quranPersonalSnapshotHasData(snapshot){
  return !!snapshot&&(!!snapshot.bookmark||(snapshot.savedAyahs||[]).length>0||(snapshot.memorizedAyahs||[]).length>0||Number(snapshot.fontSize)!==30);
@@ -633,8 +637,6 @@ async function loadQuranPersonalAccountData(){
  }
 }
 
-function delLocal(id){return new Promise((res,rej)=>{let tx;try{tx=dbLocal.transaction(STORE,"readwrite");tx.objectStore(STORE).delete(id)}catch(e){rej(e);return}let settled=false;tx.oncomplete=()=>{if(!settled){settled=true;res()}};tx.onerror=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা মুছতে ব্যর্থ"))}};tx.onabort=()=>{if(!settled){settled=true;rej(tx.error||new Error("লোকাল ডেটা মুছা বাতিল"))}}})}
-function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function safeHttpsUrl(value){try{const url=new URL(String(value));return url.protocol==="https:"?url.href:"#"}catch(e){return "#"}}
 function saveNavState(){
