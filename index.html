@@ -589,28 +589,31 @@ function quranPersonalSnapshotHasData(snapshot){
  return !!snapshot&&(!!snapshot.bookmark||(snapshot.savedAyahs||[]).length>0||(snapshot.memorizedAyahs||[]).length>0||Number(snapshot.fontSize)!==30);
 }
 async function persistQuranPersonalRecord(){
- const uid=currentUser?.uid;
+ const uid=currentUser?.uid,accountDb=dbLocal;
  if(!uid||!cloud||!localCloudAccountAllowed(uid)||!window.ZikraQuranReader)return false;
  const data=window.ZikraQuranReader.getPersonalDataSnapshot();
  if(!quranPersonalSnapshotHasData(data))return false;
- const previous=await getItem(QURAN_PERSONAL_RECORD_ID,dbLocal);
+ const previous=await getItem(QURAN_PERSONAL_RECORD_ID,accountDb);
+ if(currentUser?.uid!==uid||dbLocal!==accountDb||!localCloudAccountAllowed(uid))return false;
  const record={id:QURAN_PERSONAL_RECORD_ID,type:"quran-personal",tab:"__system__",title:"কুরআনের ব্যক্তিগত অগ্রগতি",data,updatedAt:Date.now(),deletedAt:null};
- if(previous&&Number(previous.updatedAt)>record.updatedAt)record.updatedAt=Number(previous.updatedAt)+1;
- await putItem(record,dbLocal);
- if(navigator.onLine)syncCloud();
+ if(previous&&Number(previous.updatedAt)>=record.updatedAt)record.updatedAt=Number(previous.updatedAt)+1;
+ await putItem(record,accountDb);
+ if(currentUser?.uid===uid&&dbLocal===accountDb&&navigator.onLine)syncCloud();
  return true;
 }
 let quranPersonalSaveQueue=Promise.resolve();
 window.ZikraQuranPersonalChanged=()=>{quranPersonalSaveQueue=quranPersonalSaveQueue.then(()=>persistQuranPersonalRecord()).catch(e=>console.warn("Quran personal data sync queued",e));return quranPersonalSaveQueue};
 async function loadQuranPersonalAccountData(){
- const uid=currentUser?.uid;
+ const uid=currentUser?.uid,accountDb=dbLocal;
  if(!uid||!cloud||!localCloudAccountAllowed(uid)||!window.ZikraQuranReader)return;
- const local=await getItem(QURAN_PERSONAL_RECORD_ID,dbLocal);
+ const local=await getItem(QURAN_PERSONAL_RECORD_ID,accountDb);
+ if(currentUser?.uid!==uid||dbLocal!==accountDb||!localCloudAccountAllowed(uid))return;
  let remote=null,remoteReadFailed=false;
  if(navigator.onLine){
   try{const snap=await cloud.collection("users").doc(uid).collection("items").doc(QURAN_PERSONAL_RECORD_ID).get();remote=snap.exists?snap.data():null}
   catch(e){remoteReadFailed=true;console.warn("Quran personal cloud load deferred",e)}
  }
+ if(currentUser?.uid!==uid||dbLocal!==accountDb||!localCloudAccountAllowed(uid))return;
  if(remoteReadFailed){
   if(local&&local.data)window.ZikraQuranReader.applyPersonalDataSnapshot(local.data);
   return;
@@ -618,15 +621,15 @@ async function loadQuranPersonalAccountData(){
  const localTime=Number(local?.updatedAt)||0,remoteTime=Number(remote?.updatedAt)||0;
  if(remote&&(!local||remoteTime>localTime)){
   if(remote.type==="quran-personal"&&remote.data&&typeof remote.data==="object"){
-   await putItem(remote,dbLocal);
-   window.ZikraQuranReader.applyPersonalDataSnapshot(remote.data);
+   await putItem(remote,accountDb);
+   if(currentUser?.uid===uid&&dbLocal===accountDb)window.ZikraQuranReader.applyPersonalDataSnapshot(remote.data);
   }
   return;
  }
  if(local&&local.data){window.ZikraQuranReader.applyPersonalDataSnapshot(local.data);return}
  const snapshot=window.ZikraQuranReader.getPersonalDataSnapshot();
- if(quranPersonalSnapshotHasData(snapshot)){
-  await putItem({id:QURAN_PERSONAL_RECORD_ID,type:"quran-personal",tab:"__system__",title:"কুরআনের ব্যক্তিগত অগ্রগতি",data:snapshot,updatedAt:Date.now(),deletedAt:null},dbLocal);
+ if(quranPersonalSnapshotHasData(snapshot)&&currentUser?.uid===uid&&dbLocal===accountDb){
+  await putItem({id:QURAN_PERSONAL_RECORD_ID,type:"quran-personal",tab:"__system__",title:"কুরআনের ব্যক্তিগত অগ্রগতি",data:snapshot,updatedAt:Date.now(),deletedAt:null},accountDb);
  }
 }
 
