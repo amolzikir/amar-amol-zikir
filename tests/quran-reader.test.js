@@ -107,6 +107,17 @@ test("Quran reader allows only supported reciters and valid surah audio URLs", (
 });
 
  
+test("Quran reader accepts only supported ayah repeat counts", () => {
+  assert.equal(reader.normalizeAyahRepeatCount(1), 1);
+  assert.equal(reader.normalizeAyahRepeatCount(3), 3);
+  assert.equal(reader.normalizeAyahRepeatCount(5), 5);
+  assert.equal(reader.normalizeAyahRepeatCount(10), 10);
+  assert.equal(reader.normalizeAyahRepeatCount(0), 0);
+  assert.equal(reader.normalizeAyahRepeatCount(2), 3);
+  assert.equal(reader.normalizeAyahRepeatCount(-1), 3);
+  assert.equal(reader.normalizeAyahRepeatCount("javascript:alert(1)"), 3);
+});
+
 test("Quran reader builds safe individual ayah audio URLs", () => {
   assert.equal(reader.buildAyahAudioUrl(1, "ar.alafasy"), "https://cdn.islamic.network/quran/audio/64/ar.alafasy/1.mp3");
   assert.equal(reader.buildAyahAudioUrl(262, "ar.husary"), "https://cdn.islamic.network/quran/audio/64/ar.husary/262.mp3");
