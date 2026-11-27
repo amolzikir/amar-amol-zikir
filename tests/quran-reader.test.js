@@ -229,5 +229,5 @@ test("Quran memorization progress validates, deduplicates, toggles and counts ay
   assert.equal(reader.isAyahMemorized(toggledOn, 1, 2), true);
   assert.equal(reader.countMemorizedAyahs(toggledOn, 1), 1);
   assert.equal(reader.toggleMemorizedAyah(toggledOn, 0, 1).length, 2);
-  assert.deepEqual(reader.parseMemorizedAyahs("not-json"), []);
+  assert.equal(reader.parseMemorizedAyahs("not-json").length, 0);
 });
