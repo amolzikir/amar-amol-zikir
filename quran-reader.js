@@ -164,6 +164,30 @@ function saveAyahNote(items,surah,ayah,note){
  else if(clean.trim())next.push({surah:Number(surah),ayah:Number(ayah),note:clean,bookmarked:false,savedAt:Date.now()});
  return normalizeSavedAyahs(next);
 }
+const MEMORIZATION_KEY="zikra-quran-memorization-v1";
+function normalizeMemorizedAyahs(value){
+ if(!Array.isArray(value))return [];
+ const map=new Map();
+ value.slice(0,6236).forEach(function(item){
+  if(!item)return;
+  const surah=Number(item.surah),ayah=Number(item.ayah);
+  if(!Number.isInteger(surah)||surah<1||surah>114||!Number.isInteger(ayah)||ayah<1||ayah>286)return;
+  map.set(surah+":"+ayah,{surah,ayah,memorized:true,savedAt:Number(item.savedAt)||0});
+ });
+ return Array.from(map.values()).sort(function(a,b){return a.surah-b.surah||a.ayah-b.ayah});
+}
+function parseMemorizedAyahs(raw){try{return normalizeMemorizedAyahs(JSON.parse(raw||"[]"))}catch(e){return []}}
+function readMemorizedAyahs(){try{return parseMemorizedAyahs(root.localStorage.getItem(MEMORIZATION_KEY))}catch(e){return []}}
+function persistMemorizedAyahs(items){try{root.localStorage.setItem(MEMORIZATION_KEY,JSON.stringify(normalizeMemorizedAyahs(items)));return true}catch(e){return false}}
+function isAyahMemorized(items,surah,ayah){return normalizeMemorizedAyahs(items).some(function(x){return x.surah===Number(surah)&&x.ayah===Number(ayah)})}
+function toggleMemorizedAyah(items,surah,ayah){
+ const s=Number(surah),a=Number(ayah);
+ if(!Number.isInteger(s)||s<1||s>114||!Number.isInteger(a)||a<1||a>286)return normalizeMemorizedAyahs(items);
+ const next=normalizeMemorizedAyahs(items),index=next.findIndex(function(x){return x.surah===s&&x.ayah===a});
+ if(index>=0)next.splice(index,1);else next.push({surah:s,ayah:a,memorized:true,savedAt:Date.now()});
+ return normalizeMemorizedAyahs(next);
+}
+function countMemorizedAyahs(items,surah){return normalizeMemorizedAyahs(items).filter(function(x){return surah===undefined||x.surah===Number(surah)}).length}
 function escapeHtml(value){
  return String(value).replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]});
 }
@@ -258,13 +282,14 @@ function renderSurah(data,translation,jumpAyah){
  if(!info||!container)return;
  const meta=surahList.find(x=>x.number===data.number)||data;
  info.textContent=meta.name+"  •  "+meta.englishName+"  •  "+bn(data.numberOfAyahs)+" আয়াত  •  "+(meta.revelationType==="Meccan"?"মাক্কি":"মাদানি");
- const savedItems=readSavedAyahs();
+ const savedItems=readSavedAyahs(),memorizedItems=readMemorizedAyahs();
+ info.textContent+="  •  মুখস্থ: "+bn(countMemorizedAyahs(memorizedItems,data.number))+" / "+bn(data.numberOfAyahs);
  container.innerHTML=data.ayahs.map(function(a){
   const translated=translation&&translation.ayahs&&translation.ayahs[a.numberInSurah-1];
   const bangla=translationEnabled&&translated?'<p class="quran-reader-bangla" lang="bn" dir="ltr">'+escapeHtml(translated.text.trim())+'</p>':"";
   const saved=findSavedAyah(savedItems,data.number,a.numberInSurah);
   const note=saved?saved.note:"";
-  return '<article class="quran-reader-ayah" id="quran-reader-ayah-'+a.numberInSurah+'"><div class="quran-reader-ayah-tools"><span>আয়াত '+bn(a.numberInSurah)+'</span><button type="button" class="quran-reader-bookmark" data-quran-reader-save="'+a.numberInSurah+'" aria-label="শেষ-পড়া অবস্থান সংরক্ষণ করুন" title="শেষ-পড়া অবস্থান">🔖</button></div><p class="quran-reader-arabic" lang="ar" dir="rtl">'+escapeHtml(a.text.trim())+'</p>'+bangla+'<div class="quran-reader-ayah-actions"><button type="button" data-quran-reader-play-ayah="'+a.number+'">▶ আয়াত শুনুন</button><button type="button" data-quran-reader-toggle-save="'+a.numberInSurah+'">'+(saved&&saved.bookmarked?"★ বুকমার্ক করা":"☆ বুকমার্ক")+'</button><button type="button" data-quran-reader-toggle-note="'+a.numberInSurah+'">✎ ব্যক্তিগত নোট</button><button type="button" data-quran-reader-tafsir="'+a.numberInSurah+'">📚 তাফসির</button></div><div class="quran-reader-tafsir-panel" data-quran-reader-tafsir-panel="'+a.numberInSurah+'" hidden aria-live="polite"></div><div class="quran-reader-note-editor" data-quran-reader-note-editor="'+a.numberInSurah+'" hidden><textarea maxlength="2000" rows="3" data-quran-reader-note-input="'+a.numberInSurah+'" placeholder="এই আয়াত সম্পর্কে আপনার ব্যক্তিগত নোট লিখুন…">'+escapeHtml(note)+'</textarea><button type="button" data-quran-reader-note-save="'+a.numberInSurah+'">নোট সংরক্ষণ</button></div></article>';
+  return '<article class="quran-reader-ayah" id="quran-reader-ayah-'+a.numberInSurah+'"><div class="quran-reader-ayah-tools"><span>আয়াত '+bn(a.numberInSurah)+'</span><button type="button" class="quran-reader-bookmark" data-quran-reader-save="'+a.numberInSurah+'" aria-label="শেষ-পড়া অবস্থান সংরক্ষণ করুন" title="শেষ-পড়া অবস্থান">🔖</button></div><p class="quran-reader-arabic" lang="ar" dir="rtl">'+escapeHtml(a.text.trim())+'</p>'+bangla+'<div class="quran-reader-ayah-actions"><button type="button" data-quran-reader-play-ayah="'+a.number+'">▶ আয়াত শুনুন</button><button type="button" data-quran-reader-memorized="'+a.numberInSurah+'">'+(isAyahMemorized(memorizedItems,data.number,a.numberInSurah)?"✓ মুখস্থ হয়েছে":"মুখস্থ চিহ্নিত")+'</button><button type="button" data-quran-reader-toggle-save="'+a.numberInSurah+'">'+(saved&&saved.bookmarked?"★ বুকমার্ক করা":"☆ বুকমার্ক")+'</button><button type="button" data-quran-reader-toggle-note="'+a.numberInSurah+'">✎ ব্যক্তিগত নোট</button><button type="button" data-quran-reader-tafsir="'+a.numberInSurah+'">📚 তাফসির</button></div><div class="quran-reader-tafsir-panel" data-quran-reader-tafsir-panel="'+a.numberInSurah+'" hidden aria-live="polite"></div><div class="quran-reader-note-editor" data-quran-reader-note-editor="'+a.numberInSurah+'" hidden><textarea maxlength="2000" rows="3" data-quran-reader-note-input="'+a.numberInSurah+'" placeholder="এই আয়াত সম্পর্কে আপনার ব্যক্তিগত নোট লিখুন…">'+escapeHtml(note)+'</textarea><button type="button" data-quran-reader-note-save="'+a.numberInSurah+'">নোট সংরক্ষণ</button></div></article>';
  }).join("");
  const target=Number(jumpAyah)||1;
  if(target>1){
@@ -377,6 +402,8 @@ function wire(){
   if(savedOpen){const parts=savedOpen.dataset.quranReaderOpenSaved.split(":").map(Number);if(parts.length===2){if(select)select.value=String(parts[0]);loadSurah(parts[0],parts[1])}return}
   const savedRemove=event.target.closest("[data-quran-reader-remove-saved]");
   if(savedRemove){const parts=savedRemove.dataset.quranReaderRemoveSaved.split(":").map(Number);const next=readSavedAyahs().filter(function(x){return x.surah!==parts[0]||x.ayah!==parts[1]});if(persistSavedAyahs(next)){renderSavedAyahs();if(currentSurah)renderSurah(currentSurah,currentTranslation,1);status("সংরক্ষিত আয়াত ও তার নোট সরানো হয়েছে।")}return}
+  const memorized=event.target.closest("[data-quran-reader-memorized]");
+  if(memorized){const n=Number(memorized.dataset.quranReaderMemorized),next=toggleMemorizedAyah(readMemorizedAyahs(),currentSurah.number,n);if(persistMemorizedAyahs(next)){renderSurah(currentSurah,currentTranslation,n);status(isAyahMemorized(next,currentSurah.number,n)?"আয়াতটি মুখস্থ হিসেবে সংরক্ষণ করা হয়েছে।":"মুখস্থের চিহ্ন তুলে নেওয়া হয়েছে।")}else status("মুখস্থের অগ্রগতি সংরক্ষণ করা যায়নি। ডিভাইসের স্টোরেজ পরীক্ষা করুন।",true);return}
   const toggle=event.target.closest("[data-quran-reader-toggle-save]");
   if(toggle){const n=Number(toggle.dataset.quranReaderToggleSave),next=toggleSavedAyah(readSavedAyahs(),currentSurah.number,n);if(persistSavedAyahs(next)){renderSavedAyahs();renderSurah(currentSurah,currentTranslation,n);status("বুকমার্কের অবস্থা সংরক্ষণ করা হয়েছে।")}else status("বুকমার্ক সংরক্ষণ করা যায়নি।",true);return}
   const tafsirToggle=event.target.closest("[data-quran-reader-tafsir]");
@@ -403,7 +430,7 @@ function wire(){
  if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
  renderBookmarkLabel();
 }
-root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,normalizeAyahRepeatCount:normalizeAyahRepeatCount,buildSurahAudioUrl:buildSurahAudioUrl,buildAyahAudioUrl:buildAyahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeTafsirEdition:normalizeTafsirEdition,getTafsirAttribution:getTafsirAttribution,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,getTafsirErrorMessage:getTafsirErrorMessage,escapeHtml:escapeHtml};
+root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,normalizeAyahRepeatCount:normalizeAyahRepeatCount,buildSurahAudioUrl:buildSurahAudioUrl,buildAyahAudioUrl:buildAyahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeMemorizedAyahs:normalizeMemorizedAyahs,parseMemorizedAyahs:parseMemorizedAyahs,toggleMemorizedAyah:toggleMemorizedAyah,isAyahMemorized:isAyahMemorized,countMemorizedAyahs:countMemorizedAyahs,normalizeTafsirEdition:normalizeTafsirEdition,getTafsirAttribution:getTafsirAttribution,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,getTafsirErrorMessage:getTafsirErrorMessage,escapeHtml:escapeHtml};
 root.openQuranReader=openQuranReader;
 root.closeQuranReader=closeQuranReader;
 if(typeof document!=="undefined"){
