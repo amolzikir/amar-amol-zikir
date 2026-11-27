@@ -31,8 +31,10 @@ let translationEnabled=true;
 let loading=false;
 let fontSize=30;
 let returnToTracker=false;
+let ayahRepeatRemaining=0;
 
 function normalizeAudioEdition(value){return Object.prototype.hasOwnProperty.call(AUDIO_EDITIONS,value)?value:null;}
+function normalizeAyahRepeatCount(value){const n=Number(value);return [0,1,3,5,10].includes(n)?n:3;}
 function normalizeTafsirEdition(value){return Object.prototype.hasOwnProperty.call(TAFSIR_EDITIONS,value)?value:null;}
 function getTafsirAttribution(value){const id=normalizeTafsirEdition(value);return id?TAFSIR_ATTRIBUTION[id]:null;}
 function buildTafsirUrl(surah,ayah,edition){
@@ -91,7 +93,7 @@ async function toggleTafsirPanel(button){
 }
 function buildSurahAudioUrl(surah,edition){const n=Number(surah),id=normalizeAudioEdition(edition);if(!Number.isInteger(n)||n<1||n>114||!id)return null;return AUDIO_BASE+id+"/"+n+".mp3";}
 function buildAyahAudioUrl(number,edition){const n=Number(number),id=normalizeAudioEdition(edition);if(!Number.isInteger(n)||n<1||n>6236||!id)return null;return "https://cdn.islamic.network/quran/audio/64/"+id+"/"+n+".mp3";}
-function configureSurahAudio(surah){const audio=el("quranReaderAudio"),reciter=el("quranReaderReciter"),label=el("quranReaderAudioStatus");if(!audio||!reciter)return;const edition=normalizeAudioEdition(reciter.value)||"ar.alafasy";const url=buildSurahAudioUrl(surah,edition);if(!url)return;audio.pause();audio.src=url;audio.load();if(label)label.textContent="তিলাওয়াত প্রস্তুত: "+AUDIO_EDITIONS[edition]+"। শুনতে প্লে চাপুন।";}
+function configureSurahAudio(surah){const audio=el("quranReaderAudio"),reciter=el("quranReaderReciter"),label=el("quranReaderAudioStatus");if(!audio||!reciter)return;ayahRepeatRemaining=0;const edition=normalizeAudioEdition(reciter.value)||"ar.alafasy";const url=buildSurahAudioUrl(surah,edition);if(!url)return;audio.pause();audio.src=url;audio.load();if(label)label.textContent="তিলাওয়াত প্রস্তুত: "+AUDIO_EDITIONS[edition]+"। শুনতে প্লে চাপুন।";}
 function validSurahList(data){
  if(!Array.isArray(data)||data.length!==114)return false;
  const seen=new Set();
@@ -355,9 +357,10 @@ function resumeReading(){
 }
 function wire(){
  const open=el("openQuranReader"),close=el("closeQuranReader"),select=el("quranReaderSurah"),search=el("quranReaderSearch"),prev=el("quranReaderPrev"),next=el("quranReaderNext"),resume=el("quranReaderResume"),ayahs=el("quranReaderAyahs"),smaller=el("quranReaderSmaller"),larger=el("quranReaderLarger"),translationToggle=el("quranReaderTranslationToggle");
- const reciter=el("quranReaderReciter"),audio=el("quranReaderAudio"),audioStatus=el("quranReaderAudioStatus");
+ const reciter=el("quranReaderReciter"),audio=el("quranReaderAudio"),audioStatus=el("quranReaderAudioStatus"),repeatSelect=el("quranReaderRepeatCount");
  if(reciter)reciter.addEventListener("change",function(){if(currentSurah)configureSurahAudio(currentSurah.number)});
- if(audio)audio.addEventListener("error",function(){if(audioStatus)audioStatus.textContent="এই মুহূর্তে তিলাওয়াত চালানো যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।"});
+ if(audio)audio.addEventListener("error",function(){ayahRepeatRemaining=0;if(audioStatus)audioStatus.textContent="এই মুহূর্তে তিলাওয়াত চালানো যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।"});
+ if(audio)audio.addEventListener("ended",function(){if(ayahRepeatRemaining===Infinity||ayahRepeatRemaining>0){if(ayahRepeatRemaining!==Infinity)ayahRepeatRemaining--;audio.currentTime=0;const replay=audio.play();if(replay&&typeof replay.catch==="function")replay.catch(function(){ayahRepeatRemaining=0;if(audioStatus)audioStatus.textContent="পুনরাবৃত্তি চালানো যায়নি। আবার আয়াতের বোতাম চাপুন।"});}else if(audioStatus)audioStatus.textContent="আয়াতের পুনরাবৃত্তি সম্পন্ন হয়েছে।";});
  if(open)open.addEventListener("click",openQuranReader);
  if(close)close.addEventListener("click",closeQuranReader);
  if(select)select.addEventListener("change",function(){if(select.value)loadSurah(Number(select.value),1)});
@@ -369,7 +372,7 @@ function wire(){
  if(ayahs)ayahs.addEventListener("click",function(event){
   const button=event.target.closest("[data-quran-reader-save]");
   const playAyah=event.target.closest("[data-quran-reader-play-ayah]");
-  if(playAyah){const globalAyah=Number(playAyah.dataset.quranReaderPlayAyah),edition=normalizeAudioEdition(reciter?reciter.value:"ar.alafasy")||"ar.alafasy",url=buildAyahAudioUrl(globalAyah,edition);if(!url||!audio){status("এই আয়াতের অডিও ঠিকানা পাওয়া যায়নি।",true);return}audio.pause();audio.src=url;audio.load();if(audioStatus)audioStatus.textContent="নির্বাচিত আয়াতের তিলাওয়াত প্রস্তুত।";const playResult=audio.play();if(playResult&&typeof playResult.catch==="function")playResult.catch(function(){if(audioStatus)audioStatus.textContent="আয়াতের তিলাওয়াত চালানো যায়নি। আবার প্লে চাপুন।"});return}
+  if(playAyah){const globalAyah=Number(playAyah.dataset.quranReaderPlayAyah),edition=normalizeAudioEdition(reciter?reciter.value:"ar.alafasy")||"ar.alafasy",url=buildAyahAudioUrl(globalAyah,edition),repeatCount=normalizeAyahRepeatCount(repeatSelect?repeatSelect.value:3);if(!url||!audio){status("এই আয়াতের অডিও ঠিকানা পাওয়া যায়নি।",true);return}audio.pause();ayahRepeatRemaining=repeatCount===0?Infinity:repeatCount-1;audio.src=url;audio.load();if(audioStatus)audioStatus.textContent=repeatCount===0?"নির্বাচিত আয়াত ধারাবাহিকভাবে পুনরাবৃত্তি হবে।": "নির্বাচিত আয়াত "+bn(repeatCount)+" বার শোনা হবে।";const playResult=audio.play();if(playResult&&typeof playResult.catch==="function")playResult.catch(function(){ayahRepeatRemaining=0;if(audioStatus)audioStatus.textContent="আয়াতের তিলাওয়াত চালানো যায়নি। আবার প্লে চাপুন।"});return}
   const savedOpen=event.target.closest("[data-quran-reader-open-saved]");
   if(savedOpen){const parts=savedOpen.dataset.quranReaderOpenSaved.split(":").map(Number);if(parts.length===2){if(select)select.value=String(parts[0]);loadSurah(parts[0],parts[1])}return}
   const savedRemove=event.target.closest("[data-quran-reader-remove-saved]");
@@ -400,7 +403,7 @@ function wire(){
  if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
  renderBookmarkLabel();
 }
-root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,buildSurahAudioUrl:buildSurahAudioUrl,buildAyahAudioUrl:buildAyahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeTafsirEdition:normalizeTafsirEdition,getTafsirAttribution:getTafsirAttribution,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,getTafsirErrorMessage:getTafsirErrorMessage,escapeHtml:escapeHtml};
+root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,normalizeAyahRepeatCount:normalizeAyahRepeatCount,buildSurahAudioUrl:buildSurahAudioUrl,buildAyahAudioUrl:buildAyahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeTafsirEdition:normalizeTafsirEdition,getTafsirAttribution:getTafsirAttribution,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,getTafsirErrorMessage:getTafsirErrorMessage,escapeHtml:escapeHtml};
 root.openQuranReader=openQuranReader;
 root.closeQuranReader=closeQuranReader;
 if(typeof document!=="undefined"){
