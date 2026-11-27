@@ -40,8 +40,8 @@ function buildTafsirUrl(surah,ayah,edition){
  if(!Number.isInteger(s)||s<1||s>114||!Number.isInteger(a)||a<1||a>286||!id)return null;
  return TAFSIR_BASE+id+"/"+s+"/"+a+".json";
 }
-function validTafsirData(data){
- return !!data&&typeof data==="object"&&typeof data.text==="string"&&!!data.text.trim()&&data.text.length<=300000;
+function validTafsirData(data,expectedSurah,expectedAyah){
+ return !!data&&typeof data==="object"&&Number.isInteger(expectedSurah)&&Number.isInteger(expectedAyah)&&data.surah===expectedSurah&&data.ayah===expectedAyah&&typeof data.text==="string"&&!!data.text.trim()&&data.text.length<=300000;
 }
 async function fetchTafsirData(surah,ayah,edition){
  const url=buildTafsirUrl(surah,ayah,edition);
@@ -52,12 +52,12 @@ async function fetchTafsirData(surah,ayah,edition){
   const response=await root.fetch(url,{method:"GET",headers:{Accept:"application/json"},cache:"no-store"});
   if(!response||!response.ok)throw new Error("Tafsir service returned "+(response&&response.status));
   const payload=await response.json();
-  if(!validTafsirData(payload))throw new Error("Tafsir service returned invalid data");
+  if(!validTafsirData(payload,s,a))throw new Error("Tafsir service returned invalid data");
   if(cache)try{await cache.put(url,new Response(JSON.stringify(payload),{status:200,headers:{"Content-Type":"application/json"}}))}catch(e){}
   return payload;
  }catch(networkError){
   if(cache){
-   try{const stored=await cache.match(url);if(stored){const payload=await stored.json();if(validTafsirData(payload))return payload}}catch(e){}
+   try{const stored=await cache.match(url);if(stored){const payload=await stored.json();if(validTafsirData(payload,s,a))return payload}}catch(e){}
   }
   throw networkError;
  }
