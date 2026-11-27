@@ -141,6 +141,7 @@ body.dark .dua-card,body.dark .dua-actions button{background:#1b2a23;color:var(-
 .quran-stats strong{display:block;color:var(--green);font-size:20px}
 .quran-stats span{display:block;color:var(--muted);font-size:10px;margin-top:3px}
 .quran-progress{border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0;background:var(--paper)}.quran-progress-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}.quran-progress-stat{border:1px solid var(--line);border-radius:11px;padding:10px;text-align:center}.quran-progress-stat strong{display:block;font-size:20px;color:var(--green);font-variant-numeric:tabular-nums}.quran-progress-stat span{font-size:10px;color:var(--muted)}.quran-week-title{font-size:12px;font-weight:750;color:var(--muted);margin-bottom:10px}.quran-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.quran-week-day{min-width:0;text-align:center;display:flex;flex-direction:column;gap:5px;align-items:center}.quran-week-track{height:54px;width:100%;border-radius:7px;background:var(--line);display:flex;align-items:flex-end;overflow:hidden}.quran-week-fill{width:100%;background:var(--green);border-radius:6px 6px 0 0;min-height:0}.quran-week-day strong{font-size:10px;color:var(--muted);font-weight:500}.quran-week-day small{font-size:9px;color:var(--muted);font-variant-numeric:tabular-nums}
+.quran-khatm{border:1px solid var(--line);border-radius:15px;padding:12px;margin:12px 0;background:var(--paper)}.quran-khatm h4{margin:0 0 8px}.quran-khatm .field{margin:6px 0}.quran-khatm-bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:9px 0}.quran-khatm-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:99px}.quran-khatm-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.quran-khatm-stats>div{border:1px solid var(--line);border-radius:10px;padding:8px}.quran-khatm-stats strong{display:block;color:var(--green);font-size:16px}.quran-khatm-stats span{font-size:10px;color:var(--muted)}body.dark .quran-khatm{background:#1b2a23}
 .quran-form{border:1px solid var(--line);border-radius:15px;padding:12px;display:flex;flex-direction:column;gap:7px}
 .quran-form h4,.quran-history-head h4{margin:0 0 4px}
 .quran-form .field{margin:0}
@@ -246,6 +247,7 @@ body.dark .amal-reminder-box{background:#1b2a23}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="./quran-goal.js"></script>
 <script src="./quran-reader.js"></script>
 <script>
 const firebaseConfig = {
@@ -1382,6 +1384,40 @@ function getQuranProgress(entries,todayKey=localDateKey()){
  const last7Days=Array.from({length:7},(_,i)=>{const day=today-(6-i)*86400000,key=new Date(day).toISOString().slice(0,10);return {date:key,pages:pageMap.get(key)||0}});
  return {currentStreak:current,bestStreak:best,last7Days};
 }
+function renderQuranKhatmGoal(){
+ const host=$("quranKhatmGoal")||(()=>{
+  const node=document.createElement("section");node.id="quranKhatmGoal";node.className="quran-khatm";
+  const form=document.querySelector("#quranTracker .quran-form");if(form)form.parentNode.insertBefore(node,form);
+  return node;
+ })();
+ if(!host)return;
+ const api=window.ZikraQuranGoal;
+ if(!api){host.textContent="খতম লক্ষ্য মডিউল লোড হয়নি। পৃষ্ঠাটি রিফ্রেশ করুন।";return}
+ if(!host.dataset.bound){
+  host.dataset.bound="1";
+  host.addEventListener("click",async event=>{
+   const button=event.target.closest("[data-khatm-save]");if(!button)return;
+   const select=host.querySelector("#quranKhatmDays");const days=Number(select&&select.value);
+   if(!api.ALLOWED_DAYS.includes(days)){toast("খতমের সময়সীমা নির্বাচন করুন");return}
+   if(quranTrackerSaving)return;
+   const next={...quranTrackerRecord,khatmGoal:{days,startDate:localDateKey(),createdAt:Date.now()},updatedAt:Date.now()};
+   button.disabled=true;
+   const saved=await persistQuranTracker(next);
+   if(saved)toast("খতমের লক্ষ্য সংরক্ষণ হয়েছে");
+   else button.disabled=false;
+  });
+ }
+ const goal=api.normalizeKhatmGoal(quranTrackerRecord&&quranTrackerRecord.khatmGoal);
+ const options=api.ALLOWED_DAYS.map(days=>'<option value="'+days+'"'+(goal&&goal.days===days?' selected':'')+'>'+days+' দিনে খতম</option>').join("");
+ const progress=goal?api.calculateKhatmProgress((quranTrackerRecord&&quranTrackerRecord.entries)||[],goal,localDateKey()):null;
+ let body='<p class="small">পবিত্র কুরআনের ৬০৪ পৃষ্ঠা ধরে আপনার খতমের লক্ষ্য ও অগ্রগতি হিসাব হবে। প্রতিদিনের তিলাওয়াতের পৃষ্ঠা ট্র্যাকার-এ যোগ করুন।</p>';
+ if(progress){
+  const pace=progress.completed?"আলহামদুলিল্লাহ! এক খতম সম্পন্ন হয়েছে।":progress.pace==="ahead"?"আপনি নির্ধারিত গতির চেয়ে এগিয়ে আছেন।":"লক্ষ্যে পৌঁছাতে প্রতিদিনের পড়া একটু বাড়াতে পারেন।";
+  const remaining=progress.daysRemaining?progress.requiredDailyPages.toFixed(1)+" পৃষ্ঠা/দিন":"সময়সীমা শেষ";
+  body+='<div><strong>'+progress.percent.toLocaleString(currentLocale())+'% সম্পন্ন</strong><span class="small"> · '+progress.pages.toLocaleString(currentLocale())+' / ৬০৪ পৃষ্ঠা</span></div><div class="quran-khatm-bar" role="progressbar" aria-label="খতম অগ্রগতি" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+progress.percent+'"><div class="quran-khatm-fill" style="width:'+progress.percent+'%"></div></div><div class="quran-khatm-stats"><div><strong>'+progress.remainingPages.toLocaleString(currentLocale())+'</strong><span>পৃষ্ঠা বাকি</span></div><div><strong>'+remaining+'</strong><span>এখন থেকে দৈনিক প্রয়োজন</span></div><div><strong>'+progress.daysRemaining.toLocaleString(currentLocale())+'</strong><span>দিন বাকি</span></div><div><strong>'+progress.targetDate+'</strong><span>লক্ষ্যের শেষ তারিখ</span></div></div><p class="small">'+pace+'</p>';
+ }else body+='<p class="small">এখনো কোনো খতমের লক্ষ্য নির্ধারণ করা হয়নি।';
+ host.innerHTML='<h4>🌙 কুরআন খতমের লক্ষ্য</h4>'+body+'<label class="small" for="quranKhatmDays">লক্ষ্যের সময়সীমা</label><select class="field" id="quranKhatmDays">'+options+'</select><button type="button" class="action secondary" data-khatm-save>'+(goal?"লক্ষ্য নতুন করে শুরু / পরিবর্তন করুন":"খতমের লক্ষ্য নির্ধারণ করুন")+'</button>';
+}
 function renderQuranTracker(){
  const r=quranTrackerRecord||{entries:[]},entries=(r.entries||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||Number(b.createdAt)-Number(a.createdAt));
  const fmt=n=>Number(n||0).toLocaleString(currentLocale());
@@ -1392,6 +1428,7 @@ function renderQuranTracker(){
  const maxPages=Math.max(1,...progress.last7Days.map(x=>x.pages));
  $("quranWeek").innerHTML=progress.last7Days.map(x=>'<div class="quran-week-day" aria-label="'+esc(x.date)+': '+fmt(x.pages)+' পৃষ্ঠা"><div class="quran-week-track"><div class="quran-week-fill" style="height:'+Math.round(x.pages/maxPages*100)+'%"></div></div><strong>'+esc(new Date(x.date+"T12:00:00").toLocaleDateString(currentLocale(),{weekday:"short"}))+'</strong><small>'+fmt(x.pages)+'</small></div>').join("");
 
+ renderQuranKhatmGoal();
  $("quranHistory").innerHTML=entries.length?entries.map(x=>'<article class="quran-entry" data-quran-id="'+esc(x.entryId)+'"><div class="quran-entry-head"><b>'+esc(new Date(x.date+"T12:00:00").toLocaleDateString(currentLocale(),{day:"numeric",month:"short",year:"numeric"}))+'</b><button type="button" data-quran-delete="'+esc(x.entryId)+'">'+tr("মুছুন")+'</button></div><p>'+[x.surah?tr("সূরা")+": "+esc(x.surah):"",x.ayahFrom&&x.ayahTo?tr("আয়াত")+": "+fmt(x.ayahFrom)+"–"+fmt(x.ayahTo):"",Number(x.pages)>0?tr("পৃষ্ঠা")+": "+fmt(x.pages):"",Number(x.minutes)>0?tr("সময়")+": "+fmt(x.minutes)+" "+tr("মিনিট"):""].filter(Boolean).join(" · ")+'</p></article>').join(""):'<div class="dua-empty">'+tr("এখনো কোনো তিলাওয়াত যোগ করা হয়নি")+'</div>';
 }
 function openQuranTracker(){$("homeMenu").classList.remove("show");$("quranTracker").classList.add("show");loadQuranTracker()}
