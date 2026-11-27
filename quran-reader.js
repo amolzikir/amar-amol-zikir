@@ -210,16 +210,32 @@ async function cachedJson(url,validator){
   throw networkError;
  }
 }
-function renderSurahOptions(){
+function normalizeSurahSearch(value){
+ return String(value||"").toLocaleLowerCase().replace(/[০-৯]/g,function(d){return String("০১২৩৪৫৬৭৮৯".indexOf(d))}).replace(/[\u200c\u200d\s-]+/g," ").trim();
+}
+function filterSurahList(list,query){
+ const q=normalizeSurahSearch(query);
+ if(!Array.isArray(list))return [];
+ if(!q)return list.slice();
+ return list.filter(function(s){
+  const fields=[s.number,s.name,s.englishName,s.englishNameTranslation].map(normalizeSurahSearch);
+  return fields.some(function(value){return value.includes(q)});
+ });
+}
+function renderSurahOptions(query){
  const select=el("quranReaderSurah");
  if(!select)return;
+ const selected=select.value;
+ const matches=filterSurahList(surahList,query);
  select.innerHTML="";
- surahList.forEach(function(s){
+ if(!matches.length){const empty=document.createElement("option");empty.value="";empty.textContent="কোনো সূরা পাওয়া যায়নি";empty.disabled=true;select.appendChild(empty);return}
+ matches.forEach(function(s){
   const option=document.createElement("option");
   option.value=String(s.number);
   option.textContent=bn(s.number)+". "+s.name+" — "+s.englishName+" ("+bn(s.numberOfAyahs)+" আয়াত)";
   select.appendChild(option);
  });
+ if(matches.some(function(s){return String(s.number)===selected}))select.value=selected;
 }
 function renderSurah(data,translation,jumpAyah){
  const info=el("quranReaderInfo"),container=el("quranReaderAyahs");
@@ -324,13 +340,14 @@ function resumeReading(){
  loadSurah(saved.surah,saved.ayah);
 }
 function wire(){
- const open=el("openQuranReader"),close=el("closeQuranReader"),select=el("quranReaderSurah"),prev=el("quranReaderPrev"),next=el("quranReaderNext"),resume=el("quranReaderResume"),ayahs=el("quranReaderAyahs"),smaller=el("quranReaderSmaller"),larger=el("quranReaderLarger"),translationToggle=el("quranReaderTranslationToggle");
+ const open=el("openQuranReader"),close=el("closeQuranReader"),select=el("quranReaderSurah"),search=el("quranReaderSearch"),prev=el("quranReaderPrev"),next=el("quranReaderNext"),resume=el("quranReaderResume"),ayahs=el("quranReaderAyahs"),smaller=el("quranReaderSmaller"),larger=el("quranReaderLarger"),translationToggle=el("quranReaderTranslationToggle");
  const reciter=el("quranReaderReciter"),audio=el("quranReaderAudio"),audioStatus=el("quranReaderAudioStatus");
  if(reciter)reciter.addEventListener("change",function(){if(currentSurah)configureSurahAudio(currentSurah.number)});
  if(audio)audio.addEventListener("error",function(){if(audioStatus)audioStatus.textContent="এই মুহূর্তে তিলাওয়াত চালানো যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।"});
  if(open)open.addEventListener("click",openQuranReader);
  if(close)close.addEventListener("click",closeQuranReader);
- if(select)select.addEventListener("change",function(){loadSurah(Number(select.value),1)});
+ if(select)select.addEventListener("change",function(){if(select.value)loadSurah(Number(select.value),1)});
+ if(search)search.addEventListener("input",function(){const selected=select?select.value:"";renderSurahOptions(search.value);if(select&&selected&&Array.from(select.options).some(function(o){return o.value===selected}))select.value=selected});
  if(prev)prev.addEventListener("click",function(){if(currentSurah&&currentSurah.number>1)loadSurah(currentSurah.number-1,1)});
  if(next)next.addEventListener("click",function(){if(currentSurah&&currentSurah.number<114)loadSurah(currentSurah.number+1,1)});
  if(resume)resume.addEventListener("click",resumeReading);
@@ -367,7 +384,7 @@ function wire(){
  if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
  renderBookmarkLabel();
 }
-root.ZikraQuranReader={validSurahList:validSurahList,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,buildSurahAudioUrl:buildSurahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeTafsirEdition:normalizeTafsirEdition,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,escapeHtml:escapeHtml};
+root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,buildSurahAudioUrl:buildSurahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeTafsirEdition:normalizeTafsirEdition,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,escapeHtml:escapeHtml};
 root.openQuranReader=openQuranReader;
 root.closeQuranReader=closeQuranReader;
 if(typeof document!=="undefined"){
