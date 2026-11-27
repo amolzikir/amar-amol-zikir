@@ -157,12 +157,16 @@ test("Quran reader builds safe tafsir URLs only for valid surah, ayah and editio
   assert.equal(reader.buildTafsirUrl(2, 1, "unknown-edition"), null);
 });
 
-test("Quran reader accepts only non-empty bounded tafsir text and safely escapes it", () => {
-  assert.equal(reader.validTafsirData({ text: "তাফসীরের ব্যাখ্যা" }), true);
-  assert.equal(reader.validTafsirData({ text: " " }), false);
-  assert.equal(reader.validTafsirData({ text: 123 }), false);
-  assert.equal(reader.validTafsirData({ text: "x".repeat(300001) }), false);
-  assert.equal(reader.validTafsirData(null), false);
+test("Quran reader accepts tafsir only when its surah and ayah metadata match", () => {
+  const valid = { surah: 2, ayah: 255, text: "তাফসীরের ব্যাখ্যা" };
+  assert.equal(reader.validTafsirData(valid, 2, 255), true);
+  assert.equal(reader.validTafsirData({ ...valid, surah: 3 }, 2, 255), false);
+  assert.equal(reader.validTafsirData({ ...valid, ayah: 256 }, 2, 255), false);
+  assert.equal(reader.validTafsirData({ ...valid, text: " " }, 2, 255), false);
+  assert.equal(reader.validTafsirData({ ...valid, text: 123 }, 2, 255), false);
+  assert.equal(reader.validTafsirData({ ...valid, text: "x".repeat(300001) }, 2, 255), false);
+  assert.equal(reader.validTafsirData({ text: valid.text }, 2, 255), false);
+  assert.equal(reader.validTafsirData(null, 2, 255), false);
   assert.equal(reader.escapeHtml("<script>alert(1)</script>"), "&lt;script&gt;alert(1)&lt;/script&gt;");
 });
 
