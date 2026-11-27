@@ -231,3 +231,36 @@ test("Quran memorization progress validates, deduplicates, toggles and counts ay
   assert.equal(reader.toggleMemorizedAyah(toggledOn, 0, 1).length, 2);
   assert.equal(reader.parseMemorizedAyahs("not-json").length, 0);
 });
+
+test("Quran personal bookmarks, notes and memorization stay isolated per Google account", () => {
+  const values = new Map();
+  context.localStorage = {
+    getItem(key) { return values.has(key) ? values.get(key) : null; },
+    setItem(key, value) { values.set(key, String(value)); },
+    removeItem(key) { values.delete(key); }
+  };
+  let activeAccount = "account-A";
+  context.personalStorageKey = key => key + "::account::" + activeAccount;
+  const accountA = {
+    bookmark: { surah: 2, ayah: 255, savedAt: 100 },
+    savedAyahs: [{ surah: 2, ayah: 255, note: "ব্যক্তিগত নোট", bookmarked: true, savedAt: 100 }],
+    memorizedAyahs: [{ surah: 1, ayah: 1, memorized: true, savedAt: 100 }],
+    fontSize: 34
+  };
+  assert.equal(reader.applyPersonalDataSnapshot(accountA), true);
+  assert.equal(reader.getPersonalDataSnapshot().bookmark.ayah, 255);
+  activeAccount = "account-B";
+  const emptyB = reader.getPersonalDataSnapshot();
+  assert.equal(emptyB.bookmark, null);
+  assert.equal(emptyB.savedAyahs.length, 0);
+  assert.equal(emptyB.memorizedAyahs.length, 0);
+  assert.equal(emptyB.fontSize, 30);
+  const accountB = { bookmark: { surah: 1, ayah: 2 }, savedAyahs: [], memorizedAyahs: [], fontSize: 28 };
+  assert.equal(reader.applyPersonalDataSnapshot(accountB), true);
+  activeAccount = "account-A";
+  const restoredA = reader.getPersonalDataSnapshot();
+  assert.equal(restoredA.bookmark.ayah, 255);
+  assert.equal(restoredA.savedAyahs[0].note, "ব্যক্তিগত নোট");
+  assert.equal(restoredA.memorizedAyahs.length, 1);
+  assert.equal(restoredA.fontSize, 34);
+});
