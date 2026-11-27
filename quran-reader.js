@@ -148,8 +148,10 @@ function normalizeSavedAyahs(value){
  return Array.from(map.values()).sort(function(a,b){return a.surah-b.surah||a.ayah-b.ayah});
 }
 function parseSavedAyahs(raw){try{return normalizeSavedAyahs(JSON.parse(raw||"[]"))}catch(e){return []}}
-function readSavedAyahs(){try{return parseSavedAyahs(root.localStorage.getItem(SAVED_AYAH_KEY))}catch(e){return []}}
-function persistSavedAyahs(items){try{root.localStorage.setItem(SAVED_AYAH_KEY,JSON.stringify(normalizeSavedAyahs(items)));return true}catch(e){return false}}
+function personalStorageKey(key){try{return typeof root.personalStorageKey==="function"?root.personalStorageKey(key):key}catch(e){return key}}
+function notifyPersonalDataChanged(){try{if(typeof root.ZikraQuranPersonalChanged==="function")root.ZikraQuranPersonalChanged()}catch(e){}}
+function readSavedAyahs(){try{return parseSavedAyahs(root.localStorage.getItem(personalStorageKey(SAVED_AYAH_KEY)))}catch(e){return []}}
+function persistSavedAyahs(items){try{root.localStorage.setItem(personalStorageKey(SAVED_AYAH_KEY),JSON.stringify(normalizeSavedAyahs(items)));notifyPersonalDataChanged();return true}catch(e){return false}}
 function findSavedAyah(items,surah,ayah){return items.find(function(x){return x.surah===Number(surah)&&x.ayah===Number(ayah)})||null}
 function toggleSavedAyah(items,surah,ayah){
  const next=normalizeSavedAyahs(items),existing=findSavedAyah(next,surah,ayah);
@@ -177,8 +179,8 @@ function normalizeMemorizedAyahs(value){
  return Array.from(map.values()).sort(function(a,b){return a.surah-b.surah||a.ayah-b.ayah});
 }
 function parseMemorizedAyahs(raw){try{return normalizeMemorizedAyahs(JSON.parse(raw||"[]"))}catch(e){return []}}
-function readMemorizedAyahs(){try{return parseMemorizedAyahs(root.localStorage.getItem(MEMORIZATION_KEY))}catch(e){return []}}
-function persistMemorizedAyahs(items){try{root.localStorage.setItem(MEMORIZATION_KEY,JSON.stringify(normalizeMemorizedAyahs(items)));return true}catch(e){return false}}
+function readMemorizedAyahs(){try{return parseMemorizedAyahs(root.localStorage.getItem(personalStorageKey(MEMORIZATION_KEY)))}catch(e){return []}}
+function persistMemorizedAyahs(items){try{root.localStorage.setItem(personalStorageKey(MEMORIZATION_KEY),JSON.stringify(normalizeMemorizedAyahs(items)));notifyPersonalDataChanged();return true}catch(e){return false}}
 function isAyahMemorized(items,surah,ayah){return normalizeMemorizedAyahs(items).some(function(x){return x.surah===Number(surah)&&x.ayah===Number(ayah)})}
 function toggleMemorizedAyah(items,surah,ayah){
  const s=Number(surah),a=Number(ayah);
@@ -198,12 +200,12 @@ function status(message,isError){
  if(node){node.textContent=message;node.dataset.state=isError?"error":"info"}
 }
 function readBookmark(){
- try{return parseBookmark(root.localStorage.getItem(BOOKMARK_KEY))}catch(e){return null}
+ try{return parseBookmark(root.localStorage.getItem(personalStorageKey(BOOKMARK_KEY)))}catch(e){return null}
 }
 function saveBookmark(surah,ayah){
  const value=normalizeBookmark({surah,ayah,savedAt:Date.now()});
  if(!value)return false;
- try{root.localStorage.setItem(BOOKMARK_KEY,JSON.stringify(value));renderBookmarkLabel();return true}catch(e){status("এই ডিভাইসে শেষ-পড়া অবস্থান সংরক্ষণ করা যায়নি।",true);return false}
+ try{root.localStorage.setItem(personalStorageKey(BOOKMARK_KEY),JSON.stringify(value));renderBookmarkLabel();notifyPersonalDataChanged();return true}catch(e){status("এই ডিভাইসে শেষ-পড়া অবস্থান সংরক্ষণ করা যায়নি।",true);return false}
 }
 function renderSavedAyahs(){
  const host=el("quranReaderSavedAyahs"),count=el("quranReaderSavedCount");
@@ -356,7 +358,7 @@ function openQuranReader(){
  if(tracker)tracker.classList.remove("show");
  if(reader)reader.classList.add("show");
  let savedFont=30;
- try{savedFont=Number(root.localStorage.getItem("zikra-quran-font-size-v1"))||30}catch(e){}
+ try{savedFont=Number(root.localStorage.getItem(personalStorageKey("zikra-quran-font-size-v1")))||30}catch(e){}
  fontSize=Number.isFinite(savedFont)&&savedFont>=24&&savedFont<=42?savedFont:30;
  applyFontSize();
  loadSurahList();
@@ -426,11 +428,30 @@ function wire(){
   const remove=event.target.closest("[data-quran-reader-remove-saved]");
   if(remove){const parts=remove.dataset.quranReaderRemoveSaved.split(":").map(Number);const next=readSavedAyahs().filter(function(x){return x.surah!==parts[0]||x.ayah!==parts[1]});if(persistSavedAyahs(next)){renderSavedAyahs();if(currentSurah)renderSurah(currentSurah,currentTranslation,1);status("সংরক্ষিত আয়াত ও তার নোট সরানো হয়েছে।")}else status("সংরক্ষিত তালিকা হালনাগাদ করা যায়নি।",true)}
  });
- if(smaller)smaller.addEventListener("click",function(){fontSize=Math.max(24,fontSize-2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
+ if(smaller)smaller.addEventListener("click",function(){fontSize=Math.max(24,fontSize-2);try{root.localStorage.setItem(personalStorageKey("zikra-quran-font-size-v1"),String(fontSize))}catch(e){}applyFontSize()});
  if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
  renderBookmarkLabel();
 }
-root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,normalizeAyahRepeatCount:normalizeAyahRepeatCount,buildSurahAudioUrl:buildSurahAudioUrl,buildAyahAudioUrl:buildAyahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeMemorizedAyahs:normalizeMemorizedAyahs,parseMemorizedAyahs:parseMemorizedAyahs,toggleMemorizedAyah:toggleMemorizedAyah,isAyahMemorized:isAyahMemorized,countMemorizedAyahs:countMemorizedAyahs,normalizeTafsirEdition:normalizeTafsirEdition,getTafsirAttribution:getTafsirAttribution,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,getTafsirErrorMessage:getTafsirErrorMessage,escapeHtml:escapeHtml};
+function getPersonalDataSnapshot(){
+ let font=30;try{font=Number(root.localStorage.getItem(personalStorageKey("zikra-quran-font-size-v1")))||30}catch(e){}
+ return {bookmark:readBookmark(),savedAyahs:readSavedAyahs(),memorizedAyahs:readMemorizedAyahs(),fontSize:Number.isFinite(font)&&font>=24&&font<=42?font:30};
+}
+function applyPersonalDataSnapshot(snapshot){
+ if(!snapshot||typeof snapshot!=="object")return false;
+ try{
+  const bookmark=normalizeBookmark(snapshot.bookmark),saved=normalizeSavedAyahs(snapshot.savedAyahs),memorized=normalizeMemorizedAyahs(snapshot.memorizedAyahs);
+  const font=Number(snapshot.fontSize),safeFont=Number.isFinite(font)&&font>=24&&font<=42?font:30;
+  const key=k=>personalStorageKey(k);
+  if(bookmark)root.localStorage.setItem(key(BOOKMARK_KEY),JSON.stringify(bookmark));else root.localStorage.removeItem(key(BOOKMARK_KEY));
+  root.localStorage.setItem(key(SAVED_AYAH_KEY),JSON.stringify(saved));
+  root.localStorage.setItem(key(MEMORIZATION_KEY),JSON.stringify(memorized));
+  root.localStorage.setItem(key("zikra-quran-font-size-v1"),String(safeFont));
+  fontSize=safeFont;applyFontSize();renderBookmarkLabel();
+  if(currentSurah)renderSurah(currentSurah,currentTranslation,1);
+  return true;
+ }catch(e){return false}
+}
+root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,normalizeAyahRepeatCount:normalizeAyahRepeatCount,buildSurahAudioUrl:buildSurahAudioUrl,buildAyahAudioUrl:buildAyahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeMemorizedAyahs:normalizeMemorizedAyahs,parseMemorizedAyahs:parseMemorizedAyahs,toggleMemorizedAyah:toggleMemorizedAyah,isAyahMemorized:isAyahMemorized,countMemorizedAyahs:countMemorizedAyahs,getPersonalDataSnapshot:getPersonalDataSnapshot,applyPersonalDataSnapshot:applyPersonalDataSnapshot,normalizeTafsirEdition:normalizeTafsirEdition,getTafsirAttribution:getTafsirAttribution,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,getTafsirErrorMessage:getTafsirErrorMessage,escapeHtml:escapeHtml};
 root.openQuranReader=openQuranReader;
 root.closeQuranReader=closeQuranReader;
 if(typeof document!=="undefined"){
