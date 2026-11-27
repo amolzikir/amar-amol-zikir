@@ -126,7 +126,8 @@ test("Quran reader toggles bookmarks without losing notes and saves private note
   assert.equal(reader.saveAyahNote([], 3, 18, "x".repeat(2500))[0].note.length, 2000);
 });
 
-\ntest("Quran reader accepts only the supported Bengali tafsir editions", () => {
+
+test("Quran reader accepts only the supported Bengali tafsir editions", () => {
   assert.equal(reader.normalizeTafsirEdition("bn-tafsir-abu-bakr-zakaria"), "bn-tafsir-abu-bakr-zakaria");
   assert.equal(reader.normalizeTafsirEdition("bn-tafsir-ahsanul-bayaan"), "bn-tafsir-ahsanul-bayaan");
   assert.equal(reader.normalizeTafsirEdition("bn-tafseer-ibn-e-kaseer"), "bn-tafseer-ibn-e-kaseer");
