@@ -50,7 +50,7 @@ async function fetchTafsirData(surah,ayah,edition){
  try{if(root.caches&&typeof root.caches.open==="function")cache=await root.caches.open(TAFSIR_CACHE_NAME)}catch(e){}
  try{
   const response=await root.fetch(url,{method:"GET",headers:{Accept:"application/json"},cache:"no-store"});
-  if(!response||!response.ok)throw new Error("Tafsir service returned "+(response&&response.status));
+  if(!response||!response.ok){const error=new Error("Tafsir service returned "+(response&&response.status));error.status=response&&response.status;throw error;}
   const payload=await response.json();
   if(!validTafsirData(payload,s,a))throw new Error("Tafsir service returned invalid data");
   if(cache)try{await cache.put(url,new Response(JSON.stringify(payload),{status:200,headers:{"Content-Type":"application/json"}}))}catch(e){}
@@ -61,6 +61,10 @@ async function fetchTafsirData(surah,ayah,edition){
   }
   throw networkError;
  }
+}
+function getTafsirErrorMessage(error){
+ if(error&&error.status===404)return "এই গ্রন্থের ডেটাসেটে এই আয়াতের আলাদা ব্যাখ্যা নেই। চাইলে অন্য তাফসীর নির্বাচন করে দেখুন।";
+ return "এই তাফসীরটি এখন আনা যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করুন; আগে খোলা থাকলে ক্যাশ কপি পাওয়া যেতে পারে।";
 }
 async function toggleTafsirPanel(button){
  if(!currentSurah)return;
@@ -82,7 +86,7 @@ async function toggleTafsirPanel(button){
   panel.innerHTML='<div class="quran-reader-tafsir-text">'+escapeHtml(data.text).replace(/\r?\n/g,"<br>")+'</div><p class="small">গ্রন্থ: '+escapeHtml(TAFSIR_EDITIONS[edition])+'। সংকলন/প্রকাশক: '+escapeHtml(attribution.contributor)+'। গ্রন্থতথ্য: <a href="'+escapeHtml(attribution.catalogUrl)+'" target="_blank" rel="noopener">QUL</a>। ডেটা-উৎস: <a href="https://github.com/spa5k/tafsir_api" target="_blank" rel="noopener">Tafsir API</a>।</p>';
   panel.dataset.loadedEdition=edition;
  }catch(e){
-  if(panel.isConnected)panel.textContent="এই তাফসীরটি এখন আনা যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করুন; আগে খোলা থাকলে ক্যাশ কপি পাওয়া যেতে পারে।";
+  if(panel.isConnected)panel.textContent=getTafsirErrorMessage(e);
  }finally{button.disabled=false}
 }
 function buildSurahAudioUrl(surah,edition){const n=Number(surah),id=normalizeAudioEdition(edition);if(!Number.isInteger(n)||n<1||n>114||!id)return null;return AUDIO_BASE+id+"/"+n+".mp3";}
@@ -393,7 +397,7 @@ function wire(){
  if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
  renderBookmarkLabel();
 }
-root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,buildSurahAudioUrl:buildSurahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeTafsirEdition:normalizeTafsirEdition,getTafsirAttribution:getTafsirAttribution,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,escapeHtml:escapeHtml};
+root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,buildSurahAudioUrl:buildSurahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeTafsirEdition:normalizeTafsirEdition,getTafsirAttribution:getTafsirAttribution,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,getTafsirErrorMessage:getTafsirErrorMessage,escapeHtml:escapeHtml};
 root.openQuranReader=openQuranReader;
 root.closeQuranReader=closeQuranReader;
 if(typeof document!=="undefined"){
