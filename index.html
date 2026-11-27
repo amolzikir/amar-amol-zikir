@@ -600,7 +600,8 @@ async function persistQuranPersonalRecord(){
  if(navigator.onLine)syncCloud();
  return true;
 }
-window.ZikraQuranPersonalChanged=()=>{persistQuranPersonalRecord().catch(e=>console.warn("Quran personal data sync queued",e))};
+let quranPersonalSaveQueue=Promise.resolve();
+window.ZikraQuranPersonalChanged=()=>{quranPersonalSaveQueue=quranPersonalSaveQueue.then(()=>persistQuranPersonalRecord()).catch(e=>console.warn("Quran personal data sync queued",e));return quranPersonalSaveQueue};
 async function loadQuranPersonalAccountData(){
  const uid=currentUser?.uid;
  if(!uid||!cloud||!localCloudAccountAllowed(uid)||!window.ZikraQuranReader)return;
@@ -1693,7 +1694,7 @@ function queueAccountDatabaseSwitch(user){
   document.body.style.pointerEvents="none";
   try{
    await selectLocalDatabase(user?.uid||null);
-   if(user)await loadQuranPersonalAccountData();
+   if(user)await loadQuranPersonalAccountData();else if(window.ZikraQuranReader)window.ZikraQuranReader.refreshPersonalData();
    await render();
    document.body.style.pointerEvents="";
    if(user){$("accountBtn").textContent="✓ "+(user.displayName?.split(" ")[0]||"লগইন");await syncCloud()}
