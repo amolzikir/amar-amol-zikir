@@ -430,7 +430,7 @@ function wire(){
   if(remove){const parts=remove.dataset.quranReaderRemoveSaved.split(":").map(Number);const next=readSavedAyahs().filter(function(x){return x.surah!==parts[0]||x.ayah!==parts[1]});if(persistSavedAyahs(next)){renderSavedAyahs();if(currentSurah)renderSurah(currentSurah,currentTranslation,1);status("সংরক্ষিত আয়াত ও তার নোট সরানো হয়েছে।")}else status("সংরক্ষিত তালিকা হালনাগাদ করা যায়নি।",true)}
  });
  if(smaller)smaller.addEventListener("click",function(){fontSize=Math.max(24,fontSize-2);try{root.localStorage.setItem(personalStorageKey("zikra-quran-font-size-v1"),String(fontSize));notifyPersonalDataChanged()}catch(e){}applyFontSize()});
- if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem(personalStorageKey("zikra-quran-font-size-v1"),String(fontSize))}catch(e){}applyFontSize()});
+ if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem(personalStorageKey("zikra-quran-font-size-v1"),String(fontSize));notifyPersonalDataChanged()}catch(e){}applyFontSize()});
  renderBookmarkLabel();
 }
 function getPersonalDataSnapshot(){
