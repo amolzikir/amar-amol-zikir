@@ -165,3 +165,19 @@ test("Quran reader accepts only non-empty bounded tafsir text and safely escapes
   assert.equal(reader.validTafsirData(null), false);
   assert.equal(reader.escapeHtml("<script>alert(1)</script>"), "&lt;script&gt;alert(1)&lt;/script&gt;");
 });
+
+
+test("Quran reader provides verified catalog attribution for every Bengali tafsir edition", () => {
+  const expected = [
+    ["bn-tafsir-abu-bakr-zakaria", "King Fahd Quran Printing Complex", "https://qul.tarteel.ai/resources/tafsir/33"],
+    ["bn-tafsir-ahsanul-bayaan", "Bayaan Foundation", "https://qul.tarteel.ai/resources/tafsir/32"],
+    ["bn-tafseer-ibn-e-kaseer", "Tawheed Publication", "https://qul.tarteel.ai/resources/tafsir/31"],
+    ["tafisr-fathul-majid-bn", "Tafsir Fathul Majid (QUL edition)", "https://qul.tarteel.ai/resources/tafsir/39"],
+    ["bengali-mokhtasar", "Tafsir Center for Quranic Studies", "https://qul.tarteel.ai/resources/tafsir/267"]
+  ];
+  for (const [edition, contributor, catalogUrl] of expected) {
+    assert.deepEqual(reader.getTafsirAttribution(edition), { contributor, catalogUrl });
+  }
+  assert.equal(reader.getTafsirAttribution("unknown-edition"), null);
+  assert.equal(reader.getTafsirAttribution("javascript:alert(1)"), null);
+});
