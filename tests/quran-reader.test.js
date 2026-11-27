@@ -19,6 +19,19 @@ function makeSurahList() {
   }));
 }
 
+test("Quran reader searches surahs by Arabic, English, Bengali and Bengali numerals", () => {
+  const list = makeSurahList();
+  list[0].name = "سورة الفاتحة";
+  list[0].englishName = "Al-Fatiha";
+  list[1].name = "سورة البقرة";
+  list[1].englishName = "Al-Baqara";
+  assert.equal(reader.filterSurahList(list, "الفاتحة").length, 1);
+  assert.equal(reader.filterSurahList(list, "al-fatiha")[0].number, 1);
+  assert.equal(reader.filterSurahList(list, "০২")[0].number, 2);
+  assert.equal(reader.filterSurahList(list, "").length, 114);
+  assert.equal(reader.filterSurahList(list, "not-a-surah").length, 0);
+});
+
 test("Quran reader accepts a complete ordered list of all 114 surahs", () => {
   assert.equal(reader.validSurahList(makeSurahList()), true);
 });
