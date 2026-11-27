@@ -7,6 +7,7 @@ const assert = require("node:assert/strict");
 const source = fs.readFileSync(path.join(__dirname, "..", "quran-reader.js"), "utf8");
 const context = { console };
 context.globalThis = context;
+context.window = context;
 vm.runInNewContext(source, context, { filename: "quran-reader.js" });
 const reader = context.ZikraQuranReader;
 
