@@ -209,3 +209,25 @@ test("Quran reader provides verified catalog attribution for every Bengali tafsi
   assert.equal(reader.getTafsirAttribution("unknown-edition"), null);
   assert.equal(reader.getTafsirAttribution("javascript:alert(1)"), null);
 });
+
+test("Quran memorization progress validates, deduplicates, toggles and counts ayahs", () => {
+  const initial = reader.normalizeMemorizedAyahs([
+    { surah: 1, ayah: 1, savedAt: 10 },
+    { surah: 1, ayah: 1, savedAt: 20 },
+    { surah: 2, ayah: 286 },
+    { surah: 115, ayah: 1 },
+    { surah: 2, ayah: 287 },
+    null
+  ]);
+  assert.equal(initial.length, 2);
+  assert.equal(reader.isAyahMemorized(initial, 1, 1), true);
+  assert.equal(reader.countMemorizedAyahs(initial), 2);
+  assert.equal(reader.countMemorizedAyahs(initial, 1), 1);
+  const toggledOff = reader.toggleMemorizedAyah(initial, 1, 1);
+  assert.equal(reader.isAyahMemorized(toggledOff, 1, 1), false);
+  const toggledOn = reader.toggleMemorizedAyah(toggledOff, 1, 2);
+  assert.equal(reader.isAyahMemorized(toggledOn, 1, 2), true);
+  assert.equal(reader.countMemorizedAyahs(toggledOn, 1), 1);
+  assert.equal(reader.toggleMemorizedAyah(toggledOn, 0, 1).length, 2);
+  assert.deepEqual(reader.parseMemorizedAyahs("not-json"), []);
+});
