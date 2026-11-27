@@ -7,6 +7,16 @@ const BOOKMARK_KEY="zikra-quran-reader-last-read-v1";
 const BN_TRANSLATION="bn.bengali";
 const AUDIO_EDITIONS=Object.freeze({"ar.alafasy":"মিশারি রাশিদ আল-আফাসি","ar.husary":"মাহমুদ খলিল আল-হুসারি","ar.minshawi":"মুহাম্মদ সিদ্দিক আল-মিনশাওয়ি","ar.sudais":"আবদুর রহমান আস-সুদাইস"});
 const AUDIO_BASE="https://cdn.islamic.network/quran/audio-surah/64/";
+const TAFSIR_BASE="https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@v1.2.3/tafsir/";
+const TAFSIR_CACHE_NAME="zikra-quran-tafsir-v1";
+const TAFSIR_EDITIONS=Object.freeze({
+ "bn-tafsir-abu-bakr-zakaria":"তাফসীর আবু বকর যাকারিয়া",
+ "bn-tafsir-ahsanul-bayaan":"তাফসীর আহসানুল বয়ান",
+ "bn-tafseer-ibn-e-kaseer":"তাফসীর ইবনে কাসীর (বাংলা)",
+ "tafisr-fathul-majid-bn":"তাফসীর ফাতহুল মাজীদ",
+ "bengali-mokhtasar":"বাংলা সংক্ষিপ্ত তাফসীর"
+});
+const DEFAULT_TAFSIR_EDITION="bn-tafsir-abu-bakr-zakaria";
 let surahList=[];
 let currentSurah=null;
 let currentTranslation=null;
@@ -15,6 +25,56 @@ let loading=false;
 let fontSize=30;
 
 function normalizeAudioEdition(value){return Object.prototype.hasOwnProperty.call(AUDIO_EDITIONS,value)?value:null;}
+function normalizeTafsirEdition(value){return Object.prototype.hasOwnProperty.call(TAFSIR_EDITIONS,value)?value:null;}
+function buildTafsirUrl(surah,ayah,edition){
+ const s=Number(surah),a=Number(ayah),id=normalizeTafsirEdition(edition);
+ if(!Number.isInteger(s)||s<1||s>114||!Number.isInteger(a)||a<1||a>286||!id)return null;
+ return TAFSIR_BASE+id+"/"+s+"/"+a+".json";
+}
+function validTafsirData(data){
+ return !!data&&typeof data==="object"&&typeof data.text==="string"&&!!data.text.trim()&&data.text.length<=300000;
+}
+async function fetchTafsirData(surah,ayah,edition){
+ const url=buildTafsirUrl(surah,ayah,edition);
+ if(!url)throw new Error("Invalid tafsir request");
+ let cache=null;
+ try{if(root.caches&&typeof root.caches.open==="function")cache=await root.caches.open(TAFSIR_CACHE_NAME)}catch(e){}
+ try{
+  const response=await root.fetch(url,{method:"GET",headers:{Accept:"application/json"},cache:"no-store"});
+  if(!response||!response.ok)throw new Error("Tafsir service returned "+(response&&response.status));
+  const payload=await response.json();
+  if(!validTafsirData(payload))throw new Error("Tafsir service returned invalid data");
+  if(cache)try{await cache.put(url,new Response(JSON.stringify(payload),{status:200,headers:{"Content-Type":"application/json"}}))}catch(e){}
+  return payload;
+ }catch(networkError){
+  if(cache){
+   try{const stored=await cache.match(url);if(stored){const payload=await stored.json();if(validTafsirData(payload))return payload}}catch(e){}
+  }
+  throw networkError;
+ }
+}
+async function toggleTafsirPanel(button){
+ if(!currentSurah)return;
+ const ayah=Number(button.dataset.quranReaderTafsir);
+ const panel=el("quranReaderAyahs")&&el("quranReaderAyahs").querySelector('[data-quran-reader-tafsir-panel="'+ayah+'"]');
+ if(!panel)return;
+ if(!panel.hidden){panel.hidden=true;return}
+ panel.hidden=false;
+ const selector=el("quranReaderTafsirEdition");
+ const edition=normalizeTafsirEdition(selector?selector.value:DEFAULT_TAFSIR_EDITION)||DEFAULT_TAFSIR_EDITION;
+ if(panel.dataset.loadedEdition===edition)return;
+ const surah=currentSurah.number;
+ panel.textContent="নির্বাচিত তাফসীর থেকে ব্যাখ্যা আনা হচ্ছে…";
+ button.disabled=true;
+ try{
+  const data=await fetchTafsirData(surah,ayah,edition);
+  if(!panel.isConnected)return;
+  panel.innerHTML='<div class="quran-reader-tafsir-text">'+escapeHtml(data.text).replace(/\\r?\\n/g,"<br>")+'</div><p class="small">গ্রন্থ: '+escapeHtml(TAFSIR_EDITIONS[edition])+'। সূত্র: <a href="https://github.com/spa5k/tafsir_api" target="_blank" rel="noopener">Tafsir API / উৎসতালিকা</a>।</p>';
+  panel.dataset.loadedEdition=edition;
+ }catch(e){
+  if(panel.isConnected)panel.textContent="এই তাফসীরটি এখন আনা যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করুন; আগে খোলা থাকলে ক্যাশ কপি পাওয়া যেতে পারে।";
+ }finally{button.disabled=false}
+}
 function buildSurahAudioUrl(surah,edition){const n=Number(surah),id=normalizeAudioEdition(edition);if(!Number.isInteger(n)||n<1||n>114||!id)return null;return AUDIO_BASE+id+"/"+n+".mp3";}
 function configureSurahAudio(surah){const audio=el("quranReaderAudio"),reciter=el("quranReaderReciter"),label=el("quranReaderAudioStatus");if(!audio||!reciter)return;const edition=normalizeAudioEdition(reciter.value)||"ar.alafasy";const url=buildSurahAudioUrl(surah,edition);if(!url)return;audio.pause();audio.src=url;audio.load();if(label)label.textContent="তিলাওয়াত প্রস্তুত: "+AUDIO_EDITIONS[edition]+"। শুনতে প্লে চাপুন।";}
 function validSurahList(data){
@@ -171,7 +231,7 @@ function renderSurah(data,translation,jumpAyah){
   const bangla=translationEnabled&&translated?'<p class="quran-reader-bangla" lang="bn" dir="ltr">'+escapeHtml(translated.text.trim())+'</p>':"";
   const saved=findSavedAyah(savedItems,data.number,a.numberInSurah);
   const note=saved?saved.note:"";
-  return '<article class="quran-reader-ayah" id="quran-reader-ayah-'+a.numberInSurah+'"><div class="quran-reader-ayah-tools"><span>আয়াত '+bn(a.numberInSurah)+'</span><button type="button" class="quran-reader-bookmark" data-quran-reader-save="'+a.numberInSurah+'" aria-label="শেষ-পড়া অবস্থান সংরক্ষণ করুন" title="শেষ-পড়া অবস্থান">🔖</button></div><p class="quran-reader-arabic" lang="ar" dir="rtl">'+escapeHtml(a.text.trim())+'</p>'+bangla+'<div class="quran-reader-ayah-actions"><button type="button" data-quran-reader-toggle-save="'+a.numberInSurah+'">'+(saved&&saved.bookmarked?"★ বুকমার্ক করা":"☆ বুকমার্ক")+'</button><button type="button" data-quran-reader-toggle-note="'+a.numberInSurah+'">✎ ব্যক্তিগত নোট</button></div><div class="quran-reader-note-editor" data-quran-reader-note-editor="'+a.numberInSurah+'" hidden><textarea maxlength="2000" rows="3" data-quran-reader-note-input="'+a.numberInSurah+'" placeholder="এই আয়াত সম্পর্কে আপনার ব্যক্তিগত নোট লিখুন…">'+escapeHtml(note)+'</textarea><button type="button" data-quran-reader-note-save="'+a.numberInSurah+'">নোট সংরক্ষণ</button></div></article>';
+  return '<article class="quran-reader-ayah" id="quran-reader-ayah-'+a.numberInSurah+'"><div class="quran-reader-ayah-tools"><span>আয়াত '+bn(a.numberInSurah)+'</span><button type="button" class="quran-reader-bookmark" data-quran-reader-save="'+a.numberInSurah+'" aria-label="শেষ-পড়া অবস্থান সংরক্ষণ করুন" title="শেষ-পড়া অবস্থান">🔖</button></div><p class="quran-reader-arabic" lang="ar" dir="rtl">'+escapeHtml(a.text.trim())+'</p>'+bangla+'<div class="quran-reader-ayah-actions"><button type="button" data-quran-reader-toggle-save="'+a.numberInSurah+'">'+(saved&&saved.bookmarked?"★ বুকমার্ক করা":"☆ বুকমার্ক")+'</button><button type="button" data-quran-reader-toggle-note="'+a.numberInSurah+'">✎ ব্যক্তিগত নোট</button><button type="button" data-quran-reader-tafsir="'+a.numberInSurah+'">📚 তাফসির</button></div><div class="quran-reader-tafsir-panel" data-quran-reader-tafsir-panel="'+a.numberInSurah+'" hidden aria-live="polite"></div><div class="quran-reader-note-editor" data-quran-reader-note-editor="'+a.numberInSurah+'" hidden><textarea maxlength="2000" rows="3" data-quran-reader-note-input="'+a.numberInSurah+'" placeholder="এই আয়াত সম্পর্কে আপনার ব্যক্তিগত নোট লিখুন…">'+escapeHtml(note)+'</textarea><button type="button" data-quran-reader-note-save="'+a.numberInSurah+'">নোট সংরক্ষণ</button></div></article>';
  }).join("");
  const target=Number(jumpAyah)||1;
  if(target>1){
@@ -280,6 +340,8 @@ function wire(){
   if(savedRemove){const parts=savedRemove.dataset.quranReaderRemoveSaved.split(":").map(Number);const next=readSavedAyahs().filter(function(x){return x.surah!==parts[0]||x.ayah!==parts[1]});if(persistSavedAyahs(next)){renderSavedAyahs();if(currentSurah)renderSurah(currentSurah,currentTranslation,1);status("সংরক্ষিত আয়াত ও তার নোট সরানো হয়েছে।")}return}
   const toggle=event.target.closest("[data-quran-reader-toggle-save]");
   if(toggle){const n=Number(toggle.dataset.quranReaderToggleSave),next=toggleSavedAyah(readSavedAyahs(),currentSurah.number,n);if(persistSavedAyahs(next)){renderSavedAyahs();renderSurah(currentSurah,currentTranslation,n);status("বুকমার্কের অবস্থা সংরক্ষণ করা হয়েছে।")}else status("বুকমার্ক সংরক্ষণ করা যায়নি।",true);return}
+  const tafsirToggle=event.target.closest("[data-quran-reader-tafsir]");
+  if(tafsirToggle){toggleTafsirPanel(tafsirToggle);return}
   const noteToggle=event.target.closest("[data-quran-reader-toggle-note]");
   if(noteToggle){const editor=ayahs.querySelector('[data-quran-reader-note-editor="'+Number(noteToggle.dataset.quranReaderToggleNote)+'"]');if(editor)editor.hidden=!editor.hidden;return}
   const noteSave=event.target.closest("[data-quran-reader-note-save]");
@@ -302,7 +364,7 @@ function wire(){
  if(larger)larger.addEventListener("click",function(){fontSize=Math.min(42,fontSize+2);try{root.localStorage.setItem("zikra-quran-font-size-v1",String(fontSize))}catch(e){}applyFontSize()});
  renderBookmarkLabel();
 }
-root.ZikraQuranReader={validSurahList:validSurahList,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,buildSurahAudioUrl:buildSurahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,escapeHtml:escapeHtml};
+root.ZikraQuranReader={validSurahList:validSurahList,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,buildSurahAudioUrl:buildSurahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeTafsirEdition:normalizeTafsirEdition,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,escapeHtml:escapeHtml};
 root.openQuranReader=openQuranReader;
 root.closeQuranReader=closeQuranReader;
 if(typeof document!=="undefined"){
