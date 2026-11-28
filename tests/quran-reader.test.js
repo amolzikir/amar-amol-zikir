@@ -281,3 +281,13 @@ test("Quran personal cloud bridge is restricted to the active account database",
   assert.match(indexSource, /users\"\)\.doc\(uid\)/);
   assert.match(indexSource, /applyPersonalDataSnapshot/);
 });
+
+test("Quran reader renders a per-ayah memorization conceal/reveal control", () => {
+  const readerSource = fs.readFileSync(path.join(__dirname, "..", "quran-reader.js"), "utf8");
+  const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  assert.match(readerSource, /data-quran-reader-conceal=/);
+  assert.match(readerSource, /data-quran-reader-conceal\]/);
+  assert.match(readerSource, /quran-reader-concealed/);
+  assert.match(readerSource, /aria-pressed/);
+  assert.match(indexSource, /\.quran-reader-concealed\{visibility:hidden/);
+});
