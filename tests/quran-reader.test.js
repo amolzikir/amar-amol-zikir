@@ -291,3 +291,20 @@ test("Quran reader renders a per-ayah memorization conceal/reveal control", () =
   assert.match(readerSource, /aria-pressed/);
   assert.match(indexSource, /\.quran-reader-concealed\{visibility:hidden/);
 });
+
+test("Quran memorization practice range validates ordered ayah bounds", () => {
+  assert.deepEqual(reader.normalizePracticeRange(1, 5, 7), { start: 1, end: 5, total: 5 });
+  assert.deepEqual(reader.normalizePracticeRange("2", "2", 286), { start: 2, end: 2, total: 1 });
+  for (const args of [[0, 2, 7], [3, 2, 7], [1, 8, 7], ["x", 2, 7], [1, 1, 0]]) {
+    assert.equal(reader.normalizePracticeRange(...args), null);
+  }
+});
+test("Quran reader includes sequential ayah-by-ayah memorization practice controls", () => {
+  const readerSource = fs.readFileSync(path.join(__dirname, "..", "quran-reader.js"), "utf8");
+  const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  assert.match(readerSource, /function revealNextPracticeAyah/);
+  assert.match(readerSource, /function stopMemorizationPractice/);
+  assert.match(indexSource, /id="quranPracticeStart"/);
+  assert.match(indexSource, /id="quranPracticeNext"/);
+  assert.match(indexSource, /id="quranPracticeStop"/);
+});
