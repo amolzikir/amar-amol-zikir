@@ -283,6 +283,11 @@ function renderSurahOptions(query){
  });
  if(matches.some(function(s){return String(s.number)===selected}))select.value=selected;
 }
+function normalizePracticeRange(start,end,total){
+ const from=Number(start),to=Number(end),count=Number(total);
+ if(!Number.isInteger(count)||count<1||!Number.isInteger(from)||!Number.isInteger(to)||from<1||to<from||to>count)return null;
+ return {start:from,end:to,total:to-from+1};
+}
 function renderSurah(data,translation,jumpAyah){
  const info=el("quranReaderInfo"),container=el("quranReaderAyahs");
  if(!info||!container)return;
@@ -388,6 +393,32 @@ function resumeReading(){
  if(el("quranReaderSurah"))el("quranReaderSurah").value=String(saved.surah);
  loadSurah(saved.surah,saved.ayah);
 }
+function startMemorizationPractice(){
+ const from=el("quranPracticeFrom"),to=el("quranPracticeTo"),next=el("quranPracticeNext"),stop=el("quranPracticeStop");
+ if(!currentSurah){status("আগে একটি সূরা নির্বাচন করুন।",true);return}
+ const range=normalizePracticeRange(from&&from.value,to&&to.value,currentSurah.numberOfAyahs);
+ if(!range){status("সঠিক আয়াতের সীমা দিন। যেমন: ১ থেকে ৫।",true);return}
+ const cards=Array.from({length:range.total},(_,i)=>el("quran-reader-ayah-"+(range.start+i)));
+ if(cards.some(card=>!card)){status("নির্বাচিত আয়াতগুলো লোড হয়নি। আবার সূরা খুলুন।",true);return}
+ cards.forEach(card=>card.querySelectorAll(".quran-reader-arabic,.quran-reader-bangla").forEach(part=>part.classList.add("quran-reader-concealed")));
+ practiceState={cards,index:0};
+ if(next)next.disabled=false;if(stop)stop.disabled=false;
+ status("মুখস্থ পরীক্ষা শুরু। "+bn(range.total)+"টি আয়াত আড়াল করা হয়েছে। পরের আয়াত দেখুন চাপুন।");
+}
+function revealNextPracticeAyah(){
+ if(!practiceState||practiceState.index>=practiceState.cards.length){status("এই অনুশীলনের সব আয়াত দেখানো হয়েছে।");return}
+ const card=practiceState.cards[practiceState.index++];
+ card.querySelectorAll(".quran-reader-arabic,.quran-reader-bangla").forEach(part=>part.classList.remove("quran-reader-concealed"));
+ card.scrollIntoView({block:"center",behavior:"smooth"});
+ status("আয়াত "+bn(practiceState.index)+" / "+bn(practiceState.cards.length)+" দেখানো হয়েছে।");
+ if(practiceState.index>=practiceState.cards.length){const next=el("quranPracticeNext");if(next)next.disabled=true;status("মুখস্থ পরীক্ষা সম্পন্ন। সব নির্বাচিত আয়াত দেখানো হয়েছে।")}
+}
+function stopMemorizationPractice(){
+ if(practiceState)practiceState.cards.forEach(card=>card.querySelectorAll(".quran-reader-arabic,.quran-reader-bangla").forEach(part=>part.classList.remove("quran-reader-concealed")));
+ practiceState=null;const next=el("quranPracticeNext"),stop=el("quranPracticeStop");if(next)next.disabled=true;if(stop)stop.disabled=true;
+ status("মুখস্থ পরীক্ষার মোড বন্ধ হয়েছে।");
+}
+let practiceState=null;
 function wire(){
  const open=el("openQuranReader"),close=el("closeQuranReader"),select=el("quranReaderSurah"),search=el("quranReaderSearch"),prev=el("quranReaderPrev"),next=el("quranReaderNext"),resume=el("quranReaderResume"),ayahs=el("quranReaderAyahs"),smaller=el("quranReaderSmaller"),larger=el("quranReaderLarger"),translationToggle=el("quranReaderTranslationToggle");
  const reciter=el("quranReaderReciter"),audio=el("quranReaderAudio"),audioStatus=el("quranReaderAudioStatus"),repeatSelect=el("quranReaderRepeatCount"),speedSelect=el("quranReaderAudioSpeed");
@@ -395,6 +426,10 @@ function wire(){
  if(speedSelect)speedSelect.addEventListener("change",function(){audioPlaybackRate=normalizeAudioPlaybackRate(speedSelect.value);speedSelect.value=String(audioPlaybackRate);applyAudioPlaybackRate();try{root.localStorage.setItem(personalStorageKey("zikra-quran-audio-speed-v1"),String(audioPlaybackRate));notifyPersonalDataChanged()}catch(e){}if(audioStatus)audioStatus.textContent="তিলাওয়াতের গতি "+audioPlaybackRate.toLocaleString("en-US")+"× করা হয়েছে।"});
  if(audio)audio.addEventListener("error",function(){ayahRepeatRemaining=0;if(audioStatus)audioStatus.textContent="এই মুহূর্তে তিলাওয়াত চালানো যাচ্ছে না। ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।"});
  if(audio)audio.addEventListener("ended",function(){if(ayahRepeatRemaining===Infinity||ayahRepeatRemaining>0){if(ayahRepeatRemaining!==Infinity)ayahRepeatRemaining--;audio.currentTime=0;const replay=audio.play();if(replay&&typeof replay.catch==="function")replay.catch(function(){ayahRepeatRemaining=0;if(audioStatus)audioStatus.textContent="পুনরাবৃত্তি চালানো যায়নি। আবার আয়াতের বোতাম চাপুন।"});}else if(audioStatus)audioStatus.textContent="আয়াতের পুনরাবৃত্তি সম্পন্ন হয়েছে।";});
+ const practiceStart=el("quranPracticeStart"),practiceNext=el("quranPracticeNext"),practiceStop=el("quranPracticeStop");
+ if(practiceStart)practiceStart.addEventListener("click",startMemorizationPractice);
+ if(practiceNext)practiceNext.addEventListener("click",revealNextPracticeAyah);
+ if(practiceStop)practiceStop.addEventListener("click",stopMemorizationPractice);
  if(open)open.addEventListener("click",openQuranReader);
  if(close)close.addEventListener("click",closeQuranReader);
  if(select)select.addEventListener("change",function(){if(select.value)loadSurah(Number(select.value),1)});
@@ -465,7 +500,7 @@ function applyPersonalDataSnapshot(snapshot){
   return true;
  }catch(e){return false}
 }
-root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,normalizeAyahRepeatCount:normalizeAyahRepeatCount,normalizeAudioPlaybackRate:normalizeAudioPlaybackRate,buildSurahAudioUrl:buildSurahAudioUrl,buildAyahAudioUrl:buildAyahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeMemorizedAyahs:normalizeMemorizedAyahs,parseMemorizedAyahs:parseMemorizedAyahs,toggleMemorizedAyah:toggleMemorizedAyah,isAyahMemorized:isAyahMemorized,countMemorizedAyahs:countMemorizedAyahs,getPersonalDataSnapshot:getPersonalDataSnapshot,applyPersonalDataSnapshot:applyPersonalDataSnapshot,refreshPersonalData:refreshPersonalData,normalizeTafsirEdition:normalizeTafsirEdition,getTafsirAttribution:getTafsirAttribution,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,getTafsirErrorMessage:getTafsirErrorMessage,escapeHtml:escapeHtml};
+root.ZikraQuranReader={validSurahList:validSurahList,filterSurahList:filterSurahList,normalizePracticeRange:normalizePracticeRange,normalizeSurahSearch:normalizeSurahSearch,validSurahData:validSurahData,validTranslationData:validTranslationData,normalizeBookmark:normalizeBookmark,parseBookmark:parseBookmark,normalizeAudioEdition:normalizeAudioEdition,normalizeAyahRepeatCount:normalizeAyahRepeatCount,normalizeAudioPlaybackRate:normalizeAudioPlaybackRate,buildSurahAudioUrl:buildSurahAudioUrl,buildAyahAudioUrl:buildAyahAudioUrl,normalizeSavedAyahs:normalizeSavedAyahs,parseSavedAyahs:parseSavedAyahs,toggleSavedAyah:toggleSavedAyah,saveAyahNote:saveAyahNote,normalizeMemorizedAyahs:normalizeMemorizedAyahs,parseMemorizedAyahs:parseMemorizedAyahs,toggleMemorizedAyah:toggleMemorizedAyah,isAyahMemorized:isAyahMemorized,countMemorizedAyahs:countMemorizedAyahs,getPersonalDataSnapshot:getPersonalDataSnapshot,applyPersonalDataSnapshot:applyPersonalDataSnapshot,refreshPersonalData:refreshPersonalData,normalizeTafsirEdition:normalizeTafsirEdition,getTafsirAttribution:getTafsirAttribution,buildTafsirUrl:buildTafsirUrl,validTafsirData:validTafsirData,getTafsirErrorMessage:getTafsirErrorMessage,escapeHtml:escapeHtml};
 root.openQuranReader=openQuranReader;
 root.closeQuranReader=closeQuranReader;
 if(typeof document!=="undefined"){
