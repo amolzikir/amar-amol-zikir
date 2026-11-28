@@ -310,6 +310,7 @@ function renderSurah(data,translation,jumpAyah){
 }
 async function loadSurah(number,jumpAyah){
  if(loading)return;
+ if(practiceState)stopMemorizationPractice();
  const n=Number(number);
  if(!Number.isInteger(n)||n<1||n>114)return;
  loading=true;
@@ -394,6 +395,7 @@ function resumeReading(){
  loadSurah(saved.surah,saved.ayah);
 }
 function startMemorizationPractice(){
+ if(practiceState)stopMemorizationPractice();
  const from=el("quranPracticeFrom"),to=el("quranPracticeTo"),next=el("quranPracticeNext"),stop=el("quranPracticeStop");
  if(!currentSurah){status("আগে একটি সূরা নির্বাচন করুন।",true);return}
  const range=normalizePracticeRange(from&&from.value,to&&to.value,currentSurah.numberOfAyahs);
