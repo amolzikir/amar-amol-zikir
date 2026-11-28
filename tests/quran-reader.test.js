@@ -108,6 +108,11 @@ test("Quran reader allows only supported reciters and valid surah audio URLs", (
 });
 
  
+test("Quran reader accepts only supported audio playback speeds", () => {
+  for (const speed of [0.75, 1, 1.25, 1.5, 2]) assert.equal(reader.normalizeAudioPlaybackRate(speed), speed);
+  for (const speed of [0, 0.5, 1.1, 3, -1, "javascript:alert(1)"]) assert.equal(reader.normalizeAudioPlaybackRate(speed), 1);
+});
+
 test("Quran reader accepts only supported ayah repeat counts", () => {
   assert.equal(reader.normalizeAyahRepeatCount(1), 1);
   assert.equal(reader.normalizeAyahRepeatCount(3), 3);
@@ -256,7 +261,8 @@ test("Quran personal bookmarks, notes and memorization stay isolated per Google 
   assert.equal(emptyB.savedAyahs.length, 0);
   assert.equal(emptyB.memorizedAyahs.length, 0);
   assert.equal(emptyB.fontSize, 30);
-  const accountB = { bookmark: { surah: 1, ayah: 2 }, savedAyahs: [], memorizedAyahs: [], fontSize: 28 };
+  assert.equal(emptyB.audioPlaybackRate, 1);
+  const accountB = { bookmark: { surah: 1, ayah: 2 }, savedAyahs: [], memorizedAyahs: [], fontSize: 28, audioPlaybackRate: 1.5 };
   assert.equal(reader.applyPersonalDataSnapshot(accountB), true);
   activeAccount = "account-A";
   const restoredA = reader.getPersonalDataSnapshot();
@@ -264,6 +270,7 @@ test("Quran personal bookmarks, notes and memorization stay isolated per Google 
   assert.equal(restoredA.savedAyahs[0].note, "ব্যক্তিগত নোট");
   assert.equal(restoredA.memorizedAyahs.length, 1);
   assert.equal(restoredA.fontSize, 34);
+  assert.equal(restoredA.audioPlaybackRate, 1);
 });
 
 test("Quran personal cloud bridge is restricted to the active account database", () => {
